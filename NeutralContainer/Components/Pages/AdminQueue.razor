@@ -1,0 +1,14 @@
+﻿@page "/admin/queue"
+@using Microsoft.AspNetCore.Authorization
+@using NeutralContainer.Data
+
+@attribute [Authorize(Roles = $"{RoleNames.Admin},{RoleNames.Moderator}")]
+
+<PageTitle>Admin Queue</PageTitle>
+
+<div class="container py-4">
+    <h1>Admin Queue</h1>
+    <p class="text-muted">
+        This is a placeholder for the moderation queue. Admins and moderators can review held or flagged items here.
+    </p>
+</div>

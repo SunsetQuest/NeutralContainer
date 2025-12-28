@@ -1,0 +1,14 @@
+﻿@page "/creator/inbox"
+@using Microsoft.AspNetCore.Authorization
+@using NeutralContainer.Data
+
+@attribute [Authorize(Roles = RoleNames.Creator)]
+
+<PageTitle>Creator Inbox</PageTitle>
+
+<div class="container py-4">
+    <h1>Creator Inbox</h1>
+    <p class="text-muted">
+        This is a placeholder for the creator inbox. Creators can review private and public comments for their posts here.
+    </p>
+</div>
