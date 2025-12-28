@@ -14,13 +14,7 @@
 
 
 
-&nbsp;  \* \*\*Acceptance criteria\*\*
-
-
-
-&nbsp;    \* Given I change my display name, when I save, then future posts/comments show the updated display name.
-
-&nbsp;    \* Given I change my password, when I log in next time, then the new password works and the old password does not.
+&nbsp;  \* \*\*Moved to:\*\* \`CompletedBacklog.md\`
 
 
 

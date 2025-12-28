@@ -26,6 +26,17 @@
 * Added protected Admin Queue and Creator Inbox pages with navigation links.
 * Updated unauthorized routing to show an access denied message to signed-in users.
 
+3. **User story:** As a user, I can manage my account basics (display name, password) so my identity is consistent.
+
+   * **Acceptance criteria**
+     * Given I change my display name, when I save, then future posts/comments show the updated display name.
+     * Given I change my password, when I log in next time, then the new password works and the old password does not.
+
+**Completed changes**
+* Added a display name field to the user profile, registration, and external login flows.
+* Stored display names on the user model and exposed them as auth claims for use in navigation and future content.
+* Kept the existing password management screen in the account area for updating credentials.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 4. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
