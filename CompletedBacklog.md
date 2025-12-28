@@ -119,6 +119,18 @@
 * Added comment submission with validation, visibility selection, and success confirmation.
 * Displayed newly approved public comments in the post view list.
 
+3. **User story:** As the system, I route each submitted comment into Approved / Held / Rejected with reason codes to support transparency.
+
+   * **Acceptance criteria**
+     * Given a comment is confidently compliant, when submitted, then status is Approved and it is visible per its visibility rules.
+     * Given moderation is uncertain, when submitted, then status is Held and the commenter sees “Pending review.”
+     * Given a comment clearly violates container rules, when submitted, then status is Rejected and the commenter sees rewrite guidance (no comment is posted).
+
+**Completed changes**
+* Added baseline moderation heuristics for harassment, advice, diagnosis, and shaming.
+* Stored moderation decisions and reason codes alongside comments.
+* Updated the comment composer to show approved, held, and rejected outcomes with guidance messaging.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.

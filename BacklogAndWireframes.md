@@ -38,10 +38,7 @@
 2. **User story:** As a commenter, I can write and submit a text-only comment that includes a visibility choice if allowed.
 * **Moved to:** `CompletedBacklog.md`
 3. **User story:** As the system, I route each submitted comment into Approved / Held / Rejected with reason codes to support transparency.
-* **Acceptance criteria**
-  * Given a comment is confidently compliant, when submitted, then status is Approved and it is visible per its visibility rules.
-  * Given moderation is uncertain, when submitted, then status is Held and the commenter sees “Pending review.”
-  * Given a comment clearly violates container rules, when submitted, then status is Rejected and the commenter sees rewrite guidance (no comment is posted).
+* **Moved to:** `CompletedBacklog.md`
 4. **User story (optional MVP / Phase 2-ready):** As a commenter, I can run an “AI check” before submitting to see alignment/boundary issues.
 * **Acceptance criteria**
   * Given I click “Check my comment,” when results return, then I see detected issues mapped to the creator’s rules (e.g., advice not allowed).

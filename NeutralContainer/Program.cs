@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using NeutralContainer.Components;
 using NeutralContainer.Components.Account;
 using NeutralContainer.Data;
+using NeutralContainer.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<CommentModerationService>();
 
 var app = builder.Build();
 
