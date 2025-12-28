@@ -158,6 +158,27 @@
                         <p class="text-muted">Your comment will be visible publicly after approval.</p>
                     }
 
+                    @if (!string.IsNullOrWhiteSpace(checkMessage))
+                    {
+                        <div class="alert @checkStyle">
+                            <p class="mb-1">@checkMessage</p>
+                            @if (checkReasons.Count > 0)
+                            {
+                                <ul class="mb-0">
+                                    @foreach (var reason in checkReasons)
+                                    {
+                                        <li>@reason.Summary (@reason.TriggeredRule)</li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(checkError))
+                    {
+                        <div class="alert alert-danger">@checkError</div>
+                    }
+
                     @if (!string.IsNullOrWhiteSpace(commentResultMessage))
                     {
                         <div class="alert @commentResultStyle">@commentResultMessage</div>
@@ -168,7 +189,10 @@
                         <div class="alert alert-danger">@commentError</div>
                     }
 
-                    <button class="btn btn-primary" type="submit">Submit</button>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-outline-secondary" type="button" @onclick="HandleCheckComment">Check my comment</button>
+                        <button class="btn btn-primary" type="submit">Submit</button>
+                    </div>
                 </EditForm>
             </div>
         </div>
@@ -228,6 +252,10 @@
     private string? commentResultStyle;
     private string? commentError;
     private bool showPublicComments;
+    private string? checkMessage;
+    private string? checkStyle;
+    private string? checkError;
+    private readonly List<ModerationReason> checkReasons = new();
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -256,6 +284,10 @@
             commentResultMessage = null;
             commentResultStyle = null;
             commentError = null;
+            checkMessage = null;
+            checkStyle = null;
+            checkError = null;
+            checkReasons.Clear();
             commentModel.Body = string.Empty;
             commentEditContext = new EditContext(commentModel);
             commentModel.Visibility = post.VisibilityPolicy == VisibilityPolicy.PublicOnly
@@ -399,6 +431,10 @@
         commentError = null;
         commentResultMessage = null;
         commentResultStyle = null;
+        checkMessage = null;
+        checkStyle = null;
+        checkError = null;
+        checkReasons.Clear();
 
         if (post is null)
         {
@@ -480,6 +516,51 @@
                 commentEditContext = new EditContext(commentModel);
                 break;
         }
+    }
+
+    private void HandleCheckComment()
+    {
+        checkError = null;
+        checkMessage = null;
+        checkStyle = null;
+        checkReasons.Clear();
+
+        if (post is null)
+        {
+            checkError = "Unable to check your comment because the post could not be loaded.";
+            return;
+        }
+
+        if (commentEditContext is null)
+        {
+            checkError = "Unable to validate your comment. Please refresh and try again.";
+            return;
+        }
+
+        if (!commentEditContext.Validate())
+        {
+            checkError = "Please fix the validation errors above before running the check.";
+            return;
+        }
+
+        var moderationResult = CommentModerationService.Evaluate(post, commentModel.Body);
+        if (moderationResult.Reasons.Count == 0)
+        {
+            checkMessage = "Looks aligned with the Response Agreement. You can submit when ready.";
+            checkStyle = "alert-success";
+            return;
+        }
+
+        checkReasons.AddRange(moderationResult.Reasons);
+        checkMessage = moderationResult.Status switch
+        {
+            CommentModerationStatus.Rejected =>
+                "This comment would likely be rejected. Consider revising before submitting.",
+            CommentModerationStatus.Held =>
+                "This comment may be held for review. Consider revising to better fit the agreement.",
+            _ => "We noticed some potential issues. Consider revising before submitting."
+        };
+        checkStyle = "alert-warning";
     }
 
     private static string BuildModerationMessage(string baseMessage, CommentModerationResult result)

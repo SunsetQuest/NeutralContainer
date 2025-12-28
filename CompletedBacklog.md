@@ -131,6 +131,17 @@
 * Stored moderation decisions and reason codes alongside comments.
 * Updated the comment composer to show approved, held, and rejected outcomes with guidance messaging.
 
+4. **User story (optional MVP / Phase 2-ready):** As a commenter, I can run an “AI check” before submitting to see alignment/boundary issues.
+
+   * **Acceptance criteria**
+     * Given I click “Check my comment,” when results return, then I see detected issues mapped to the creator’s rules (e.g., advice not allowed).
+     * Given I ignore the check and submit anyway, when submitted, then server-side enforcement still applies.
+
+**Completed changes**
+* Added a client-side “Check my comment” action that runs the moderation heuristics without submitting.
+* Displayed alignment feedback and triggered rule summaries inline in the comment composer.
+* Kept server-side moderation unchanged so submissions are still enforced at save time.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
