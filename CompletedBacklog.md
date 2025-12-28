@@ -142,6 +142,19 @@
 * Displayed alignment feedback and triggered rule summaries inline in the comment composer.
 * Kept server-side moderation unchanged so submissions are still enforced at save time.
 
+### Epic 4 — Moderation v1 (automated checks + decisioning + logs)
+
+1. **User story:** As the system, I run baseline heuristics (spam/rate limits/profanity) before deeper classification.
+
+   * **Acceptance criteria**
+     * Given a user exceeds rate limits, when submitting, then the submission is blocked with a clear error message.
+     * Given spam heuristics trigger, when submitting, then comment is Held or Rejected (configurable) with “Spam suspected” reason.
+
+**Completed changes**
+* Added per-user rate limiting to comment submission with a clear feedback message.
+* Expanded moderation heuristics to flag spam-like content and profanity with reason codes.
+* Tuned spam severity based on moderation level to allow stricter rejection in extra gentle containers.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
