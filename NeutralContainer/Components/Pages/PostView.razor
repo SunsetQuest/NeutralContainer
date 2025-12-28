@@ -860,11 +860,30 @@
     private sealed class CommentComposerModel
     {
         [Required]
-        [MinLength(10)]
         [MaxLength(2000)]
+        [CustomValidation(typeof(CommentComposerModel), nameof(ValidateBody))]
         public string Body { get; set; } = string.Empty;
 
         [Required]
         public CommentVisibility Visibility { get; set; } = CommentVisibility.Private;
+
+        public static ValidationResult? ValidateBody(string? value, ValidationContext context)
+        {
+            var trimmed = value?.Trim() ?? string.Empty;
+
+            if (trimmed.Length == 0)
+            {
+                return new ValidationResult("The Body field is required.", new[] { nameof(Body) });
+            }
+
+            if (trimmed.Length < 10)
+            {
+                return new ValidationResult(
+                    "The Body field must be a string or array type with a minimum length of '10'.",
+                    new[] { nameof(Body) });
+            }
+
+            return ValidationResult.Success;
+        }
     }
 }
