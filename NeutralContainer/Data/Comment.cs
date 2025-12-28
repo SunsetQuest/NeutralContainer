@@ -24,6 +24,9 @@ public class Comment
 
     public CommentModerationStatus ModerationStatus { get; set; } = CommentModerationStatus.Approved;
 
+    [MaxLength(4000)]
+    public string? ModerationReasonsJson { get; set; }
+
     public bool CommenterPublicConsent { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;

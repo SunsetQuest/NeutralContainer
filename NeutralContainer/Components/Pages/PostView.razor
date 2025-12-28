@@ -5,8 +5,11 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using NeutralContainer.Data
+@using NeutralContainer.Utilities
+@using System.Text.Json
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
+@inject CommentModerationService CommentModerationService
 
 @attribute [Authorize]
 
@@ -157,7 +160,7 @@
 
                     @if (!string.IsNullOrWhiteSpace(commentResultMessage))
                     {
-                        <div class="alert alert-success">@commentResultMessage</div>
+                        <div class="alert @commentResultStyle">@commentResultMessage</div>
                     }
 
                     @if (!string.IsNullOrWhiteSpace(commentError))
@@ -222,6 +225,7 @@
     private readonly CommentComposerModel commentModel = new();
     private EditContext? commentEditContext;
     private string? commentResultMessage;
+    private string? commentResultStyle;
     private string? commentError;
     private bool showPublicComments;
 
@@ -250,6 +254,7 @@
             moderationLevelLabel = DescribeModerationLevel(post.ModerationLevel);
             showPublicComments = post.VisibilityPolicy is VisibilityPolicy.PublicOnly or VisibilityPolicy.CommenterChoice;
             commentResultMessage = null;
+            commentResultStyle = null;
             commentError = null;
             commentModel.Body = string.Empty;
             commentEditContext = new EditContext(commentModel);
@@ -393,6 +398,7 @@
     {
         commentError = null;
         commentResultMessage = null;
+        commentResultStyle = null;
 
         if (post is null)
         {
@@ -422,6 +428,7 @@
             _ => CommentVisibility.Private
         };
 
+        var moderationResult = CommentModerationService.Evaluate(post, commentModel.Body);
         var comment = new Comment
         {
             PostId = post.Id,
@@ -429,24 +436,61 @@
             Body = commentModel.Body.Trim(),
             Visibility = visibility,
             CommenterPublicConsent = visibility == CommentVisibility.Public,
-            ModerationStatus = CommentModerationStatus.Approved
+            ModerationStatus = moderationResult.Status,
+            ModerationReasonsJson = moderationResult.Reasons.Count == 0
+                ? null
+                : JsonSerializer.Serialize(moderationResult.Reasons)
         };
 
         DbContext.Comments.Add(comment);
         await DbContext.SaveChangesAsync();
 
-        commentResultMessage = visibility == CommentVisibility.Public
-            ? "Thanks! Your comment is now visible publicly."
-            : "Thanks! Your comment was sent privately to the creator.";
-
-        commentModel.Body = string.Empty;
-        commentEditContext = new EditContext(commentModel);
-
-        if (showPublicComments && visibility == CommentVisibility.Public)
+        switch (moderationResult.Status)
         {
-            publicComments.Clear();
-            await LoadPublicComments();
+            case CommentModerationStatus.Approved:
+                commentResultMessage = visibility == CommentVisibility.Public
+                    ? "Thanks! Your comment is now visible publicly."
+                    : "Thanks! Your comment was sent privately to the creator.";
+                commentResultStyle = "alert-success";
+                commentModel.Body = string.Empty;
+                commentEditContext = new EditContext(commentModel);
+                if (showPublicComments && visibility == CommentVisibility.Public)
+                {
+                    publicComments.Clear();
+                    await LoadPublicComments();
+                }
+                break;
+            case CommentModerationStatus.Held:
+                commentResultMessage = BuildModerationMessage(
+                    "Thanks! Your comment is pending review.",
+                    moderationResult);
+                commentResultStyle = "alert-warning";
+                commentModel.Body = string.Empty;
+                commentEditContext = new EditContext(commentModel);
+                break;
+            case CommentModerationStatus.Rejected:
+                commentError = BuildModerationMessage(
+                    "Your comment needs a rewrite before it can be submitted.",
+                    moderationResult);
+                break;
+            default:
+                commentResultMessage = "Thanks! Your comment was received.";
+                commentResultStyle = "alert-success";
+                commentModel.Body = string.Empty;
+                commentEditContext = new EditContext(commentModel);
+                break;
         }
+    }
+
+    private static string BuildModerationMessage(string baseMessage, CommentModerationResult result)
+    {
+        if (result.Reasons.Count == 0)
+        {
+            return baseMessage;
+        }
+
+        var summary = string.Join(" ", result.Reasons.Select(reason => reason.Summary));
+        return $"{baseMessage} {summary}";
     }
 
     private sealed record CommentListItem(string Body, DateTimeOffset CreatedAt, string DisplayName);
