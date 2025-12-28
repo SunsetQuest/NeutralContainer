@@ -26,6 +26,8 @@ public class Comment
 
     public bool IsHidden { get; set; }
 
+    public bool IsHighlighted { get; set; }
+
     [MaxLength(4000)]
     public string? ModerationReasonsJson { get; set; }
 

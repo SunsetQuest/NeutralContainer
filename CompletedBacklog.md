@@ -200,6 +200,17 @@
 * Added comment reporting from the Creator Inbox, flagging comments and persisting reports.
 * Expanded the Admin Queue to list open reports with resolve actions.
 
+4. **User story:** As a creator, I can highlight approved public comments so visitors see standout feedback first.
+
+   * **Acceptance criteria**
+     * Given a comment is approved and public, when I click Highlight, then it appears in a highlighted section on the post view.
+     * Given I unhighlight a comment, when the post view loads, then it appears only in the standard public comment list.
+
+**Completed changes**
+* Added a highlight flag to comments with Creator Inbox actions to highlight or unhighlight public, approved feedback.
+* Rendered highlighted public comments in a dedicated section on the post view, with badges to call them out.
+* Ensured hidden or rejected comments clear any highlight state.
+
 ### Epic 6 — Reporting and Admin Queue (held/flagged/reports/users)
 
 1. **User story:** As an admin, I can see a queue of Held comments and decide Approve/Reject.
