@@ -6,5 +6,7 @@ namespace NeutralContainer.Data
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<Post> Posts => Set<Post>();
+
+        public DbSet<Comment> Comments => Set<Comment>();
     }
 }

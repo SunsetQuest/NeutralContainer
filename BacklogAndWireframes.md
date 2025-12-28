@@ -117,33 +117,13 @@
 
 1\. \*\*User story:\*\* As a logged-in commenter, I can view a post (video + rules) so I understand the container before responding.
 
-
-
-&nbsp;  \* \*\*Acceptance criteria\*\*
-
-
-
-&nbsp;    \* Given I open a post, when the page loads, then the Response Agreement card is visible above the comment composer.
-
-&nbsp;    \* Given public comments are enabled, when the page loads, then approved public comments are visible in a list.
-
-&nbsp;    \* Given public comments are not enabled, when the page loads, then no public comments section is shown (or it shows “Public comments are disabled”).
+&nbsp;  \* \*\*Moved to:\*\* \`CompletedBacklog.md\`
 
 
 
 2\. \*\*User story:\*\* As a commenter, I can write and submit a text-only comment that includes a visibility choice if allowed.
 
-
-
-&nbsp;  \* \*\*Acceptance criteria\*\*
-
-
-
-&nbsp;    \* Given the creator’s policy is Commenter chooses, when I submit, then my selected visibility is stored with the comment.
-
-&nbsp;    \* Given I submit an empty or too-short comment (configurable), when I submit, then I see a validation error and nothing is saved.
-
-&nbsp;    \* Given I submit a valid comment, when moderation returns Approved, then I see confirmation and (if public) the comment appears in the public list.
+&nbsp;  \* \*\*Moved to:\*\* \`CompletedBacklog.md\`
 
 
 

@@ -1,9 +1,12 @@
 ﻿@page "/posts/{PostId:int}"
 
+@using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using NeutralContainer.Data
 @inject ApplicationDbContext DbContext
+@inject UserManager<ApplicationUser> UserManager
 
 @attribute [Authorize]
 
@@ -104,6 +107,102 @@
                 </div>
             </div>
         </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5">Leave a comment</h2>
+
+                <EditForm EditContext="commentEditContext" OnValidSubmit="HandleValidCommentSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label class="form-label" for="commentBody">Your comment</label>
+                        <InputTextArea id="commentBody"
+                                       class="form-control"
+                                       rows="4"
+                                       @bind-Value="commentModel.Body" />
+                        <ValidationMessage For="@(() => commentModel.Body)" />
+                    </div>
+
+                    @if (post.VisibilityPolicy == VisibilityPolicy.CommenterChoice)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Visibility</label>
+                            <div class="form-check">
+                                <InputRadio id="commentVisibilityPrivate"
+                                            class="form-check-input"
+                                            @bind-Value="commentModel.Visibility"
+                                            Value="CommentVisibility.Private" />
+                                <label class="form-check-label" for="commentVisibilityPrivate">Private (creator only)</label>
+                            </div>
+                            <div class="form-check">
+                                <InputRadio id="commentVisibilityPublic"
+                                            class="form-check-input"
+                                            @bind-Value="commentModel.Visibility"
+                                            Value="CommentVisibility.Public" />
+                                <label class="form-check-label" for="commentVisibilityPublic">Public (shows on this post)</label>
+                            </div>
+                            <ValidationMessage For="@(() => commentModel.Visibility)" />
+                        </div>
+                    }
+                    else if (post.VisibilityPolicy == VisibilityPolicy.PrivateOnly)
+                    {
+                        <p class="text-muted">This creator only accepts private feedback.</p>
+                    }
+                    else if (post.VisibilityPolicy == VisibilityPolicy.PublicOnly)
+                    {
+                        <p class="text-muted">Your comment will be visible publicly after approval.</p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(commentResultMessage))
+                    {
+                        <div class="alert alert-success">@commentResultMessage</div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(commentError))
+                    {
+                        <div class="alert alert-danger">@commentError</div>
+                    }
+
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                </EditForm>
+            </div>
+        </div>
+
+        @if (showPublicComments)
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h5">Public comments</h2>
+                    @if (publicComments.Count == 0)
+                    {
+                        <p class="text-muted mb-0">No public comments yet.</p>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column gap-3">
+                            @foreach (var comment in publicComments)
+                            {
+                                <div class="border rounded p-3">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>@comment.DisplayName</strong>
+                                        </div>
+                                        <small class="text-muted">@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
+                                    </div>
+                                    <p class="mb-0">@comment.Body</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">Public comments are disabled for this post.</p>
+        }
     }
 </div>
 
@@ -119,6 +218,15 @@
     private readonly List<string> sensitivityFlags = new();
     private string visibilityPolicyLabel = string.Empty;
     private string moderationLevelLabel = string.Empty;
+    private readonly List<CommentListItem> publicComments = new();
+    private readonly CommentComposerModel commentModel = new();
+    private EditContext? commentEditContext;
+    private string? commentResultMessage;
+    private string? commentError;
+    private bool showPublicComments;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -130,6 +238,8 @@
         allowedFeedbackModes.Clear();
         avoidanceModes.Clear();
         sensitivityFlags.Clear();
+        publicComments.Clear();
+        showPublicComments = false;
 
         if (post is not null)
         {
@@ -138,6 +248,19 @@
             sensitivityFlags.AddRange(DescribeSensitivityFlags(post.SensitivityFlags));
             visibilityPolicyLabel = DescribeVisibilityPolicy(post.VisibilityPolicy);
             moderationLevelLabel = DescribeModerationLevel(post.ModerationLevel);
+            showPublicComments = post.VisibilityPolicy is VisibilityPolicy.PublicOnly or VisibilityPolicy.CommenterChoice;
+            commentResultMessage = null;
+            commentError = null;
+            commentModel.Body = string.Empty;
+            commentEditContext = new EditContext(commentModel);
+            commentModel.Visibility = post.VisibilityPolicy == VisibilityPolicy.PublicOnly
+                ? CommentVisibility.Public
+                : CommentVisibility.Private;
+
+            if (showPublicComments)
+            {
+                await LoadPublicComments();
+            }
         }
         isLoading = false;
     }
@@ -240,4 +363,102 @@
         ModerationLevel.Standard => "Standard",
         _ => "Standard"
     };
+
+    private async Task LoadPublicComments()
+    {
+        if (post is null)
+        {
+            return;
+        }
+
+        var comments = await DbContext.Comments
+            .AsNoTracking()
+            .Include(comment => comment.CommenterUser)
+            .Where(comment => comment.PostId == post.Id)
+            .Where(comment => comment.ModerationStatus == CommentModerationStatus.Approved)
+            .Where(comment => comment.Visibility == CommentVisibility.Public)
+            .OrderBy(comment => comment.CreatedAt)
+            .Select(comment => new CommentListItem(
+                comment.Body,
+                comment.CreatedAt,
+                string.IsNullOrWhiteSpace(comment.CommenterUser!.DisplayName)
+                    ? comment.CommenterUser!.UserName ?? "Commenter"
+                    : comment.CommenterUser!.DisplayName))
+            .ToListAsync();
+
+        publicComments.AddRange(comments);
+    }
+
+    private async Task HandleValidCommentSubmit()
+    {
+        commentError = null;
+        commentResultMessage = null;
+
+        if (post is null)
+        {
+            commentError = "Unable to submit a comment because the post could not be loaded.";
+            return;
+        }
+
+        if (commentEditContext is null)
+        {
+            commentError = "Unable to validate the comment form. Please refresh and try again.";
+            return;
+        }
+
+        var authState = await AuthenticationStateTask;
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user is null)
+        {
+            commentError = "Unable to identify the current user. Please sign in again.";
+            return;
+        }
+
+        var visibility = post.VisibilityPolicy switch
+        {
+            VisibilityPolicy.PrivateOnly => CommentVisibility.Private,
+            VisibilityPolicy.PublicOnly => CommentVisibility.Public,
+            VisibilityPolicy.CommenterChoice => commentModel.Visibility,
+            _ => CommentVisibility.Private
+        };
+
+        var comment = new Comment
+        {
+            PostId = post.Id,
+            CommenterUserId = user.Id,
+            Body = commentModel.Body.Trim(),
+            Visibility = visibility,
+            CommenterPublicConsent = visibility == CommentVisibility.Public,
+            ModerationStatus = CommentModerationStatus.Approved
+        };
+
+        DbContext.Comments.Add(comment);
+        await DbContext.SaveChangesAsync();
+
+        commentResultMessage = visibility == CommentVisibility.Public
+            ? "Thanks! Your comment is now visible publicly."
+            : "Thanks! Your comment was sent privately to the creator.";
+
+        commentModel.Body = string.Empty;
+        commentEditContext = new EditContext(commentModel);
+
+        if (showPublicComments && visibility == CommentVisibility.Public)
+        {
+            publicComments.Clear();
+            await LoadPublicComments();
+        }
+    }
+
+    private sealed record CommentListItem(string Body, DateTimeOffset CreatedAt, string DisplayName);
+
+    private sealed class CommentComposerModel
+    {
+        [Required]
+        [MinLength(10)]
+        [MaxLength(2000)]
+        public string Body { get; set; } = string.Empty;
+
+        [Required]
+        public CommentVisibility Visibility { get; set; } = CommentVisibility.Private;
+    }
 }
