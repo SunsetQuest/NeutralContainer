@@ -85,7 +85,13 @@
                                 <td>@comment.CommenterName</td>
                                 <td>@comment.Visibility</td>
                                 <td>
-                                    <span class="badge @GetStatusBadgeClass(comment)">@GetStatusLabel(comment)</span>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span class="badge @GetStatusBadgeClass(comment)">@GetStatusLabel(comment)</span>
+                                        @if (comment.IsHighlighted)
+                                        {
+                                            <span class="badge text-bg-warning">Highlighted</span>
+                                        }
+                                    </div>
                                 </td>
                                 <td>@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
                                 <td>@comment.Preview</td>
@@ -121,6 +127,16 @@
                                         }
                                         </div>
                                         <div class="btn-group btn-group-sm" role="group">
+                                            @if (comment.Status == CommentModerationStatus.Approved
+                                                 && comment.Visibility == CommentVisibility.Public
+                                                 && !comment.IsHidden)
+                                            {
+                                                <button class="btn btn-outline-primary"
+                                                        type="button"
+                                                        @onclick="(() => ToggleHighlightCommentAsync(comment.Id, !comment.IsHighlighted))">
+                                                    @(comment.IsHighlighted ? "Unhighlight" : "Highlight")
+                                                </button>
+                                            }
                                             <button class="btn btn-outline-danger"
                                                     type="button"
                                                     disabled="@comment.IsCommenterBlocked"
@@ -246,6 +262,7 @@
                     comment.Visibility,
                     comment.ModerationStatus,
                     comment.IsHidden,
+                    comment.IsHighlighted,
                     blockedUserIds.Contains(comment.CommenterUserId),
                     comment.CreatedAt,
                     BuildPreview(comment.Body)))
@@ -319,6 +336,7 @@
 
             DbContext.CommentReports.Add(report);
             comment.ModerationStatus = CommentModerationStatus.Flagged;
+            comment.IsHighlighted = false;
             await DbContext.SaveChangesAsync();
 
             actionMessage = "Report submitted to admins.";
@@ -432,7 +450,36 @@
     {
         var message = hide ? "Comment hidden." : "Comment unhidden.";
         var action = hide ? "Hide" : "Unhide";
-        await UpdateCommentAsync(commentId, comment => comment.IsHidden = hide, message, action);
+        await UpdateCommentAsync(commentId, comment =>
+        {
+            comment.IsHidden = hide;
+            if (hide)
+            {
+                comment.IsHighlighted = false;
+            }
+        }, message, action);
+    }
+
+    private async Task ToggleHighlightCommentAsync(int commentId, bool highlight)
+    {
+        var message = highlight ? "Comment highlighted." : "Comment unhighlighted.";
+        var action = highlight ? "Highlight" : "Unhighlight";
+
+        await UpdateCommentAsync(commentId, comment =>
+        {
+            if (comment.ModerationStatus != CommentModerationStatus.Approved)
+            {
+                return;
+            }
+
+            if (comment.Visibility != CommentVisibility.Public || comment.IsHidden)
+            {
+                comment.IsHighlighted = false;
+                return;
+            }
+
+            comment.IsHighlighted = highlight;
+        }, message, action);
     }
 
     private async Task UpdateCommentAsync(int commentId, Action<Comment> update, string successMessage, string actionLabel)
@@ -556,6 +603,7 @@
         CommentVisibility Visibility,
         CommentModerationStatus Status,
         bool IsHidden,
+        bool IsHighlighted,
         bool IsCommenterBlocked,
         DateTimeOffset CreatedAt,
         string Preview);

@@ -74,6 +74,11 @@
 * **Acceptance criteria**
   * Given I click Block user from a comment, when confirmed, then that user can no longer comment on my posts.
   * Given I report a comment, when submitted, then a Report record is created and appears in the Admin Queue.
+4. **User story:** As a creator, I can highlight approved public comments so visitors see standout feedback first.
+* **Moved to:** `CompletedBacklog.md`
+* **Acceptance criteria**
+  * Given a comment is approved and public, when I click Highlight, then it appears in a highlighted section on the post view.
+  * Given I unhighlight a comment, when the post view loads, then it appears only in the standard public comment list.
 ---
 ### Epic 6 — Reporting and Admin Queue (held/flagged/reports/users)
 **Goal:** Admin/moderator can resolve held/flagged content, handle reports, and suspend users.

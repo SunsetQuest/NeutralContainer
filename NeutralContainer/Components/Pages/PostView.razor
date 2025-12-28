@@ -215,6 +215,30 @@
 
         @if (showPublicComments)
         {
+            @if (highlightedComments.Count > 0)
+            {
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="h5">Highlighted comments</h2>
+                        <div class="d-flex flex-column gap-3">
+                            @foreach (var comment in highlightedComments)
+                            {
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong>@comment.DisplayName</strong>
+                                            <span class="badge text-bg-warning ms-2">Highlighted</span>
+                                        </div>
+                                        <small class="text-muted">@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
+                                    </div>
+                                    <p class="mb-0">@comment.Body</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
             <div class="card mb-4">
                 <div class="card-body">
                     <h2 class="h5">Public comments</h2>
@@ -231,6 +255,10 @@
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
                                             <strong>@comment.DisplayName</strong>
+                                            @if (comment.IsHighlighted)
+                                            {
+                                                <span class="badge text-bg-warning ms-2">Highlighted</span>
+                                            }
                                         </div>
                                         <small class="text-muted">@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
                                     </div>
@@ -284,6 +312,7 @@
     private string visibilityPolicyLabel = string.Empty;
     private string moderationLevelLabel = string.Empty;
     private readonly List<CommentListItem> publicComments = new();
+    private readonly List<CommentListItem> highlightedComments = new();
     private readonly List<ViewerCommentListItem> viewerPrivateComments = new();
     private readonly CommentComposerModel commentModel = new();
     private EditContext? commentEditContext;
@@ -318,6 +347,7 @@
         avoidanceModes.Clear();
         sensitivityFlags.Clear();
         publicComments.Clear();
+        highlightedComments.Clear();
         viewerPrivateComments.Clear();
         showPublicComments = false;
         showViewerPrivateComments = false;
@@ -462,6 +492,9 @@
             return;
         }
 
+        publicComments.Clear();
+        highlightedComments.Clear();
+
         var comments = await DbContext.Comments
             .AsNoTracking()
             .Include(comment => comment.CommenterUser)
@@ -473,12 +506,14 @@
             .Select(comment => new CommentListItem(
                 comment.Body,
                 comment.CreatedAt,
+                comment.IsHighlighted,
                 string.IsNullOrWhiteSpace(comment.CommenterUser!.DisplayName)
                     ? comment.CommenterUser!.UserName ?? "Commenter"
                     : comment.CommenterUser!.DisplayName))
             .ToListAsync();
 
         publicComments.AddRange(comments);
+        highlightedComments.AddRange(comments.Where(comment => comment.IsHighlighted));
     }
 
     private async Task LoadViewerPrivateComments()
@@ -615,7 +650,6 @@
                 commentEditContext = new EditContext(commentModel);
                 if (showPublicComments && visibility == CommentVisibility.Public)
                 {
-                    publicComments.Clear();
                     await LoadPublicComments();
                 }
                 break;
@@ -803,7 +837,7 @@
         return new CommentModerationResult(CommentModerationStatus.Held, reasons);
     }
 
-    private sealed record CommentListItem(string Body, DateTimeOffset CreatedAt, string DisplayName);
+    private sealed record CommentListItem(string Body, DateTimeOffset CreatedAt, bool IsHighlighted, string DisplayName);
 
     private static string GetViewerCommentLabel(ViewerCommentListItem comment) => comment.Status switch
     {

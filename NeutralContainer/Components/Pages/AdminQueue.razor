@@ -831,6 +831,10 @@
             }
 
             comment.ModerationStatus = approve ? CommentModerationStatus.Approved : CommentModerationStatus.Rejected;
+            if (!approve)
+            {
+                comment.IsHighlighted = false;
+            }
             await DbContext.SaveChangesAsync();
             await LogModerationActionAsync("Comment", comment.Id.ToString(), approve ? "Approve" : "Reject", null);
 
@@ -859,6 +863,10 @@
             }
 
             comment.ModerationStatus = approve ? CommentModerationStatus.Approved : CommentModerationStatus.Rejected;
+            if (!approve)
+            {
+                comment.IsHighlighted = false;
+            }
             await DbContext.SaveChangesAsync();
             await LogModerationActionAsync("Comment", comment.Id.ToString(), approve ? "Approve" : "Reject", null);
 
