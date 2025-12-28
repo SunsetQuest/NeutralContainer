@@ -94,6 +94,31 @@
 * Added moderation strictness selection to the create post form with a default of Standard.
 * Surface the chosen moderation level in the Response Agreement details on the post view page.
 
+### Epic 3 — Post viewing and comment submission (text-only MVP)
+
+1. **User story:** As a logged-in commenter, I can view a post (video + rules) so I understand the container before responding.
+
+   * **Acceptance criteria**
+     * Given I open a post, when the page loads, then the Response Agreement card is visible above the comment composer.
+     * Given public comments are enabled, when the page loads, then approved public comments are visible in a list.
+     * Given public comments are not enabled, when the page loads, then no public comments section is shown (or it shows “Public comments are disabled”).
+
+**Completed changes**
+* Added a comment composer to the post view below the Response Agreement.
+* Rendered a public comments section only when the creator allows public visibility, with a disabled notice otherwise.
+
+2. **User story:** As a commenter, I can write and submit a text-only comment that includes a visibility choice if allowed.
+
+   * **Acceptance criteria**
+     * Given the creator’s policy is Commenter chooses, when I submit, then my selected visibility is stored with the comment.
+     * Given I submit an empty or too-short comment (configurable), when I submit, then I see a validation error and nothing is saved.
+     * Given I submit a valid comment, when moderation returns Approved, then I see confirmation and (if public) the comment appears in the public list.
+
+**Completed changes**
+* Created comment storage with visibility, consent, status, and timestamps.
+* Added comment submission with validation, visibility selection, and success confirmation.
+* Displayed newly approved public comments in the post view list.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
