@@ -8,7 +8,7 @@
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
 
-@attribute [Authorize(Roles = $"{RoleNames.Admin},{RoleNames.Moderator}")]
+@attribute [Authorize(Roles = RoleNames.Admin + "," + RoleNames.Moderator)]
 
 <PageTitle>Admin Queue</PageTitle>
 
