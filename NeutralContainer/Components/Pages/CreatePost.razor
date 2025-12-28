@@ -29,6 +29,23 @@
             <ValidationMessage For="@(() => model.YouTubeUrl)" />
         </div>
 
+        <div class="mb-3">
+            <label class="form-label" for="title">Title (optional)</label>
+            <InputText id="title"
+                       class="form-control"
+                       @bind-Value="model.Title" />
+            <ValidationMessage For="@(() => model.Title)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="contextText">Context (optional)</label>
+            <InputTextArea id="contextText"
+                           class="form-control"
+                           rows="4"
+                           @bind-Value="model.ContextText" />
+            <ValidationMessage For="@(() => model.ContextText)" />
+        </div>
+
         @if (!string.IsNullOrWhiteSpace(model.VideoId))
         {
             <div class="mb-4">
@@ -106,7 +123,9 @@
         {
             CreatorUserId = user.Id,
             YouTubeUrl = model.YouTubeUrl,
-            YouTubeVideoId = videoId
+            YouTubeVideoId = videoId,
+            Title = string.IsNullOrWhiteSpace(model.Title) ? null : model.Title.Trim(),
+            ContextText = string.IsNullOrWhiteSpace(model.ContextText) ? null : model.ContextText.Trim()
         };
 
         DbContext.Posts.Add(post);
@@ -121,6 +140,12 @@
         public string YouTubeUrl { get; set; } = string.Empty;
 
         public string? VideoId { get; set; }
+
+        [MaxLength(200)]
+        public string? Title { get; set; }
+
+        [MaxLength(2000)]
+        public string? ContextText { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

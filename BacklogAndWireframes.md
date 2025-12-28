@@ -38,6 +38,7 @@
 
 2\. \*\*User story:\*\* As a creator, I can set post metadata (title optional, context prompt optional) to frame the share without forcing narrative.
 
+&nbsp;  \* \*\*Moved to:\*\* \`CompletedBacklog.md\`
 
 
 &nbsp;  \* \*\*Acceptance criteria\*\*

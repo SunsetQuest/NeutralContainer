@@ -21,6 +21,7 @@
     }
     else
     {
+        <h1>@postTitle</h1>
         <div class="ratio ratio-16x9 mb-4">
             <iframe src="@($"https://www.youtube.com/embed/{post.YouTubeVideoId}")"
                     title="YouTube video"
@@ -29,6 +30,15 @@
         <p class="text-muted">
             Posted @post.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")
         </p>
+        @if (!string.IsNullOrWhiteSpace(post.ContextText))
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h5">Context</h2>
+                    <p class="mb-0">@post.ContextText</p>
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -38,6 +48,7 @@
 
     private Post? post;
     private bool isLoading = true;
+    private string postTitle = "Untitled";
 
     protected override async Task OnParametersSetAsync()
     {
@@ -45,6 +56,7 @@
         post = await DbContext.Posts
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == PostId);
+        postTitle = string.IsNullOrWhiteSpace(post?.Title) ? "Untitled" : post.Title;
         isLoading = false;
     }
 }

@@ -52,6 +52,16 @@
 * Updated the post view to load stored posts and render the embedded player.
 * Added navigation for authenticated users to create new posts.
 
+5. **User story:** As a creator, I can set post metadata (title optional, context prompt optional) to frame the share without forcing narrative.
+
+   * **Acceptance criteria**
+     * Given I leave Title blank, when I publish, then the post is created and displays a default title (e.g., “Untitled”).
+     * Given I enter Context text, when I publish, then it displays on the post view page.
+
+**Completed changes**
+* Added optional title and context fields to posts and the create form.
+* Displayed post titles with an "Untitled" fallback and surfaced context text on the post view.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
