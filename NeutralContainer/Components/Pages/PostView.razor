@@ -121,6 +121,12 @@
                         You have been blocked by the creator and cannot comment on this post.
                     </div>
                 }
+                @if (isUserSuspended)
+                {
+                    <div class="alert alert-warning">
+                        @suspensionMessage
+                    </div>
+                }
 
                 <EditForm EditContext="commentEditContext" OnValidSubmit="HandleValidCommentSubmit">
                     <DataAnnotationsValidator />
@@ -131,7 +137,7 @@
                         <InputTextArea id="commentBody"
                                        class="form-control"
                                        rows="4"
-                                       disabled="@isUserBlocked"
+                                       disabled="@(isUserBlocked || isUserSuspended)"
                                        @bind-Value="commentModel.Body" />
                         <ValidationMessage For="@(() => commentModel.Body)" />
                     </div>
@@ -144,7 +150,7 @@
                                 <InputRadio id="commentVisibilityPrivate"
                                             class="form-check-input"
                                             @bind-Value="commentModel.Visibility"
-                                            disabled="@isUserBlocked"
+                                            disabled="@(isUserBlocked || isUserSuspended)"
                                             Value="CommentVisibility.Private" />
                                 <label class="form-check-label" for="commentVisibilityPrivate">Private (creator only)</label>
                             </div>
@@ -152,7 +158,7 @@
                                 <InputRadio id="commentVisibilityPublic"
                                             class="form-check-input"
                                             @bind-Value="commentModel.Visibility"
-                                            disabled="@isUserBlocked"
+                                            disabled="@(isUserBlocked || isUserSuspended)"
                                             Value="CommentVisibility.Public" />
                                 <label class="form-check-label" for="commentVisibilityPublic">Public (shows on this post)</label>
                             </div>
@@ -200,8 +206,8 @@
                     }
 
                     <div class="d-flex flex-wrap gap-2">
-                        <button class="btn btn-outline-secondary" type="button" @onclick="HandleCheckComment" disabled="@isUserBlocked">Check my comment</button>
-                        <button class="btn btn-primary" type="submit" disabled="@isUserBlocked">Submit</button>
+                        <button class="btn btn-outline-secondary" type="button" @onclick="HandleCheckComment" disabled="@(isUserBlocked || isUserSuspended)">Check my comment</button>
+                        <button class="btn btn-primary" type="submit" disabled="@(isUserBlocked || isUserSuspended)">Submit</button>
                     </div>
                 </EditForm>
             </div>
@@ -292,7 +298,11 @@
     private readonly List<ModerationReason> checkReasons = new();
     private static readonly TimeSpan CommentRateLimitWindow = TimeSpan.FromMinutes(2);
     private const int CommentRateLimitCount = 3;
+    private static readonly TimeSpan NewAccountHoldWindow = TimeSpan.FromHours(6);
+    private const int NewAccountHoldCount = 2;
     private bool isUserBlocked;
+    private bool isUserSuspended;
+    private string suspensionMessage = "Your account is suspended and cannot post comments right now.";
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -334,6 +344,7 @@
                 : CommentVisibility.Private;
 
             await UpdateBlockStatusAsync();
+            await UpdateSuspensionStatusAsync();
 
             if (showPublicComments)
             {
@@ -548,6 +559,13 @@
             return;
         }
 
+        await UpdateSuspensionStatusAsync();
+        if (isUserSuspended)
+        {
+            commentError = suspensionMessage;
+            return;
+        }
+
         var recentCommentCount = await DbContext.Comments
             .AsNoTracking()
             .Where(comment => comment.CommenterUserId == user.Id)
@@ -569,6 +587,7 @@
         };
 
         var moderationResult = CommentModerationService.Evaluate(post, commentModel.Body);
+        moderationResult = await ApplyNewAccountHoldAsync(user, moderationResult);
         var comment = new Comment
         {
             PostId = post.Id,
@@ -647,6 +666,12 @@
             return;
         }
 
+        if (isUserSuspended)
+        {
+            checkError = suspensionMessage;
+            return;
+        }
+
         if (!commentEditContext.Validate())
         {
             checkError = "Please fix the validation errors above before running the check.";
@@ -708,6 +733,74 @@
         isUserBlocked = await DbContext.CreatorBlocks
             .AsNoTracking()
             .AnyAsync(block => block.CreatorUserId == post.CreatorUserId && block.BlockedUserId == user.Id);
+    }
+
+    private async Task UpdateSuspensionStatusAsync()
+    {
+        isUserSuspended = false;
+        suspensionMessage = "Your account is suspended and cannot post comments right now.";
+
+        var authState = await AuthenticationStateTask;
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user is null)
+        {
+            return;
+        }
+
+        if (!user.IsSuspended)
+        {
+            return;
+        }
+
+        if (user.SuspendedUntil.HasValue && user.SuspendedUntil <= DateTimeOffset.UtcNow)
+        {
+            return;
+        }
+
+        isUserSuspended = true;
+        if (!string.IsNullOrWhiteSpace(user.SuspensionReason))
+        {
+            suspensionMessage = $"Your account is suspended: {user.SuspensionReason}";
+        }
+    }
+
+    private async Task<CommentModerationResult> ApplyNewAccountHoldAsync(ApplicationUser user, CommentModerationResult result)
+    {
+        if (user.CreatedAt == default)
+        {
+            return result;
+        }
+
+        if (DateTimeOffset.UtcNow - user.CreatedAt > TimeSpan.FromDays(7))
+        {
+            return result;
+        }
+
+        var recentCommentCount = await DbContext.Comments
+            .AsNoTracking()
+            .Where(comment => comment.CommenterUserId == user.Id)
+            .Where(comment => comment.CreatedAt >= DateTimeOffset.UtcNow.Subtract(NewAccountHoldWindow))
+            .CountAsync();
+
+        if (recentCommentCount < NewAccountHoldCount)
+        {
+            return result;
+        }
+
+        if (result.Status == CommentModerationStatus.Rejected)
+        {
+            return result;
+        }
+
+        var reasons = result.Reasons.ToList();
+        reasons.Add(new ModerationReason(
+            "new_account_spam_risk",
+            "New account activity triggered a manual review hold.",
+            "New account rate check",
+            ModerationSeverity.Low,
+            0.55));
+
+        return new CommentModerationResult(CommentModerationStatus.Held, reasons);
     }
 
     private sealed record CommentListItem(string Body, DateTimeOffset CreatedAt, string DisplayName);

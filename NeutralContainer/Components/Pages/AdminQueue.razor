@@ -1,10 +1,12 @@
 ﻿@page "/admin/queue"
 @using System.Text.Json
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using NeutralContainer.Data
 @using NeutralContainer.Utilities
 @inject ApplicationDbContext DbContext
+@inject UserManager<ApplicationUser> UserManager
 
 @attribute [Authorize(Roles = $"{RoleNames.Admin},{RoleNames.Moderator}")]
 
@@ -43,6 +45,13 @@
                         type="button"
                         @onclick="(() => SelectTab(QueueTab.Reports))">
                     Reports <span class="badge text-bg-secondary ms-1">@reports.Count</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link @(selectedTab == QueueTab.Users ? "active" : "")"
+                        type="button"
+                        @onclick="(() => SelectTab(QueueTab.Users))">
+                    Users <span class="badge text-bg-secondary ms-1">@users.Count</span>
                 </button>
             </li>
         </ul>
@@ -459,6 +468,120 @@
                 </div>
             </div>
         }
+        else if (selectedTab == QueueTab.Users)
+        {
+            <div class="row g-3">
+                <div class="col-12 col-lg-5">
+                    <h2 class="h5">Users</h2>
+
+                    @if (users.Count == 0)
+                    {
+                        <p class="text-muted">No users found.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">User</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Joined</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in users)
+                                    {
+                                        <tr class="@(selectedUser?.Id == user.Id ? "table-active" : "")">
+                                            <td>@user.DisplayName</td>
+                                            <td>@user.Email</td>
+                                            <td>@user.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                            <td>
+                                                <span class="badge @(user.IsSuspended ? "text-bg-danger" : "text-bg-success")">
+                                                    @(user.IsSuspended ? "Suspended" : "Active")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        type="button"
+                                                        @onclick="(() => SelectUser(user.Id))">
+                                                    Review
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="col-12 col-lg-7">
+                    <h2 class="h5">User detail</h2>
+                    @if (selectedUser is null)
+                    {
+                        <p class="text-muted">Select a user to manage suspension status.</p>
+                    }
+                    else
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                                    <div>
+                                        <h3 class="h6 mb-1">@selectedUser.DisplayName</h3>
+                                        <div class="text-muted small">@selectedUser.Email</div>
+                                    </div>
+                                    <span class="badge @(selectedUser.IsSuspended ? "text-bg-danger" : "text-bg-success")">
+                                        @(selectedUser.IsSuspended ? "Suspended" : "Active")
+                                    </span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="text-muted small">Joined</div>
+                                    <div>@selectedUser.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</div>
+                                </div>
+
+                                @if (selectedUser.IsSuspended)
+                                {
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Suspended at</div>
+                                        <div>@selectedUser.SuspendedAt?.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</div>
+                                    </div>
+                                }
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="suspensionReason">Suspension reason</label>
+                                    <InputTextArea id="suspensionReason"
+                                                   class="form-control"
+                                                   rows="3"
+                                                   @bind-Value="suspensionReason" />
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    @if (selectedUser.IsSuspended)
+                                    {
+                                        <button class="btn btn-outline-success"
+                                                type="button"
+                                                @onclick="(() => UnsuspendUserAsync(selectedUser.Id))">
+                                            Unsuspend
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-danger"
+                                                type="button"
+                                                @onclick="(() => SuspendUserAsync(selectedUser.Id))">
+                                            Suspend
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -466,6 +589,7 @@
     private readonly List<ReportListItem> reports = new();
     private readonly List<HeldCommentItem> heldComments = new();
     private readonly List<HeldCommentItem> flaggedComments = new();
+    private readonly List<UserListItem> users = new();
     private bool isLoading = true;
     private string? loadError;
     private string? actionMessage;
@@ -474,6 +598,11 @@
     private HeldCommentItem? selectedHeldComment;
     private HeldCommentItem? selectedFlaggedComment;
     private ReportListItem? selectedReport;
+    private UserListItem? selectedUser;
+    private string? suspensionReason;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -488,15 +617,19 @@
         reports.Clear();
         heldComments.Clear();
         flaggedComments.Clear();
+        users.Clear();
         selectedHeldComment = null;
         selectedFlaggedComment = null;
         selectedReport = null;
+        selectedUser = null;
+        suspensionReason = null;
 
         try
         {
             await LoadReportsAsync();
             await LoadHeldCommentsAsync();
             await LoadFlaggedCommentsAsync();
+            await LoadUsersAsync();
         }
         catch (Exception ex)
         {
@@ -634,6 +767,27 @@
         }
     }
 
+    private async Task LoadUsersAsync()
+    {
+        var userEntities = await DbContext.Users
+            .AsNoTracking()
+            .OrderBy(user => user.UserName)
+            .ToListAsync();
+
+        foreach (var user in userEntities)
+        {
+            users.Add(new UserListItem(
+                user.Id,
+                ResolveDisplayName(user),
+                user.Email ?? user.UserName ?? "Unknown",
+                user.CreatedAt,
+                user.IsSuspended,
+                user.SuspendedAt,
+                user.SuspendedUntil,
+                user.SuspensionReason));
+        }
+    }
+
     private void SelectTab(QueueTab tab)
     {
         selectedTab = tab;
@@ -656,6 +810,12 @@
         selectedReport = reports.FirstOrDefault(report => report.Id == reportId);
     }
 
+    private void SelectUser(string userId)
+    {
+        selectedUser = users.FirstOrDefault(user => user.Id == userId);
+        suspensionReason = selectedUser?.SuspensionReason;
+    }
+
     private async Task ResolveHeldCommentAsync(int commentId, bool approve)
     {
         actionMessage = null;
@@ -672,6 +832,7 @@
 
             comment.ModerationStatus = approve ? CommentModerationStatus.Approved : CommentModerationStatus.Rejected;
             await DbContext.SaveChangesAsync();
+            await LogModerationActionAsync("Comment", comment.Id.ToString(), approve ? "Approve" : "Reject", null);
 
             actionMessage = approve ? "Comment approved and published per visibility rules." : "Comment rejected and removed from the held queue.";
             actionMessageStyle = "alert-success";
@@ -699,6 +860,7 @@
 
             comment.ModerationStatus = approve ? CommentModerationStatus.Approved : CommentModerationStatus.Rejected;
             await DbContext.SaveChangesAsync();
+            await LogModerationActionAsync("Comment", comment.Id.ToString(), approve ? "Approve" : "Reject", null);
 
             actionMessage = approve ? "Comment approved and published per visibility rules." : "Comment rejected and removed from the flagged queue.";
             actionMessageStyle = "alert-success";
@@ -722,12 +884,111 @@
 
             report.Status = ReportStatus.Resolved;
             await DbContext.SaveChangesAsync();
+            await LogModerationActionAsync("Report", report.Id.ToString(), "Resolve", null);
             await LoadQueueAsync();
         }
         catch (Exception ex)
         {
             loadError = $"Unable to resolve the report. {ex.Message}";
         }
+    }
+
+    private async Task SuspendUserAsync(string userId)
+    {
+        actionMessage = null;
+
+        try
+        {
+            var authState = await AuthenticationStateTask;
+            var actor = await UserManager.GetUserAsync(authState.User);
+            if (actor is null)
+            {
+                actionMessage = "Unable to identify the current admin user.";
+                actionMessageStyle = "alert-danger";
+                return;
+            }
+
+            if (actor.Id == userId)
+            {
+                actionMessage = "You cannot suspend your own account.";
+                actionMessageStyle = "alert-warning";
+                return;
+            }
+
+            var user = await DbContext.Users.FirstOrDefaultAsync(current => current.Id == userId);
+            if (user is null)
+            {
+                actionMessage = "That user could not be found.";
+                actionMessageStyle = "alert-warning";
+                return;
+            }
+
+            user.IsSuspended = true;
+            user.SuspendedAt = DateTimeOffset.UtcNow;
+            user.SuspendedUntil = null;
+            user.SuspensionReason = string.IsNullOrWhiteSpace(suspensionReason) ? null : suspensionReason.Trim();
+            await DbContext.SaveChangesAsync();
+            await LogModerationActionAsync("User", user.Id, "Suspend", user.SuspensionReason);
+
+            actionMessage = "User suspended.";
+            actionMessageStyle = "alert-success";
+            await LoadQueueAsync();
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Unable to suspend the user. {ex.Message}";
+        }
+    }
+
+    private async Task UnsuspendUserAsync(string userId)
+    {
+        actionMessage = null;
+
+        try
+        {
+            var user = await DbContext.Users.FirstOrDefaultAsync(current => current.Id == userId);
+            if (user is null)
+            {
+                actionMessage = "That user could not be found.";
+                actionMessageStyle = "alert-warning";
+                return;
+            }
+
+            user.IsSuspended = false;
+            user.SuspendedAt = null;
+            user.SuspendedUntil = null;
+            user.SuspensionReason = null;
+            await DbContext.SaveChangesAsync();
+            await LogModerationActionAsync("User", user.Id, "Unsuspend", null);
+
+            actionMessage = "User unsuspended.";
+            actionMessageStyle = "alert-success";
+            await LoadQueueAsync();
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Unable to unsuspend the user. {ex.Message}";
+        }
+    }
+
+    private async Task LogModerationActionAsync(string entityType, string entityId, string action, string? reason)
+    {
+        var authState = await AuthenticationStateTask;
+        var actor = await UserManager.GetUserAsync(authState.User);
+        if (actor is null)
+        {
+            return;
+        }
+
+        DbContext.ModerationLogs.Add(new ModerationLog
+        {
+            EntityType = entityType,
+            EntityId = entityId,
+            Action = action,
+            Reason = reason,
+            ActorUserId = actor.Id
+        });
+        await DbContext.SaveChangesAsync();
     }
 
     private static string ResolveDisplayName(ApplicationUser? user)
@@ -891,7 +1152,8 @@
     {
         Held,
         Flagged,
-        Reports
+        Reports,
+        Users
     }
 
     private sealed record ReportListItem(
@@ -924,4 +1186,14 @@
         string ModerationLevel,
         string? CustomRulesText,
         List<ModerationReason> Reasons);
+
+    private sealed record UserListItem(
+        string Id,
+        string DisplayName,
+        string Email,
+        DateTimeOffset CreatedAt,
+        bool IsSuspended,
+        DateTimeOffset? SuspendedAt,
+        DateTimeOffset? SuspendedUntil,
+        string? SuspensionReason);
 }

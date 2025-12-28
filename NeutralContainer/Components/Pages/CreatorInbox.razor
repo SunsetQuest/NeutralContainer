@@ -425,16 +425,17 @@
         {
             comment.ModerationStatus = CommentModerationStatus.Approved;
             comment.IsHidden = false;
-        }, "Comment approved.");
+        }, "Comment approved.", "Approve");
     }
 
     private async Task ToggleHideCommentAsync(int commentId, bool hide)
     {
         var message = hide ? "Comment hidden." : "Comment unhidden.";
-        await UpdateCommentAsync(commentId, comment => comment.IsHidden = hide, message);
+        var action = hide ? "Hide" : "Unhide";
+        await UpdateCommentAsync(commentId, comment => comment.IsHidden = hide, message, action);
     }
 
-    private async Task UpdateCommentAsync(int commentId, Action<Comment> update, string successMessage)
+    private async Task UpdateCommentAsync(int commentId, Action<Comment> update, string successMessage, string actionLabel)
     {
         actionMessage = null;
         actionMessageStyle = "alert-info";
@@ -463,6 +464,7 @@
 
             update(comment);
             await DbContext.SaveChangesAsync();
+            await LogModerationActionAsync("Comment", comment.Id.ToString(), actionLabel, null);
 
             actionMessage = successMessage;
             actionMessageStyle = "alert-success";
@@ -473,6 +475,26 @@
             actionMessage = $"Unable to update the comment. {ex.Message}";
             actionMessageStyle = "alert-danger";
         }
+    }
+
+    private async Task LogModerationActionAsync(string entityType, string entityId, string action, string? reason)
+    {
+        var authState = await AuthenticationStateTask;
+        var actor = await UserManager.GetUserAsync(authState.User);
+        if (actor is null)
+        {
+            return;
+        }
+
+        DbContext.ModerationLogs.Add(new ModerationLog
+        {
+            EntityType = entityType,
+            EntityId = entityId,
+            Action = action,
+            Reason = reason,
+            ActorUserId = actor.Id
+        });
+        await DbContext.SaveChangesAsync();
     }
 
     private static string ResolveDisplayName(ApplicationUser? user)

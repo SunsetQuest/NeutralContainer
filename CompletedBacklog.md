@@ -225,6 +225,17 @@
 * Expanded the reports view to include a selectable detail panel with reporter, reason, and linked comment context.
 * Kept report resolution actions and queue refresh behavior aligned with the new detail workflow.
 
+3. **User story:** As an admin, I can suspend a user to limit abuse/spam.
+
+   * **Acceptance criteria**
+     * Given I suspend a user, when they attempt to comment, then the system blocks the action and shows a suspension message.
+     * Given a user is suspended, when they attempt to log in, then access is denied (configurable) or limited to read-only pages.
+
+**Completed changes**
+* Added suspension fields to the user profile and surfaced a Users tab in the Admin Queue with suspend/unsuspend actions.
+* Blocked suspended accounts from logging in and from submitting comments, with clear suspension messaging in the composer.
+* Captured suspension reasons for display and moderation tracking.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 1. **User story:** As the system, I enforce privacy rules for private comments (creator + commenter + admins).
@@ -236,6 +247,25 @@
 **Completed changes**
 * Added a "Your private comments" panel on post views that only surfaces private comments created by the current commenter.
 * Filtered the private-comment panel to exclude rejected feedback and show moderation status badges for commenter visibility.
+
+2. **User story:** As the system, I provide audit logging for moderation actions.
+
+   * **Acceptance criteria**
+     * Given any approve/reject/hide/suspend action, when executed, then a ModerationLog entry is created with actor + reason + timestamp.
+
+**Completed changes**
+* Added a ModerationLog entity and persistence table for moderation actions.
+* Logged approve/reject actions in the Admin Queue, hide/unhide approvals in the Creator Inbox, and user suspension changes.
+
+3. **User story:** As the system, I implement baseline anti-abuse controls.
+
+   * **Acceptance criteria**
+     * Given repeated rapid submissions, when thresholds are exceeded, then rate limiting is applied.
+     * Given suspicious patterns (new accounts spamming), when detected, then content is Held by default.
+
+**Completed changes**
+* Kept the per-user comment rate limiter in place for rapid submissions.
+* Added a new-account activity heuristic that forces comments into Held status when recent activity exceeds the threshold.
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
 
