@@ -1,0 +1,136 @@
+@page "/posts/create"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using NeutralContainer.Data
+@using NeutralContainer.Utilities
+@inject ApplicationDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject UserManager<ApplicationUser> UserManager
+
+@attribute [Authorize]
+
+<PageTitle>Create Post</PageTitle>
+
+<div class="container py-4">
+    <h1>Create Post</h1>
+    <p class="text-muted">Use an Unlisted YouTube video; disable YouTube comments.</p>
+
+    <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label" for="youtubeUrl">YouTube URL</label>
+            <InputText id="youtubeUrl"
+                       class="form-control"
+                       @bind-Value="model.YouTubeUrl"
+                       @oninput="HandleUrlInput" />
+            <ValidationMessage For="@(() => model.YouTubeUrl)" />
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(model.VideoId))
+        {
+            <div class="mb-4">
+                <label class="form-label">Preview</label>
+                <div class="ratio ratio-16x9">
+                    <iframe src="@($"https://www.youtube.com/embed/{model.VideoId}")"
+                            title="YouTube video preview"
+                            allowfullscreen></iframe>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(saveError))
+        {
+            <div class="alert alert-danger">@saveError</div>
+        }
+
+        <button class="btn btn-primary" type="submit">Publish</button>
+    </EditForm>
+</div>
+
+@code {
+    private readonly CreatePostModel model = new();
+    private EditContext? editContext;
+    private string? saveError;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(model);
+    }
+
+    private void HandleUrlInput(ChangeEventArgs args)
+    {
+        model.YouTubeUrl = args.Value?.ToString() ?? string.Empty;
+        if (YouTubeUrlHelper.TryExtractVideoId(model.YouTubeUrl, out var videoId))
+        {
+            model.VideoId = videoId;
+        }
+        else
+        {
+            model.VideoId = null;
+        }
+
+        editContext?.NotifyValidationStateChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        saveError = null;
+
+        if (editContext is null)
+        {
+            saveError = "Unable to validate the form. Please refresh and try again.";
+            return;
+        }
+
+        if (!YouTubeUrlHelper.TryExtractVideoId(model.YouTubeUrl, out var videoId))
+        {
+            saveError = "Please enter a valid YouTube URL.";
+            return;
+        }
+
+        var authState = await AuthenticationStateTask;
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user is null)
+        {
+            saveError = "Unable to identify the current user. Please sign in again.";
+            return;
+        }
+
+        var post = new Post
+        {
+            CreatorUserId = user.Id,
+            YouTubeUrl = model.YouTubeUrl,
+            YouTubeVideoId = videoId
+        };
+
+        DbContext.Posts.Add(post);
+        await DbContext.SaveChangesAsync();
+
+        NavigationManager.NavigateTo($"/posts/{post.Id}");
+    }
+
+    private sealed class CreatePostModel : IValidatableObject
+    {
+        [Required]
+        public string YouTubeUrl { get; set; } = string.Empty;
+
+        public string? VideoId { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!string.IsNullOrWhiteSpace(YouTubeUrl)
+                && !YouTubeUrlHelper.TryExtractVideoId(YouTubeUrl, out _))
+            {
+                yield return new ValidationResult(
+                    "Enter a valid YouTube URL (youtu.be or youtube.com).",
+                    new[] { nameof(YouTubeUrl) });
+            }
+        }
+    }
+}
