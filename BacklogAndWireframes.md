@@ -65,6 +65,7 @@
 1. **User story:** As a creator, I can view an inbox grouped by status so I can triage quickly.
 * **Moved to:** `CompletedBacklog.md`
 2. **User story:** As a creator, I can approve or hide comments to manage what is visible and what stays private.
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given a comment is Held, when I click Approve, then status becomes Approved and it becomes visible per visibility rules.
   * Given a comment is Approved, when I click Hide, then it is removed from public display (if public) and remains visible in creator inbox with status Hidden (or Approved + Hidden flag).

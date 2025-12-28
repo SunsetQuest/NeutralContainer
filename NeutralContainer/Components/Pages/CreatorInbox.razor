@@ -40,6 +40,11 @@
             </div>
         </div>
 
+        @if (!string.IsNullOrWhiteSpace(actionMessage))
+        {
+            <div class="alert @actionMessageStyle">@actionMessage</div>
+        }
+
         <ul class="nav nav-tabs mb-3">
             @foreach (var status in statusTabs)
             {
@@ -69,6 +74,7 @@
                             <th scope="col">Status</th>
                             <th scope="col">Submitted</th>
                             <th scope="col">Preview</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,10 +85,41 @@
                                 <td>@comment.CommenterName</td>
                                 <td>@comment.Visibility</td>
                                 <td>
-                                    <span class="badge @GetStatusBadgeClass(comment.Status)">@comment.Status</span>
+                                    <span class="badge @GetStatusBadgeClass(comment)">@GetStatusLabel(comment)</span>
                                 </td>
                                 <td>@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
                                 <td>@comment.Preview</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        @if (comment.Status == CommentModerationStatus.Held)
+                                        {
+                                            <button class="btn btn-outline-success"
+                                                    type="button"
+                                                    @onclick="(() => ApproveCommentAsync(comment.Id))">
+                                                Approve
+                                            </button>
+                                        }
+                                        @if (comment.Status == CommentModerationStatus.Approved)
+                                        {
+                                            if (comment.IsHidden)
+                                            {
+                                                <button class="btn btn-outline-secondary"
+                                                        type="button"
+                                                        @onclick="(() => ToggleHideCommentAsync(comment.Id, false))">
+                                                    Unhide
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-outline-secondary"
+                                                        type="button"
+                                                        @onclick="(() => ToggleHideCommentAsync(comment.Id, true))">
+                                                    Hide
+                                                </button>
+                                            }
+                                        }
+                                    </div>
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -110,6 +147,8 @@
     private int totalFilteredCount;
     private bool isLoading = true;
     private string? loadError;
+    private string? actionMessage;
+    private string actionMessageStyle = "alert-info";
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -161,6 +200,7 @@
                     ResolveDisplayName(comment.CommenterUser),
                     comment.Visibility,
                     comment.ModerationStatus,
+                    comment.IsHidden,
                     comment.CreatedAt,
                     BuildPreview(comment.Body)))
                 .ToListAsync();
@@ -212,6 +252,62 @@
             .ToList();
     }
 
+    private async Task ApproveCommentAsync(int commentId)
+    {
+        await UpdateCommentAsync(commentId, comment =>
+        {
+            comment.ModerationStatus = CommentModerationStatus.Approved;
+            comment.IsHidden = false;
+        }, "Comment approved.");
+    }
+
+    private async Task ToggleHideCommentAsync(int commentId, bool hide)
+    {
+        var message = hide ? "Comment hidden." : "Comment unhidden.";
+        await UpdateCommentAsync(commentId, comment => comment.IsHidden = hide, message);
+    }
+
+    private async Task UpdateCommentAsync(int commentId, Action<Comment> update, string successMessage)
+    {
+        actionMessage = null;
+        actionMessageStyle = "alert-info";
+
+        try
+        {
+            var authState = await AuthenticationStateTask;
+            var user = await UserManager.GetUserAsync(authState.User);
+            if (user is null)
+            {
+                actionMessage = "Unable to identify the current user. Please sign in again.";
+                actionMessageStyle = "alert-danger";
+                return;
+            }
+
+            var comment = await DbContext.Comments
+                .Include(current => current.Post)
+                .FirstOrDefaultAsync(current => current.Id == commentId && current.Post!.CreatorUserId == user.Id);
+
+            if (comment is null)
+            {
+                actionMessage = "Unable to find that comment. It may have been updated or removed.";
+                actionMessageStyle = "alert-warning";
+                return;
+            }
+
+            update(comment);
+            await DbContext.SaveChangesAsync();
+
+            actionMessage = successMessage;
+            actionMessageStyle = "alert-success";
+            await LoadInboxAsync();
+        }
+        catch (Exception ex)
+        {
+            actionMessage = $"Unable to update the comment. {ex.Message}";
+            actionMessageStyle = "alert-danger";
+        }
+    }
+
     private static string ResolveDisplayName(ApplicationUser? user)
     {
         if (user is null)
@@ -238,14 +334,25 @@
         return normalized.Length <= 120 ? normalized : $"{normalized[..117]}…";
     }
 
-    private static string GetStatusBadgeClass(CommentModerationStatus status) => status switch
+    private static string GetStatusLabel(CommentInboxItem comment)
+        => comment.IsHidden ? "Hidden" : comment.Status.ToString();
+
+    private static string GetStatusBadgeClass(CommentInboxItem comment)
     {
-        CommentModerationStatus.Approved => "text-bg-success",
-        CommentModerationStatus.Held => "text-bg-warning",
-        CommentModerationStatus.Rejected => "text-bg-danger",
-        CommentModerationStatus.Flagged => "text-bg-danger",
-        _ => "text-bg-secondary"
-    };
+        if (comment.IsHidden)
+        {
+            return "text-bg-secondary";
+        }
+
+        return comment.Status switch
+        {
+            CommentModerationStatus.Approved => "text-bg-success",
+            CommentModerationStatus.Held => "text-bg-warning",
+            CommentModerationStatus.Rejected => "text-bg-danger",
+            CommentModerationStatus.Flagged => "text-bg-danger",
+            _ => "text-bg-secondary"
+        };
+    }
 
     private sealed record StatusTab(CommentModerationStatus Status, string Label);
 
@@ -258,6 +365,7 @@
         string CommenterName,
         CommentVisibility Visibility,
         CommentModerationStatus Status,
+        bool IsHidden,
         DateTimeOffset CreatedAt,
         string Preview);
 }
