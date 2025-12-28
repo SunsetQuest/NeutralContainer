@@ -40,9 +40,7 @@
 3. **User story:** As the system, I route each submitted comment into Approved / Held / Rejected with reason codes to support transparency.
 * **Moved to:** `CompletedBacklog.md`
 4. **User story (optional MVP / Phase 2-ready):** As a commenter, I can run an “AI check” before submitting to see alignment/boundary issues.
-* **Acceptance criteria**
-  * Given I click “Check my comment,” when results return, then I see detected issues mapped to the creator’s rules (e.g., advice not allowed).
-  * Given I ignore the check and submit anyway, when submitted, then server-side enforcement still applies.
+* **Moved to:** `CompletedBacklog.md`
 ---
 ### Epic 4 — Moderation v1 (automated checks + decisioning + logs)
 **Goal:** Implement “Hold + explain” as the safe default; support reason codes and audit trail.
