@@ -214,6 +214,17 @@
 * Surfaced post context, Response Agreement details, and moderation reasons for held comments.
 * Added approve/reject actions that update comment moderation status and refresh the queue.
 
+2. **User story:** As an admin, I can review Flagged items and user reports to take action.
+
+   * **Acceptance criteria**
+     * Given a report exists, when I open it, then I can see reporter, reason, and linked comment.
+     * Given I mark a report “Resolved,” when saved, then it no longer appears in the default open queue.
+
+**Completed changes**
+* Added a flagged comments tab in the Admin Queue with a review panel and approve/reject actions.
+* Expanded the reports view to include a selectable detail panel with reporter, reason, and linked comment context.
+* Kept report resolution actions and queue refresh behavior aligned with the new detail workflow.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.

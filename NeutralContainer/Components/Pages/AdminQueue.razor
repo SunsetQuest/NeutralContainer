@@ -32,6 +32,13 @@
                 </button>
             </li>
             <li class="nav-item">
+                <button class="nav-link @(selectedTab == QueueTab.Flagged ? "active" : "")"
+                        type="button"
+                        @onclick="(() => SelectTab(QueueTab.Flagged))">
+                    Flagged comments <span class="badge text-bg-secondary ms-1">@flaggedComments.Count</span>
+                </button>
+            </li>
+            <li class="nav-item">
                 <button class="nav-link @(selectedTab == QueueTab.Reports ? "active" : "")"
                         type="button"
                         @onclick="(() => SelectTab(QueueTab.Reports))">
@@ -199,50 +206,258 @@
                 </div>
             </div>
         }
+        else if (selectedTab == QueueTab.Flagged)
+        {
+            <div class="row g-3">
+                <div class="col-12 col-lg-5">
+                    <h2 class="h5">Flagged comments</h2>
+                    @if (flaggedComments.Count == 0)
+                    {
+                        <p class="text-muted">No flagged comments right now.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Post</th>
+                                        <th scope="col">Commenter</th>
+                                        <th scope="col">Submitted</th>
+                                        <th scope="col">Preview</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var comment in flaggedComments)
+                                    {
+                                        <tr class="@(selectedFlaggedComment?.Id == comment.Id ? "table-active" : "")">
+                                            <td>@comment.PostTitle</td>
+                                            <td>@comment.CommenterName</td>
+                                            <td>@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                            <td>@comment.Preview</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        type="button"
+                                                        @onclick="(() => SelectFlaggedComment(comment.Id))">
+                                                    Review
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="col-12 col-lg-7">
+                    <h2 class="h5">Comment detail</h2>
+                    @if (selectedFlaggedComment is null)
+                    {
+                        <p class="text-muted">Select a flagged comment to review the details.</p>
+                    }
+                    else
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                                    <div>
+                                        <h3 class="h6 mb-1">@selectedFlaggedComment.PostTitle</h3>
+                                        <div class="text-muted small">
+                                            Creator: @selectedFlaggedComment.CreatorName · Commenter: @selectedFlaggedComment.CommenterName
+                                        </div>
+                                    </div>
+                                    <span class="badge text-bg-danger">Flagged</span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Comment</h4>
+                                    <p class="mb-1">@selectedFlaggedComment.Body</p>
+                                    <div class="text-muted small">
+                                        Visibility: @selectedFlaggedComment.VisibilityLabel · Submitted @selectedFlaggedComment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Post context</h4>
+                                    <p class="mb-1 text-muted">@selectedFlaggedComment.ContextText</p>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Response Agreement</h4>
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-6">
+                                            <div class="border rounded p-2 h-100">
+                                                <div class="small text-muted">Looking for</div>
+                                                <ul class="mb-0">
+                                                    @foreach (var item in selectedFlaggedComment.AllowedFeedback)
+                                                    {
+                                                        <li>@item</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="border rounded p-2 h-100">
+                                                <div class="small text-muted">Please avoid</div>
+                                                <ul class="mb-0">
+                                                    @foreach (var item in selectedFlaggedComment.AvoidanceModes)
+                                                    {
+                                                        <li>@item</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <span class="badge text-bg-light border">Moderation: @selectedFlaggedComment.ModerationLevel</span>
+                                        @foreach (var flag in selectedFlaggedComment.SensitivityFlags)
+                                        {
+                                            <span class="badge text-bg-light border ms-1">@flag</span>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(selectedFlaggedComment.CustomRulesText))
+                                    {
+                                        <div class="mt-2">
+                                            <div class="small text-muted">Custom rules</div>
+                                            <p class="mb-0">@selectedFlaggedComment.CustomRulesText</p>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Triggered reasons</h4>
+                                    @if (selectedFlaggedComment.Reasons.Count == 0)
+                                    {
+                                        <p class="text-muted mb-0">No moderation reasons were stored for this comment.</p>
+                                    }
+                                    else
+                                    {
+                                        <ul class="mb-0">
+                                            @foreach (var reason in selectedFlaggedComment.Reasons)
+                                            {
+                                                <li>@reason.Summary (@reason.TriggeredRule, @reason.Severity)</li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button class="btn btn-success"
+                                            type="button"
+                                            @onclick="(() => ResolveFlaggedCommentAsync(selectedFlaggedComment.Id, true))">
+                                        Approve
+                                    </button>
+                                    <button class="btn btn-outline-danger"
+                                            type="button"
+                                            @onclick="(() => ResolveFlaggedCommentAsync(selectedFlaggedComment.Id, false))">
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
         else if (selectedTab == QueueTab.Reports)
         {
-            <h2 class="h5">Open reports</h2>
+            <div class="row g-3">
+                <div class="col-12 col-lg-5">
+                    <h2 class="h5">Open reports</h2>
 
-            @if (reports.Count == 0)
-            {
-                <p class="text-muted">No open reports right now.</p>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table align-middle">
-                        <thead>
-                            <tr>
-                                <th scope="col">Post</th>
-                                <th scope="col">Comment</th>
-                                <th scope="col">Reporter</th>
-                                <th scope="col">Reason</th>
-                                <th scope="col">Created</th>
-                                <th scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var report in reports)
-                            {
-                                <tr>
-                                    <td>@report.PostTitle</td>
-                                    <td>@report.CommentPreview</td>
-                                    <td>@report.ReporterName</td>
-                                    <td>@(string.IsNullOrWhiteSpace(report.Reason) ? "—" : report.Reason)</td>
-                                    <td>@report.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-success"
-                                                type="button"
-                                                @onclick="(() => ResolveReportAsync(report.Id))">
-                                            Resolve
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                    @if (reports.Count == 0)
+                    {
+                        <p class="text-muted">No open reports right now.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Post</th>
+                                        <th scope="col">Comment</th>
+                                        <th scope="col">Reporter</th>
+                                        <th scope="col">Created</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var report in reports)
+                                    {
+                                        <tr class="@(selectedReport?.Id == report.Id ? "table-active" : "")">
+                                            <td>@report.PostTitle</td>
+                                            <td>@report.CommentPreview</td>
+                                            <td>@report.ReporterName</td>
+                                            <td>@report.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        type="button"
+                                                        @onclick="(() => SelectReport(report.Id))">
+                                                    Review
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
-            }
+                <div class="col-12 col-lg-7">
+                    <h2 class="h5">Report detail</h2>
+                    @if (selectedReport is null)
+                    {
+                        <p class="text-muted">Select a report to review the details.</p>
+                    }
+                    else
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                                    <div>
+                                        <h3 class="h6 mb-1">@selectedReport.PostTitle</h3>
+                                        <div class="text-muted small">
+                                            Creator: @selectedReport.CreatorName · Commenter: @selectedReport.CommenterName
+                                        </div>
+                                    </div>
+                                    <span class="badge text-bg-secondary">Open report</span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Comment</h4>
+                                    <p class="mb-1">@selectedReport.CommentBody</p>
+                                    <div class="text-muted small">
+                                        Visibility: @selectedReport.VisibilityLabel · Submitted @selectedReport.CommentCreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Report</h4>
+                                    <div class="text-muted small mb-1">
+                                        Reporter: @selectedReport.ReporterName · Created @selectedReport.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                    </div>
+                                    <p class="mb-0">@selectedReport.ReasonLabel</p>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Post context</h4>
+                                    <p class="mb-1 text-muted">@selectedReport.ContextText</p>
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button class="btn btn-outline-success"
+                                            type="button"
+                                            @onclick="(() => ResolveReportAsync(selectedReport.Id))">
+                                        Resolve report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
         }
     }
 </div>
@@ -250,12 +465,15 @@
 @code {
     private readonly List<ReportListItem> reports = new();
     private readonly List<HeldCommentItem> heldComments = new();
+    private readonly List<HeldCommentItem> flaggedComments = new();
     private bool isLoading = true;
     private string? loadError;
     private string? actionMessage;
     private string actionMessageStyle = "alert-info";
     private QueueTab selectedTab = QueueTab.Held;
     private HeldCommentItem? selectedHeldComment;
+    private HeldCommentItem? selectedFlaggedComment;
+    private ReportListItem? selectedReport;
 
     protected override async Task OnInitializedAsync()
     {
@@ -269,12 +487,16 @@
         actionMessage = null;
         reports.Clear();
         heldComments.Clear();
+        flaggedComments.Clear();
         selectedHeldComment = null;
+        selectedFlaggedComment = null;
+        selectedReport = null;
 
         try
         {
             await LoadReportsAsync();
             await LoadHeldCommentsAsync();
+            await LoadFlaggedCommentsAsync();
         }
         catch (Exception ex)
         {
@@ -288,23 +510,46 @@
 
     private async Task LoadReportsAsync()
     {
-        var items = await DbContext.CommentReports
+        var reportEntities = await DbContext.CommentReports
             .AsNoTracking()
             .Include(report => report.Comment)
             .ThenInclude(comment => comment!.Post)
+            .Include(report => report.Comment)
+            .ThenInclude(comment => comment!.CommenterUser)
             .Include(report => report.ReporterUser)
             .Where(report => report.Status == ReportStatus.Open)
             .OrderByDescending(report => report.CreatedAt)
-            .Select(report => new ReportListItem(
-                report.Id,
-                string.IsNullOrWhiteSpace(report.Comment!.Post!.Title) ? "Untitled" : report.Comment!.Post!.Title,
-                BuildPreview(report.Comment!.Body),
-                ResolveDisplayName(report.ReporterUser),
-                report.Reason,
-                report.CreatedAt))
             .ToListAsync();
 
-        reports.AddRange(items);
+        var creatorIds = reportEntities
+            .Select(report => report.Comment?.Post?.CreatorUserId)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct()
+            .ToList();
+
+        var creators = await DbContext.Users
+            .AsNoTracking()
+            .Where(user => creatorIds.Contains(user.Id))
+            .ToDictionaryAsync(user => user.Id, ResolveDisplayName);
+
+        foreach (var report in reportEntities)
+        {
+            var comment = report.Comment;
+            var post = comment?.Post;
+            reports.Add(new ReportListItem(
+                report.Id,
+                string.IsNullOrWhiteSpace(post?.Title) ? "Untitled" : post!.Title!,
+                BuildPreview(comment?.Body ?? string.Empty),
+                ResolveDisplayName(report.ReporterUser),
+                ResolveDisplayName(comment?.CommenterUser),
+                ResolveCreatorName(post, creators),
+                comment?.Body ?? string.Empty,
+                comment?.Visibility.ToString() ?? "Unknown",
+                comment?.CreatedAt ?? DateTimeOffset.MinValue,
+                ResolveContextText(post),
+                string.IsNullOrWhiteSpace(report.Reason) ? "No reason provided." : report.Reason,
+                report.CreatedAt));
+        }
     }
 
     private async Task LoadHeldCommentsAsync()
@@ -348,6 +593,47 @@
         }
     }
 
+    private async Task LoadFlaggedCommentsAsync()
+    {
+        var comments = await DbContext.Comments
+            .AsNoTracking()
+            .Include(comment => comment.Post)
+            .Include(comment => comment.CommenterUser)
+            .Where(comment => comment.ModerationStatus == CommentModerationStatus.Flagged)
+            .OrderByDescending(comment => comment.CreatedAt)
+            .ToListAsync();
+
+        var creatorIds = comments
+            .Select(comment => comment.Post!.CreatorUserId)
+            .Distinct()
+            .ToList();
+
+        var creators = await DbContext.Users
+            .AsNoTracking()
+            .Where(user => creatorIds.Contains(user.Id))
+            .ToDictionaryAsync(user => user.Id, ResolveDisplayName);
+
+        foreach (var comment in comments)
+        {
+            flaggedComments.Add(new HeldCommentItem(
+                comment.Id,
+                ResolvePostTitle(comment.Post),
+                ResolveCreatorName(comment.Post, creators),
+                ResolveDisplayName(comment.CommenterUser),
+                BuildPreview(comment.Body),
+                comment.Body,
+                ResolveContextText(comment.Post),
+                comment.Visibility.ToString(),
+                comment.CreatedAt,
+                DescribeFeedbackModes(comment.Post!.AllowedFeedbackModes).ToList(),
+                DescribeAvoidanceModes(comment.Post!.AvoidanceModes).ToList(),
+                DescribeSensitivityFlags(comment.Post!.SensitivityFlags).ToList(),
+                comment.Post!.ModerationLevel.ToString(),
+                comment.Post!.CustomRulesText,
+                ParseReasons(comment.ModerationReasonsJson)));
+        }
+    }
+
     private void SelectTab(QueueTab tab)
     {
         selectedTab = tab;
@@ -358,6 +644,16 @@
     private void SelectHeldComment(int commentId)
     {
         selectedHeldComment = heldComments.FirstOrDefault(comment => comment.Id == commentId);
+    }
+
+    private void SelectFlaggedComment(int commentId)
+    {
+        selectedFlaggedComment = flaggedComments.FirstOrDefault(comment => comment.Id == commentId);
+    }
+
+    private void SelectReport(int reportId)
+    {
+        selectedReport = reports.FirstOrDefault(report => report.Id == reportId);
     }
 
     private async Task ResolveHeldCommentAsync(int commentId, bool approve)
@@ -378,6 +674,33 @@
             await DbContext.SaveChangesAsync();
 
             actionMessage = approve ? "Comment approved and published per visibility rules." : "Comment rejected and removed from the held queue.";
+            actionMessageStyle = "alert-success";
+            await LoadQueueAsync();
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Unable to update the comment. {ex.Message}";
+        }
+    }
+
+    private async Task ResolveFlaggedCommentAsync(int commentId, bool approve)
+    {
+        actionMessage = null;
+
+        try
+        {
+            var comment = await DbContext.Comments.FirstOrDefaultAsync(item => item.Id == commentId);
+            if (comment is null)
+            {
+                actionMessage = "That comment could not be found.";
+                actionMessageStyle = "alert-warning";
+                return;
+            }
+
+            comment.ModerationStatus = approve ? CommentModerationStatus.Approved : CommentModerationStatus.Rejected;
+            await DbContext.SaveChangesAsync();
+
+            actionMessage = approve ? "Comment approved and published per visibility rules." : "Comment rejected and removed from the flagged queue.";
             actionMessageStyle = "alert-success";
             await LoadQueueAsync();
         }
@@ -567,6 +890,7 @@
     private enum QueueTab
     {
         Held,
+        Flagged,
         Reports
     }
 
@@ -575,7 +899,13 @@
         string PostTitle,
         string CommentPreview,
         string ReporterName,
-        string? Reason,
+        string CommenterName,
+        string CreatorName,
+        string CommentBody,
+        string VisibilityLabel,
+        DateTimeOffset CommentCreatedAt,
+        string ContextText,
+        string ReasonLabel,
         DateTimeOffset CreatedAt);
 
     private sealed record HeldCommentItem(
