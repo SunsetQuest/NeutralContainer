@@ -50,6 +50,7 @@
   * Given a user exceeds rate limits, when submitting, then the submission is blocked with a clear error message.
   * Given spam heuristics trigger, when submitting, then comment is Held or Rejected (configurable) with “Spam suspected” reason.
 2. **User story:** As the system, I classify likely violations (disrespect/harassment, diagnosing/labeling, unsolicited advice, moralizing/shaming/minimizing).
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given advice is disabled for the post, when a comment contains prescriptive advice with high confidence, then it is Held or Rejected based on configured thresholds.
   * Given advice is enabled, when advice is detected, then it does not cause rejection by itself (though other violations still apply).

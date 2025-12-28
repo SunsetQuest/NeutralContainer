@@ -69,12 +69,30 @@ public sealed class CommentModerationService
         "you are weak"
     ];
 
+    private static readonly string[] MinimizingSignals =
+    [
+        "it's not that bad",
+        "you're overreacting",
+        "just calm down",
+        "get over it",
+        "stop being so sensitive"
+    ];
+
+    private static readonly string[] ResolutionSignals =
+    [
+        "just move on",
+        "let it go",
+        "find closure",
+        "fix it already"
+    ];
+
     public CommentModerationResult Evaluate(Post post, string body)
     {
         var normalized = body.Trim().ToLowerInvariant();
         var reasons = new List<ModerationReason>();
 
-        if (ContainsAny(normalized, SpamSignals))
+        var spamMatches = CountMatches(normalized, SpamSignals);
+        if (spamMatches > 0)
         {
             var spamSeverity = post.ModerationLevel == ModerationLevel.High
                 ? ModerationSeverity.High
@@ -83,57 +101,95 @@ public sealed class CommentModerationService
                 "spam_suspected",
                 "Spam-like content detected.",
                 "Spam suspected",
-                spamSeverity));
+                spamSeverity,
+                GetConfidence(spamMatches)));
         }
 
-        if (ContainsAny(normalized, ProfanitySignals))
+        var profanityMatches = CountMatches(normalized, ProfanitySignals);
+        if (profanityMatches > 0)
         {
             reasons.Add(new ModerationReason(
                 "profanity_detected",
                 "Profanity detected.",
                 "Avoid profanity",
-                ModerationSeverity.Medium));
+                ModerationSeverity.Medium,
+                GetConfidence(profanityMatches)));
         }
 
-        if (ContainsAny(normalized, SevereHarassmentSignals))
+        var harassmentMatches = CountMatches(normalized, SevereHarassmentSignals);
+        if (harassmentMatches > 0)
         {
             reasons.Add(new ModerationReason(
                 "harassment_or_disrespect",
                 "Disrespectful or harassing language detected.",
                 "Respectful tone required",
-                ModerationSeverity.High));
+                ModerationSeverity.High,
+                GetConfidence(harassmentMatches)));
         }
 
         var adviceAllowed = post.AllowedFeedbackModes.HasFlag(FeedbackMode.AdviceAllowed);
         var prescriptiveAvoided = post.AvoidanceModes.HasFlag(AvoidanceMode.PrescriptiveLanguage);
-        if (!adviceAllowed && prescriptiveAvoided && ContainsAny(normalized, AdviceSignals))
+        var adviceMatches = CountMatches(normalized, AdviceSignals);
+        if (!adviceAllowed && prescriptiveAvoided && adviceMatches > 0)
         {
             reasons.Add(new ModerationReason(
                 "unsolicited_advice",
                 "Advice or prescriptive language detected.",
                 "Advice not allowed in this container",
-                ModerationSeverity.Medium));
+                ModerationSeverity.Medium,
+                GetConfidence(adviceMatches)));
         }
 
         var diagnosingAvoided = post.AvoidanceModes.HasFlag(AvoidanceMode.DiagnosingOrLabeling)
             || post.SensitivityFlags.HasFlag(SensitivityFlag.NoMentalHealthLabels);
-        if (diagnosingAvoided && ContainsAny(normalized, DiagnosisSignals))
+        var diagnosisMatches = CountMatches(normalized, DiagnosisSignals);
+        if (diagnosingAvoided && diagnosisMatches > 0)
         {
+            var triggeredRule = post.SensitivityFlags.HasFlag(SensitivityFlag.NoMentalHealthLabels)
+                ? "No mental health labels"
+                : "No diagnosing or labeling";
             reasons.Add(new ModerationReason(
                 "diagnosis_or_labeling",
                 "Diagnostic or labeling language detected.",
-                "No diagnosing or labeling",
-                ModerationSeverity.Medium));
+                triggeredRule,
+                ModerationSeverity.Medium,
+                GetConfidence(diagnosisMatches)));
         }
 
         var shamingAvoided = post.AvoidanceModes.HasFlag(AvoidanceMode.MoralizingOrShaming);
-        if (shamingAvoided && ContainsAny(normalized, ShamingSignals))
+        var shamingMatches = CountMatches(normalized, ShamingSignals);
+        if (shamingAvoided && shamingMatches > 0)
         {
             reasons.Add(new ModerationReason(
                 "moralizing_or_shaming",
                 "Shaming or moralizing language detected.",
                 "Avoid moralizing or shaming",
-                ModerationSeverity.Low));
+                ModerationSeverity.Low,
+                GetConfidence(shamingMatches)));
+        }
+
+        var minimizingAvoided = post.AvoidanceModes.HasFlag(AvoidanceMode.MinimizingOrDismissing);
+        var minimizingMatches = CountMatches(normalized, MinimizingSignals);
+        if (minimizingAvoided && minimizingMatches > 0)
+        {
+            reasons.Add(new ModerationReason(
+                "minimizing_or_dismissing",
+                "Minimizing or dismissive language detected.",
+                "Avoid minimizing or dismissing",
+                ModerationSeverity.Low,
+                GetConfidence(minimizingMatches)));
+        }
+
+        var resolutionAvoided = post.AvoidanceModes.HasFlag(AvoidanceMode.PushingTowardResolution);
+        var resolutionMatches = CountMatches(normalized, ResolutionSignals);
+        if (resolutionAvoided && resolutionMatches > 0)
+        {
+            reasons.Add(new ModerationReason(
+                "pushing_toward_resolution",
+                "Pushing toward resolution detected.",
+                "Avoid pushing toward resolution",
+                ModerationSeverity.Low,
+                GetConfidence(resolutionMatches)));
         }
 
         var status = DetermineStatus(post.ModerationLevel, reasons);
@@ -160,25 +216,35 @@ public sealed class CommentModerationService
         return level == ModerationLevel.High ? CommentModerationStatus.Held : CommentModerationStatus.Approved;
     }
 
-    private static bool ContainsAny(string normalizedBody, IEnumerable<string> signals)
+    private static int CountMatches(string normalizedBody, IEnumerable<string> signals)
     {
+        var count = 0;
         foreach (var signal in signals)
         {
             if (normalizedBody.Contains(signal, StringComparison.OrdinalIgnoreCase))
             {
-                return true;
+                count++;
             }
         }
 
-        return false;
+        return count;
     }
+
+    private static double GetConfidence(int matchCount) => matchCount switch
+    {
+        >= 3 => 0.9,
+        2 => 0.75,
+        1 => 0.6,
+        _ => 0.5
+    };
 }
 
 public sealed record ModerationReason(
     string Code,
     string Summary,
     string TriggeredRule,
-    ModerationSeverity Severity);
+    ModerationSeverity Severity,
+    double Confidence);
 
 public sealed record CommentModerationResult(
     CommentModerationStatus Status,

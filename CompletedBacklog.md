@@ -155,6 +155,17 @@
 * Expanded moderation heuristics to flag spam-like content and profanity with reason codes.
 * Tuned spam severity based on moderation level to allow stricter rejection in extra gentle containers.
 
+2. **User story:** As the system, I classify likely violations (disrespect/harassment, diagnosing/labeling, unsolicited advice, moralizing/shaming/minimizing).
+
+   * **Acceptance criteria**
+     * Given advice is disabled for the post, when a comment contains prescriptive advice with high confidence, then it is Held or Rejected based on configured thresholds.
+     * Given advice is enabled, when advice is detected, then it does not cause rejection by itself (though other violations still apply).
+     * Given the post has “No mental health labels,” when a comment contains diagnostic language, then it is Held or Rejected and the reason references that setting.
+
+**Completed changes**
+* Expanded moderation heuristics to detect minimizing/dismissing language and pushing toward resolution when the creator asked to avoid it.
+* Updated diagnostic-language reasons to reference the “No mental health labels” sensitivity toggle when enabled.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
