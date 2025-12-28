@@ -37,9 +37,24 @@
 * Stored display names on the user model and exposed them as auth claims for use in navigation and future content.
 * Kept the existing password management screen in the account area for updating credentials.
 
+### Epic 2 — Create post with YouTube embed + Response Agreement
+
+4. **User story:** As a creator, I can create a post by pasting a YouTube URL so the app stores the VideoId and renders an embed.
+
+   * **Acceptance criteria**
+     * Given I paste a valid youtu.be or youtube.com URL, when I submit/leave the field, then the system extracts/stores VideoId and shows an embed preview.
+     * Given I paste an invalid URL, when I submit, then I see a validation error and cannot publish.
+     * Given I publish successfully, when I open the post view, then the embedded player loads using the stored VideoId.
+
+**Completed changes**
+* Added a Create Post page with URL validation, live YouTube preview, and publish workflow.
+* Stored posts with the extracted VideoId and original URL in the database.
+* Updated the post view to load stored posts and render the embedded player.
+* Added navigation for authenticated users to create new posts.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
-4. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
+5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
 
    * **Acceptance criteria**
      * Given production deployments, when the app starts, then the SQL connection string is sourced from environment variables (not committed to git).

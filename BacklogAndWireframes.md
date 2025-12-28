@@ -32,17 +32,7 @@
 
 1\. \*\*User story:\*\* As a creator, I can create a post by pasting a YouTube URL so the app stores the VideoId and renders an embed.
 
-
-
-&nbsp;  \* \*\*Acceptance criteria\*\*
-
-
-
-&nbsp;    \* Given I paste a valid youtu.be or youtube.com URL, when I submit/leave the field, then the system extracts/stores VideoId and shows an embed preview.
-
-&nbsp;    \* Given I paste an invalid URL, when I submit, then I see a validation error and cannot publish.
-
-&nbsp;    \* Given I publish successfully, when I open the post view, then the embedded player loads using the stored VideoId.
+&nbsp;  \* \*\*Moved to:\*\* \`CompletedBacklog.md\`
 
 
 
