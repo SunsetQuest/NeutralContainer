@@ -6,6 +6,7 @@
 @using NeutralContainer.Data
 
 @inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
@@ -87,6 +88,13 @@
 
     public async Task LoginUser()
     {
+        var user = await UserManager.FindByEmailAsync(Input.Email);
+        if (user is not null && IsUserSuspended(user))
+        {
+            errorMessage = "Error: Your account is suspended. Please contact support.";
+            return;
+        }
+
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
         var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
@@ -110,6 +118,16 @@
         {
             errorMessage = "Error: Invalid login attempt.";
         }
+    }
+
+    private static bool IsUserSuspended(ApplicationUser user)
+    {
+        if (!user.IsSuspended)
+        {
+            return false;
+        }
+
+        return user.SuspendedUntil is null || user.SuspendedUntil > DateTimeOffset.UtcNow;
     }
 
     private sealed class InputModel

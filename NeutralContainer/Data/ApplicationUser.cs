@@ -9,6 +9,17 @@ namespace NeutralContainer.Data
         [PersonalData]
         [MaxLength(100)]
         public string? DisplayName { get; set; }
+
+        public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+        public bool IsSuspended { get; set; }
+
+        public DateTimeOffset? SuspendedAt { get; set; }
+
+        public DateTimeOffset? SuspendedUntil { get; set; }
+
+        [MaxLength(500)]
+        public string? SuspensionReason { get; set; }
     }
 
 }

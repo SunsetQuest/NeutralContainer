@@ -89,6 +89,7 @@
   * Given a report exists, when I open it, then I can see reporter, reason, and linked comment.
   * Given I mark a report “Resolved,” when saved, then it no longer appears in the default open queue.
 3. **User story:** As an admin, I can suspend a user to limit abuse/spam.
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given I suspend a user, when they attempt to comment, then the system blocks the action and shows a suspension message.
   * Given a user is suspended, when they attempt to log in, then access is denied (configurable) or limited to read-only pages.
@@ -101,9 +102,11 @@
   * Given a private comment, when a different authenticated user views the post, then they cannot access that comment via UI or direct URL.
   * Given an admin views moderation detail, when they open the item, then they can see private comments for enforcement purposes.
 2. **User story:** As the system, I provide audit logging for moderation actions.
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given any approve/reject/hide/suspend action, when executed, then a ModerationLog entry is created with actor + reason + timestamp.
 3. **User story:** As the system, I implement baseline anti-abuse controls.
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given repeated rapid submissions, when thresholds are exceeded, then rate limiting is applied.
   * Given suspicious patterns (new accounts spamming), when detected, then content is Held by default.

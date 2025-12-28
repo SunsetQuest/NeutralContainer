@@ -13,6 +13,8 @@ namespace NeutralContainer.Data
 
         public DbSet<CreatorBlock> CreatorBlocks => Set<CreatorBlock>();
 
+        public DbSet<ModerationLog> ModerationLogs => Set<ModerationLog>();
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
