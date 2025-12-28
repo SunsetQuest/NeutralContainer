@@ -45,6 +45,7 @@
 ### Epic 4 — Moderation v1 (automated checks + decisioning + logs)
 **Goal:** Implement “Hold + explain” as the safe default; support reason codes and audit trail.
 1. **User story:** As the system, I run baseline heuristics (spam/rate limits/profanity) before deeper classification.
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given a user exceeds rate limits, when submitting, then the submission is blocked with a clear error message.
   * Given spam heuristics trigger, when submitting, then comment is Held or Rejected (configurable) with “Spam suspected” reason.

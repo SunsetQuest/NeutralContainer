@@ -15,6 +15,28 @@ public sealed class CommentModerationService
         "shut up"
     ];
 
+    private static readonly string[] SpamSignals =
+    [
+        "buy now",
+        "free money",
+        "click here",
+        "limited time offer",
+        "subscribe to my channel",
+        "visit my site",
+        "http://",
+        "https://"
+    ];
+
+    private static readonly string[] ProfanitySignals =
+    [
+        "fuck",
+        "shit",
+        "bullshit",
+        "asshole",
+        "bitch",
+        "bastard"
+    ];
+
     private static readonly string[] AdviceSignals =
     [
         "you should",
@@ -51,6 +73,27 @@ public sealed class CommentModerationService
     {
         var normalized = body.Trim().ToLowerInvariant();
         var reasons = new List<ModerationReason>();
+
+        if (ContainsAny(normalized, SpamSignals))
+        {
+            var spamSeverity = post.ModerationLevel == ModerationLevel.High
+                ? ModerationSeverity.High
+                : ModerationSeverity.Medium;
+            reasons.Add(new ModerationReason(
+                "spam_suspected",
+                "Spam-like content detected.",
+                "Spam suspected",
+                spamSeverity));
+        }
+
+        if (ContainsAny(normalized, ProfanitySignals))
+        {
+            reasons.Add(new ModerationReason(
+                "profanity_detected",
+                "Profanity detected.",
+                "Avoid profanity",
+                ModerationSeverity.Medium));
+        }
 
         if (ContainsAny(normalized, SevereHarassmentSignals))
         {

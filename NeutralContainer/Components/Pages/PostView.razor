@@ -256,6 +256,8 @@
     private string? checkStyle;
     private string? checkError;
     private readonly List<ModerationReason> checkReasons = new();
+    private static readonly TimeSpan CommentRateLimitWindow = TimeSpan.FromMinutes(2);
+    private const int CommentRateLimitCount = 3;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -453,6 +455,18 @@
         if (user is null)
         {
             commentError = "Unable to identify the current user. Please sign in again.";
+            return;
+        }
+
+        var recentCommentCount = await DbContext.Comments
+            .AsNoTracking()
+            .Where(comment => comment.CommenterUserId == user.Id)
+            .Where(comment => comment.CreatedAt >= DateTimeOffset.UtcNow.Subtract(CommentRateLimitWindow))
+            .CountAsync();
+
+        if (recentCommentCount >= CommentRateLimitCount)
+        {
+            commentError = "You are commenting too quickly. Please wait a moment before trying again.";
             return;
         }
 
