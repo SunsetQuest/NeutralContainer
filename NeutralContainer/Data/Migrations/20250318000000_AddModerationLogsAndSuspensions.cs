@@ -18,6 +18,8 @@ namespace NeutralContainer.Migrations
                 nullable: false,
                 defaultValueSql: "SYSUTCDATETIME()");
 
+            migrationBuilder.Sql("UPDATE AspNetUsers SET CreatedAt = DATEADD(day, -30, SYSUTCDATETIME())");
+
             migrationBuilder.AddColumn<bool>(
                 name: "IsSuspended",
                 table: "AspNetUsers",
