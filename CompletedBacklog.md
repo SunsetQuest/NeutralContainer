@@ -1,5 +1,18 @@
 ## Completed backlog items
 
+### Epic 1 — Identity, access control, and roles
+
+1. **User story:** As a visitor, I can register and log in so I can access posts and participate.
+
+   * **Acceptance criteria**
+     * Given I am not authenticated, when I attempt to open any post URL, then I am redirected to login.
+     * Given I register with email + password, when I confirm registration, then I can log in and see the app shell navigation.
+     * Given I log out, when I revisit a protected page, then I am prompted to log in again.
+
+**Completed changes**
+* Added an authenticated post route placeholder so `/posts/{postId}` redirects to login for anonymous users.
+* Disabled the confirmed-account requirement so newly registered users can sign in immediately.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 4. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
