@@ -84,6 +84,7 @@
   * Given I approve, when saved, then the comment becomes Approved and is visible per visibility rules.
   * Given I reject, when saved, then the comment is set to Rejected and (optionally) rewrite guidance is stored/shown.
 2. **User story:** As an admin, I can review Flagged items and user reports to take action.
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given a report exists, when I open it, then I can see reporter, reason, and linked comment.
   * Given I mark a report “Resolved,” when saved, then it no longer appears in the default open queue.
