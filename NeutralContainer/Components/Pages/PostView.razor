@@ -857,7 +857,7 @@
 
     private sealed record ViewerCommentListItem(string Body, DateTimeOffset CreatedAt, CommentModerationStatus Status);
 
-    private sealed class CommentComposerModel
+    private sealed class CommentComposerModel : IValidatableObject
     {
         [Required]
         [MaxLength(2000)]
