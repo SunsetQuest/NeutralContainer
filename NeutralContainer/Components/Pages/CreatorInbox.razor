@@ -1,6 +1,11 @@
-﻿@page "/creator/inbox"
+@page "/creator/inbox"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @using NeutralContainer.Data
+@inject ApplicationDbContext DbContext
+@inject UserManager<ApplicationUser> UserManager
 
 @attribute [Authorize(Roles = RoleNames.Creator)]
 
@@ -8,7 +13,251 @@
 
 <div class="container py-4">
     <h1>Creator Inbox</h1>
-    <p class="text-muted">
-        This is a placeholder for the creator inbox. Creators can review private and public comments for their posts here.
-    </p>
+
+    @if (isLoading)
+    {
+        <p class="text-muted">Loading inbox…</p>
+    }
+    else if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <div class="alert alert-danger">@loadError</div>
+    }
+    else
+    {
+        <div class="row g-3 align-items-end mb-4">
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="postFilter">Filter by post</label>
+                <select id="postFilter" class="form-select" @onchange="HandlePostFilterChanged">
+                    <option value="">All posts</option>
+                    @foreach (var post in posts)
+                    {
+                        <option value="@post.Id" selected="@(post.Id == selectedPostId)">@post.Title</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12 col-md-6 text-md-end">
+                <span class="text-muted">@totalFilteredCount comment(s)</span>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs mb-3">
+            @foreach (var status in statusTabs)
+            {
+                <li class="nav-item">
+                    <button class="nav-link @(selectedStatus == status.Status ? "active" : "")"
+                            type="button"
+                            @onclick="(() => SelectStatus(status.Status))">
+                        @status.Label <span class="badge text-bg-secondary ms-1">@statusCounts.GetValueOrDefault(status.Status)</span>
+                    </button>
+                </li>
+            }
+        </ul>
+
+        @if (filteredComments.Count == 0)
+        {
+            <p class="text-muted">No comments in this view yet.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Post</th>
+                            <th scope="col">Commenter</th>
+                            <th scope="col">Visibility</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Submitted</th>
+                            <th scope="col">Preview</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var comment in filteredComments)
+                        {
+                            <tr>
+                                <td>@comment.PostTitle</td>
+                                <td>@comment.CommenterName</td>
+                                <td>@comment.Visibility</td>
+                                <td>
+                                    <span class="badge @GetStatusBadgeClass(comment.Status)">@comment.Status</span>
+                                </td>
+                                <td>@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                <td>@comment.Preview</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
 </div>
+
+@code {
+    private static readonly IReadOnlyList<StatusTab> statusTabs = new List<StatusTab>
+    {
+        new(CommentModerationStatus.Approved, "Approved"),
+        new(CommentModerationStatus.Held, "Held"),
+        new(CommentModerationStatus.Rejected, "Rejected"),
+        new(CommentModerationStatus.Flagged, "Flagged")
+    };
+
+    private readonly List<PostOption> posts = new();
+    private readonly List<CommentInboxItem> allComments = new();
+    private readonly Dictionary<CommentModerationStatus, int> statusCounts = new();
+    private List<CommentInboxItem> filteredComments = new();
+    private CommentModerationStatus selectedStatus = CommentModerationStatus.Approved;
+    private int? selectedPostId;
+    private int totalFilteredCount;
+    private bool isLoading = true;
+    private string? loadError;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadInboxAsync();
+    }
+
+    private async Task LoadInboxAsync()
+    {
+        isLoading = true;
+        loadError = null;
+        allComments.Clear();
+        posts.Clear();
+        statusCounts.Clear();
+
+        try
+        {
+            var authState = await AuthenticationStateTask;
+            var user = await UserManager.GetUserAsync(authState.User);
+            if (user is null)
+            {
+                loadError = "Unable to identify the current user. Please sign in again.";
+                return;
+            }
+
+            var creatorPosts = await DbContext.Posts
+                .AsNoTracking()
+                .Where(post => post.CreatorUserId == user.Id)
+                .OrderByDescending(post => post.CreatedAt)
+                .Select(post => new PostOption(
+                    post.Id,
+                    string.IsNullOrWhiteSpace(post.Title) ? "Untitled" : post.Title))
+                .ToListAsync();
+
+            posts.AddRange(creatorPosts);
+
+            var comments = await DbContext.Comments
+                .AsNoTracking()
+                .Include(comment => comment.Post)
+                .Include(comment => comment.CommenterUser)
+                .Where(comment => comment.Post!.CreatorUserId == user.Id)
+                .OrderByDescending(comment => comment.CreatedAt)
+                .Select(comment => new CommentInboxItem(
+                    comment.Id,
+                    comment.PostId,
+                    string.IsNullOrWhiteSpace(comment.Post!.Title) ? "Untitled" : comment.Post!.Title,
+                    ResolveDisplayName(comment.CommenterUser),
+                    comment.Visibility,
+                    comment.ModerationStatus,
+                    comment.CreatedAt,
+                    BuildPreview(comment.Body)))
+                .ToListAsync();
+
+            allComments.AddRange(comments);
+            UpdateFilters();
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Unable to load the inbox. {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void HandlePostFilterChanged(ChangeEventArgs args)
+    {
+        selectedPostId = int.TryParse(args.Value?.ToString(), out var postId)
+            ? postId
+            : null;
+        UpdateFilters();
+    }
+
+    private void SelectStatus(CommentModerationStatus status)
+    {
+        selectedStatus = status;
+        UpdateFilters();
+    }
+
+    private void UpdateFilters()
+    {
+        var baseList = selectedPostId.HasValue
+            ? allComments.Where(comment => comment.PostId == selectedPostId.Value)
+            : allComments.AsEnumerable();
+
+        var baseListArray = baseList.ToList();
+        totalFilteredCount = baseListArray.Count;
+
+        statusCounts.Clear();
+        foreach (var status in statusTabs.Select(tab => tab.Status))
+        {
+            statusCounts[status] = baseListArray.Count(comment => comment.Status == status);
+        }
+
+        filteredComments = baseListArray
+            .Where(comment => comment.Status == selectedStatus)
+            .ToList();
+    }
+
+    private static string ResolveDisplayName(ApplicationUser? user)
+    {
+        if (user is null)
+        {
+            return "Commenter";
+        }
+
+        if (!string.IsNullOrWhiteSpace(user.DisplayName))
+        {
+            return user.DisplayName;
+        }
+
+        return string.IsNullOrWhiteSpace(user.UserName) ? "Commenter" : user.UserName;
+    }
+
+    private static string BuildPreview(string body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            return string.Empty;
+        }
+
+        var normalized = body.Trim();
+        return normalized.Length <= 120 ? normalized : $"{normalized[..117]}…";
+    }
+
+    private static string GetStatusBadgeClass(CommentModerationStatus status) => status switch
+    {
+        CommentModerationStatus.Approved => "text-bg-success",
+        CommentModerationStatus.Held => "text-bg-warning",
+        CommentModerationStatus.Rejected => "text-bg-danger",
+        CommentModerationStatus.Flagged => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+
+    private sealed record StatusTab(CommentModerationStatus Status, string Label);
+
+    private sealed record PostOption(int Id, string Title);
+
+    private sealed record CommentInboxItem(
+        int Id,
+        int PostId,
+        string PostTitle,
+        string CommenterName,
+        CommentVisibility Visibility,
+        CommentModerationStatus Status,
+        DateTimeOffset CreatedAt,
+        string Preview);
+}
