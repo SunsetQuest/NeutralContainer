@@ -1,6 +1,8 @@
 ﻿@page "/admin/queue"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
 @using NeutralContainer.Data
+@inject ApplicationDbContext DbContext
 
 @attribute [Authorize(Roles = $"{RoleNames.Admin},{RoleNames.Moderator}")]
 
@@ -8,7 +10,159 @@
 
 <div class="container py-4">
     <h1>Admin Queue</h1>
-    <p class="text-muted">
-        This is a placeholder for the moderation queue. Admins and moderators can review held or flagged items here.
-    </p>
+
+    @if (isLoading)
+    {
+        <p class="text-muted">Loading reports…</p>
+    }
+    else if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <div class="alert alert-danger">@loadError</div>
+    }
+    else
+    {
+        <h2 class="h5">Open reports</h2>
+
+        @if (reports.Count == 0)
+        {
+            <p class="text-muted">No open reports right now.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Post</th>
+                            <th scope="col">Comment</th>
+                            <th scope="col">Reporter</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Created</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var report in reports)
+                        {
+                            <tr>
+                                <td>@report.PostTitle</td>
+                                <td>@report.CommentPreview</td>
+                                <td>@report.ReporterName</td>
+                                <td>@(string.IsNullOrWhiteSpace(report.Reason) ? "—" : report.Reason)</td>
+                                <td>@report.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-success"
+                                            type="button"
+                                            @onclick="(() => ResolveReportAsync(report.Id))">
+                                        Resolve
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
 </div>
+
+@code {
+    private readonly List<ReportListItem> reports = new();
+    private bool isLoading = true;
+    private string? loadError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReportsAsync();
+    }
+
+    private async Task LoadReportsAsync()
+    {
+        isLoading = true;
+        loadError = null;
+        reports.Clear();
+
+        try
+        {
+            var items = await DbContext.CommentReports
+                .AsNoTracking()
+                .Include(report => report.Comment)
+                .ThenInclude(comment => comment!.Post)
+                .Include(report => report.ReporterUser)
+                .Where(report => report.Status == ReportStatus.Open)
+                .OrderByDescending(report => report.CreatedAt)
+                .Select(report => new ReportListItem(
+                    report.Id,
+                    string.IsNullOrWhiteSpace(report.Comment!.Post!.Title) ? "Untitled" : report.Comment!.Post!.Title,
+                    BuildPreview(report.Comment!.Body),
+                    ResolveDisplayName(report.ReporterUser),
+                    report.Reason,
+                    report.CreatedAt))
+                .ToListAsync();
+
+            reports.AddRange(items);
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Unable to load reports. {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ResolveReportAsync(int reportId)
+    {
+        try
+        {
+            var report = await DbContext.CommentReports.FirstOrDefaultAsync(item => item.Id == reportId);
+            if (report is null)
+            {
+                return;
+            }
+
+            report.Status = ReportStatus.Resolved;
+            await DbContext.SaveChangesAsync();
+            await LoadReportsAsync();
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Unable to resolve the report. {ex.Message}";
+        }
+    }
+
+    private static string ResolveDisplayName(ApplicationUser? user)
+    {
+        if (user is null)
+        {
+            return "Reporter";
+        }
+
+        if (!string.IsNullOrWhiteSpace(user.DisplayName))
+        {
+            return user.DisplayName;
+        }
+
+        return string.IsNullOrWhiteSpace(user.UserName) ? "Reporter" : user.UserName;
+    }
+
+    private static string BuildPreview(string body)
+    {
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            return string.Empty;
+        }
+
+        var normalized = body.Trim();
+        return normalized.Length <= 120 ? normalized : $"{normalized[..117]}…";
+    }
+
+    private sealed record ReportListItem(
+        int Id,
+        string PostTitle,
+        string CommentPreview,
+        string ReporterName,
+        string? Reason,
+        DateTimeOffset CreatedAt);
+}

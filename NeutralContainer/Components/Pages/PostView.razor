@@ -115,6 +115,13 @@
             <div class="card-body">
                 <h2 class="h5">Leave a comment</h2>
 
+                @if (isUserBlocked)
+                {
+                    <div class="alert alert-warning">
+                        You have been blocked by the creator and cannot comment on this post.
+                    </div>
+                }
+
                 <EditForm EditContext="commentEditContext" OnValidSubmit="HandleValidCommentSubmit">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
@@ -124,6 +131,7 @@
                         <InputTextArea id="commentBody"
                                        class="form-control"
                                        rows="4"
+                                       disabled="@isUserBlocked"
                                        @bind-Value="commentModel.Body" />
                         <ValidationMessage For="@(() => commentModel.Body)" />
                     </div>
@@ -136,6 +144,7 @@
                                 <InputRadio id="commentVisibilityPrivate"
                                             class="form-check-input"
                                             @bind-Value="commentModel.Visibility"
+                                            disabled="@isUserBlocked"
                                             Value="CommentVisibility.Private" />
                                 <label class="form-check-label" for="commentVisibilityPrivate">Private (creator only)</label>
                             </div>
@@ -143,6 +152,7 @@
                                 <InputRadio id="commentVisibilityPublic"
                                             class="form-check-input"
                                             @bind-Value="commentModel.Visibility"
+                                            disabled="@isUserBlocked"
                                             Value="CommentVisibility.Public" />
                                 <label class="form-check-label" for="commentVisibilityPublic">Public (shows on this post)</label>
                             </div>
@@ -190,8 +200,8 @@
                     }
 
                     <div class="d-flex flex-wrap gap-2">
-                        <button class="btn btn-outline-secondary" type="button" @onclick="HandleCheckComment">Check my comment</button>
-                        <button class="btn btn-primary" type="submit">Submit</button>
+                        <button class="btn btn-outline-secondary" type="button" @onclick="HandleCheckComment" disabled="@isUserBlocked">Check my comment</button>
+                        <button class="btn btn-primary" type="submit" disabled="@isUserBlocked">Submit</button>
                     </div>
                 </EditForm>
             </div>
@@ -258,6 +268,7 @@
     private readonly List<ModerationReason> checkReasons = new();
     private static readonly TimeSpan CommentRateLimitWindow = TimeSpan.FromMinutes(2);
     private const int CommentRateLimitCount = 3;
+    private bool isUserBlocked;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -295,6 +306,8 @@
             commentModel.Visibility = post.VisibilityPolicy == VisibilityPolicy.PublicOnly
                 ? CommentVisibility.Public
                 : CommentVisibility.Private;
+
+            await UpdateBlockStatusAsync();
 
             if (showPublicComments)
             {
@@ -459,6 +472,13 @@
             return;
         }
 
+        await UpdateBlockStatusAsync();
+        if (isUserBlocked)
+        {
+            commentError = "You have been blocked by the creator and cannot comment on this post.";
+            return;
+        }
+
         var recentCommentCount = await DbContext.Comments
             .AsNoTracking()
             .Where(comment => comment.CommenterUserId == user.Id)
@@ -552,6 +572,12 @@
             return;
         }
 
+        if (isUserBlocked)
+        {
+            checkError = "You have been blocked by the creator and cannot comment on this post.";
+            return;
+        }
+
         if (!commentEditContext.Validate())
         {
             checkError = "Please fix the validation errors above before running the check.";
@@ -587,6 +613,32 @@
 
         var summary = string.Join(" ", result.Reasons.Select(reason => reason.Summary));
         return $"{baseMessage} {summary}";
+    }
+
+    private async Task UpdateBlockStatusAsync()
+    {
+        isUserBlocked = false;
+
+        if (post is null)
+        {
+            return;
+        }
+
+        var authState = await AuthenticationStateTask;
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user is null)
+        {
+            return;
+        }
+
+        if (user.Id == post.CreatorUserId)
+        {
+            return;
+        }
+
+        isUserBlocked = await DbContext.CreatorBlocks
+            .AsNoTracking()
+            .AnyAsync(block => block.CreatorUserId == post.CreatorUserId && block.BlockedUserId == user.Id);
     }
 
     private sealed record CommentListItem(string Body, DateTimeOffset CreatedAt, string DisplayName);
