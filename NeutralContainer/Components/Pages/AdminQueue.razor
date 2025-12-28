@@ -1,7 +1,9 @@
 ﻿@page "/admin/queue"
+@using System.Text.Json
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using NeutralContainer.Data
+@using NeutralContainer.Utilities
 @inject ApplicationDbContext DbContext
 
 @attribute [Authorize(Roles = $"{RoleNames.Admin},{RoleNames.Moderator}")]
@@ -13,7 +15,7 @@
 
     @if (isLoading)
     {
-        <p class="text-muted">Loading reports…</p>
+        <p class="text-muted">Loading queue…</p>
     }
     else if (!string.IsNullOrWhiteSpace(loadError))
     {
@@ -21,94 +23,367 @@
     }
     else
     {
-        <h2 class="h5">Open reports</h2>
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <button class="nav-link @(selectedTab == QueueTab.Held ? "active" : "")"
+                        type="button"
+                        @onclick="(() => SelectTab(QueueTab.Held))">
+                    Held comments <span class="badge text-bg-secondary ms-1">@heldComments.Count</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link @(selectedTab == QueueTab.Reports ? "active" : "")"
+                        type="button"
+                        @onclick="(() => SelectTab(QueueTab.Reports))">
+                    Reports <span class="badge text-bg-secondary ms-1">@reports.Count</span>
+                </button>
+            </li>
+        </ul>
 
-        @if (reports.Count == 0)
+        @if (!string.IsNullOrWhiteSpace(actionMessage))
         {
-            <p class="text-muted">No open reports right now.</p>
+            <div class="alert @actionMessageStyle">@actionMessage</div>
         }
-        else
+
+        @if (selectedTab == QueueTab.Held)
         {
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col">Post</th>
-                            <th scope="col">Comment</th>
-                            <th scope="col">Reporter</th>
-                            <th scope="col">Reason</th>
-                            <th scope="col">Created</th>
-                            <th scope="col">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var report in reports)
-                        {
-                            <tr>
-                                <td>@report.PostTitle</td>
-                                <td>@report.CommentPreview</td>
-                                <td>@report.ReporterName</td>
-                                <td>@(string.IsNullOrWhiteSpace(report.Reason) ? "—" : report.Reason)</td>
-                                <td>@report.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-success"
+            <div class="row g-3">
+                <div class="col-12 col-lg-5">
+                    <h2 class="h5">Held comments</h2>
+                    @if (heldComments.Count == 0)
+                    {
+                        <p class="text-muted">No held comments right now.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Post</th>
+                                        <th scope="col">Commenter</th>
+                                        <th scope="col">Submitted</th>
+                                        <th scope="col">Preview</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var comment in heldComments)
+                                    {
+                                        <tr class="@(selectedHeldComment?.Id == comment.Id ? "table-active" : "")">
+                                            <td>@comment.PostTitle</td>
+                                            <td>@comment.CommenterName</td>
+                                            <td>@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                            <td>@comment.Preview</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        type="button"
+                                                        @onclick="(() => SelectHeldComment(comment.Id))">
+                                                    Review
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="col-12 col-lg-7">
+                    <h2 class="h5">Comment detail</h2>
+                    @if (selectedHeldComment is null)
+                    {
+                        <p class="text-muted">Select a held comment to review the details.</p>
+                    }
+                    else
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                                    <div>
+                                        <h3 class="h6 mb-1">@selectedHeldComment.PostTitle</h3>
+                                        <div class="text-muted small">
+                                            Creator: @selectedHeldComment.CreatorName · Commenter: @selectedHeldComment.CommenterName
+                                        </div>
+                                    </div>
+                                    <span class="badge text-bg-warning">Held</span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Comment</h4>
+                                    <p class="mb-1">@selectedHeldComment.Body</p>
+                                    <div class="text-muted small">
+                                        Visibility: @selectedHeldComment.VisibilityLabel · Submitted @selectedHeldComment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Post context</h4>
+                                    <p class="mb-1 text-muted">@selectedHeldComment.ContextText</p>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Response Agreement</h4>
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-6">
+                                            <div class="border rounded p-2 h-100">
+                                                <div class="small text-muted">Looking for</div>
+                                                <ul class="mb-0">
+                                                    @foreach (var item in selectedHeldComment.AllowedFeedback)
+                                                    {
+                                                        <li>@item</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="border rounded p-2 h-100">
+                                                <div class="small text-muted">Please avoid</div>
+                                                <ul class="mb-0">
+                                                    @foreach (var item in selectedHeldComment.AvoidanceModes)
+                                                    {
+                                                        <li>@item</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <span class="badge text-bg-light border">Moderation: @selectedHeldComment.ModerationLevel</span>
+                                        @foreach (var flag in selectedHeldComment.SensitivityFlags)
+                                        {
+                                            <span class="badge text-bg-light border ms-1">@flag</span>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(selectedHeldComment.CustomRulesText))
+                                    {
+                                        <div class="mt-2">
+                                            <div class="small text-muted">Custom rules</div>
+                                            <p class="mb-0">@selectedHeldComment.CustomRulesText</p>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Triggered reasons</h4>
+                                    @if (selectedHeldComment.Reasons.Count == 0)
+                                    {
+                                        <p class="text-muted mb-0">No moderation reasons were stored for this comment.</p>
+                                    }
+                                    else
+                                    {
+                                        <ul class="mb-0">
+                                            @foreach (var reason in selectedHeldComment.Reasons)
+                                            {
+                                                <li>@reason.Summary (@reason.TriggeredRule, @reason.Severity)</li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button class="btn btn-success"
                                             type="button"
-                                            @onclick="(() => ResolveReportAsync(report.Id))">
-                                        Resolve
+                                            @onclick="(() => ResolveHeldCommentAsync(selectedHeldComment.Id, true))">
+                                        Approve
                                     </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                                    <button class="btn btn-outline-danger"
+                                            type="button"
+                                            @onclick="(() => ResolveHeldCommentAsync(selectedHeldComment.Id, false))">
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
+        }
+        else if (selectedTab == QueueTab.Reports)
+        {
+            <h2 class="h5">Open reports</h2>
+
+            @if (reports.Count == 0)
+            {
+                <p class="text-muted">No open reports right now.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th scope="col">Post</th>
+                                <th scope="col">Comment</th>
+                                <th scope="col">Reporter</th>
+                                <th scope="col">Reason</th>
+                                <th scope="col">Created</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var report in reports)
+                            {
+                                <tr>
+                                    <td>@report.PostTitle</td>
+                                    <td>@report.CommentPreview</td>
+                                    <td>@report.ReporterName</td>
+                                    <td>@(string.IsNullOrWhiteSpace(report.Reason) ? "—" : report.Reason)</td>
+                                    <td>@report.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-success"
+                                                type="button"
+                                                @onclick="(() => ResolveReportAsync(report.Id))">
+                                            Resolve
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         }
     }
 </div>
 
 @code {
     private readonly List<ReportListItem> reports = new();
+    private readonly List<HeldCommentItem> heldComments = new();
     private bool isLoading = true;
     private string? loadError;
+    private string? actionMessage;
+    private string actionMessageStyle = "alert-info";
+    private QueueTab selectedTab = QueueTab.Held;
+    private HeldCommentItem? selectedHeldComment;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadReportsAsync();
+        await LoadQueueAsync();
     }
 
-    private async Task LoadReportsAsync()
+    private async Task LoadQueueAsync()
     {
         isLoading = true;
         loadError = null;
+        actionMessage = null;
         reports.Clear();
+        heldComments.Clear();
+        selectedHeldComment = null;
 
         try
         {
-            var items = await DbContext.CommentReports
-                .AsNoTracking()
-                .Include(report => report.Comment)
-                .ThenInclude(comment => comment!.Post)
-                .Include(report => report.ReporterUser)
-                .Where(report => report.Status == ReportStatus.Open)
-                .OrderByDescending(report => report.CreatedAt)
-                .Select(report => new ReportListItem(
-                    report.Id,
-                    string.IsNullOrWhiteSpace(report.Comment!.Post!.Title) ? "Untitled" : report.Comment!.Post!.Title,
-                    BuildPreview(report.Comment!.Body),
-                    ResolveDisplayName(report.ReporterUser),
-                    report.Reason,
-                    report.CreatedAt))
-                .ToListAsync();
-
-            reports.AddRange(items);
+            await LoadReportsAsync();
+            await LoadHeldCommentsAsync();
         }
         catch (Exception ex)
         {
-            loadError = $"Unable to load reports. {ex.Message}";
+            loadError = $"Unable to load the admin queue. {ex.Message}";
         }
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task LoadReportsAsync()
+    {
+        var items = await DbContext.CommentReports
+            .AsNoTracking()
+            .Include(report => report.Comment)
+            .ThenInclude(comment => comment!.Post)
+            .Include(report => report.ReporterUser)
+            .Where(report => report.Status == ReportStatus.Open)
+            .OrderByDescending(report => report.CreatedAt)
+            .Select(report => new ReportListItem(
+                report.Id,
+                string.IsNullOrWhiteSpace(report.Comment!.Post!.Title) ? "Untitled" : report.Comment!.Post!.Title,
+                BuildPreview(report.Comment!.Body),
+                ResolveDisplayName(report.ReporterUser),
+                report.Reason,
+                report.CreatedAt))
+            .ToListAsync();
+
+        reports.AddRange(items);
+    }
+
+    private async Task LoadHeldCommentsAsync()
+    {
+        var comments = await DbContext.Comments
+            .AsNoTracking()
+            .Include(comment => comment.Post)
+            .Include(comment => comment.CommenterUser)
+            .Where(comment => comment.ModerationStatus == CommentModerationStatus.Held)
+            .OrderByDescending(comment => comment.CreatedAt)
+            .ToListAsync();
+
+        var creatorIds = comments
+            .Select(comment => comment.Post!.CreatorUserId)
+            .Distinct()
+            .ToList();
+
+        var creators = await DbContext.Users
+            .AsNoTracking()
+            .Where(user => creatorIds.Contains(user.Id))
+            .ToDictionaryAsync(user => user.Id, ResolveDisplayName);
+
+        foreach (var comment in comments)
+        {
+            heldComments.Add(new HeldCommentItem(
+                comment.Id,
+                ResolvePostTitle(comment.Post),
+                ResolveCreatorName(comment.Post, creators),
+                ResolveDisplayName(comment.CommenterUser),
+                BuildPreview(comment.Body),
+                comment.Body,
+                ResolveContextText(comment.Post),
+                comment.Visibility.ToString(),
+                comment.CreatedAt,
+                DescribeFeedbackModes(comment.Post!.AllowedFeedbackModes).ToList(),
+                DescribeAvoidanceModes(comment.Post!.AvoidanceModes).ToList(),
+                DescribeSensitivityFlags(comment.Post!.SensitivityFlags).ToList(),
+                comment.Post!.ModerationLevel.ToString(),
+                comment.Post!.CustomRulesText,
+                ParseReasons(comment.ModerationReasonsJson)));
+        }
+    }
+
+    private void SelectTab(QueueTab tab)
+    {
+        selectedTab = tab;
+        actionMessage = null;
+        actionMessageStyle = "alert-info";
+    }
+
+    private void SelectHeldComment(int commentId)
+    {
+        selectedHeldComment = heldComments.FirstOrDefault(comment => comment.Id == commentId);
+    }
+
+    private async Task ResolveHeldCommentAsync(int commentId, bool approve)
+    {
+        actionMessage = null;
+
+        try
+        {
+            var comment = await DbContext.Comments.FirstOrDefaultAsync(item => item.Id == commentId);
+            if (comment is null)
+            {
+                actionMessage = "That comment could not be found.";
+                actionMessageStyle = "alert-warning";
+                return;
+            }
+
+            comment.ModerationStatus = approve ? CommentModerationStatus.Approved : CommentModerationStatus.Rejected;
+            await DbContext.SaveChangesAsync();
+
+            actionMessage = approve ? "Comment approved and published per visibility rules." : "Comment rejected and removed from the held queue.";
+            actionMessageStyle = "alert-success";
+            await LoadQueueAsync();
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Unable to update the comment. {ex.Message}";
         }
     }
 
@@ -124,7 +399,7 @@
 
             report.Status = ReportStatus.Resolved;
             await DbContext.SaveChangesAsync();
-            await LoadReportsAsync();
+            await LoadQueueAsync();
         }
         catch (Exception ex)
         {
@@ -136,7 +411,7 @@
     {
         if (user is null)
         {
-            return "Reporter";
+            return "Unknown";
         }
 
         if (!string.IsNullOrWhiteSpace(user.DisplayName))
@@ -144,7 +419,37 @@
             return user.DisplayName;
         }
 
-        return string.IsNullOrWhiteSpace(user.UserName) ? "Reporter" : user.UserName;
+        return string.IsNullOrWhiteSpace(user.UserName) ? "Unknown" : user.UserName;
+    }
+
+    private static string ResolvePostTitle(Post? post)
+    {
+        if (post is null || string.IsNullOrWhiteSpace(post.Title))
+        {
+            return "Untitled";
+        }
+
+        return post.Title;
+    }
+
+    private static string ResolveCreatorName(Post? post, IReadOnlyDictionary<string, string> creators)
+    {
+        if (post is null)
+        {
+            return "Unknown";
+        }
+
+        return creators.TryGetValue(post.CreatorUserId, out var name) ? name : "Unknown";
+    }
+
+    private static string ResolveContextText(Post? post)
+    {
+        if (post is null || string.IsNullOrWhiteSpace(post.ContextText))
+        {
+            return "No additional context provided.";
+        }
+
+        return post.ContextText;
     }
 
     private static string BuildPreview(string body)
@@ -158,6 +463,113 @@
         return normalized.Length <= 120 ? normalized : $"{normalized[..117]}…";
     }
 
+    private static List<ModerationReason> ParseReasons(string? reasonsJson)
+    {
+        if (string.IsNullOrWhiteSpace(reasonsJson))
+        {
+            return new List<ModerationReason>();
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<ModerationReason>>(reasonsJson) ?? new List<ModerationReason>();
+        }
+        catch (JsonException)
+        {
+            return new List<ModerationReason>();
+        }
+    }
+
+    private static IEnumerable<string> DescribeFeedbackModes(FeedbackMode modes)
+    {
+        if (modes.HasFlag(FeedbackMode.PresenceOnly))
+        {
+            yield return "Presence-only";
+        }
+
+        if (modes.HasFlag(FeedbackMode.ReflectiveListening))
+        {
+            yield return "Reflective listening";
+        }
+
+        if (modes.HasFlag(FeedbackMode.ClarifyingQuestions))
+        {
+            yield return "Clarifying questions";
+        }
+
+        if (modes.HasFlag(FeedbackMode.SharePerspective))
+        {
+            yield return "Share your perspective";
+        }
+
+        if (modes.HasFlag(FeedbackMode.AdviceAllowed))
+        {
+            yield return "Suggestions/advice allowed";
+        }
+
+        if (modes.HasFlag(FeedbackMode.ResourcesAllowed))
+        {
+            yield return "Resources allowed";
+        }
+    }
+
+    private static IEnumerable<string> DescribeAvoidanceModes(AvoidanceMode modes)
+    {
+        if (modes.HasFlag(AvoidanceMode.DiagnosingOrLabeling))
+        {
+            yield return "Diagnosing or labeling";
+        }
+
+        if (modes.HasFlag(AvoidanceMode.MoralizingOrShaming))
+        {
+            yield return "Moralizing/shaming";
+        }
+
+        if (modes.HasFlag(AvoidanceMode.PrescriptiveLanguage))
+        {
+            yield return "Prescriptive language";
+        }
+
+        if (modes.HasFlag(AvoidanceMode.MinimizingOrDismissing))
+        {
+            yield return "Minimizing/dismissing";
+        }
+
+        if (modes.HasFlag(AvoidanceMode.PushingTowardResolution))
+        {
+            yield return "Pushing toward resolution";
+        }
+    }
+
+    private static IEnumerable<string> DescribeSensitivityFlags(SensitivityFlag flags)
+    {
+        if (flags.HasFlag(SensitivityFlag.ExtraGentleContainer))
+        {
+            yield return "Extra gentle container";
+        }
+
+        if (flags.HasFlag(SensitivityFlag.NoMentalHealthLabels))
+        {
+            yield return "No mental health labels";
+        }
+
+        if (flags.HasFlag(SensitivityFlag.NoRelationshipAdvice))
+        {
+            yield return "No relationship advice";
+        }
+
+        if (flags.HasFlag(SensitivityFlag.NoMedicalAdvice))
+        {
+            yield return "No medical advice";
+        }
+    }
+
+    private enum QueueTab
+    {
+        Held,
+        Reports
+    }
+
     private sealed record ReportListItem(
         int Id,
         string PostTitle,
@@ -165,4 +577,21 @@
         string ReporterName,
         string? Reason,
         DateTimeOffset CreatedAt);
+
+    private sealed record HeldCommentItem(
+        int Id,
+        string PostTitle,
+        string CreatorName,
+        string CommenterName,
+        string Preview,
+        string Body,
+        string ContextText,
+        string VisibilityLabel,
+        DateTimeOffset CreatedAt,
+        IReadOnlyList<string> AllowedFeedback,
+        IReadOnlyList<string> AvoidanceModes,
+        IReadOnlyList<string> SensitivityFlags,
+        string ModerationLevel,
+        string? CustomRulesText,
+        List<ModerationReason> Reasons);
 }
