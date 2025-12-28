@@ -436,19 +436,6 @@
 
 
 
-4\. \*\*User story:\*\* As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
-
-
-
-&nbsp;  \* \*\*Acceptance criteria\*\*
-
-
-
-&nbsp;    \* Given production deployments, when the app starts, then the SQL connection string is sourced from environment variables (not committed to git).
-
-&nbsp;    \* Given local development, when appsettings.Development.json is present, then the app can connect using the dev connection string without exposing production values.
-
-&nbsp;    \* Given the connection string is missing, when the app starts, then it fails fast with an actionable error message pointing to how to configure it.
 
 
 
