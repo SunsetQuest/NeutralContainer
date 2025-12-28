@@ -13,6 +13,19 @@
 * Added an authenticated post route placeholder so `/posts/{postId}` redirects to login for anonymous users.
 * Disabled the confirmed-account requirement so newly registered users can sign in immediately.
 
+2. **User story:** As the system, I enforce roles (Creator/Commenter/Admin) to control page access and actions.
+
+   * **Acceptance criteria**
+     * Given I am a standard user, when I attempt to open the Admin Queue, then I receive an access denied message.
+     * Given I am an Admin/Moderator, when I open the Admin Queue, then I can view held/flagged items and act on them.
+     * Given I am the post’s creator, when I open the Creator Inbox for that post, then I can see private and public comments for that post.
+
+**Completed changes**
+* Added role definitions and seeded Identity roles on startup.
+* Assigned default Creator and Commenter roles at registration.
+* Added protected Admin Queue and Creator Inbox pages with navigation links.
+* Updated unauthorized routing to show an access denied message to signed-in users.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 4. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.

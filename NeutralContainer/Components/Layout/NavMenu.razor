@@ -36,6 +36,26 @@
             </NavLink>
         </div>
 
+        <AuthorizeView Roles="Creator">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="creator/inbox">
+                        <span class="bi bi-inbox-fill-nav-menu" aria-hidden="true"></span> Creator Inbox
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Admin,Moderator">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="admin/queue">
+                        <span class="bi bi-shield-lock-fill-nav-menu" aria-hidden="true"></span> Admin Queue
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
@@ -89,4 +109,3 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-

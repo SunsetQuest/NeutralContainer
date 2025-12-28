@@ -10,23 +10,7 @@
 
 
 
-1\. \*\*User story:\*\* As the system, I enforce roles (Creator/Commenter/Admin) to control page access and actions. 
-
-
-
-&nbsp;  \* \*\*Acceptance criteria\*\*
-
-
-
-&nbsp;    \* Given I am a standard user, when I attempt to open the Admin Queue, then I receive an access denied message.
-
-&nbsp;    \* Given I am an Admin/Moderator, when I open the Admin Queue, then I can view held/flagged items and act on them.
-
-&nbsp;    \* Given I am the post’s creator, when I open the Creator Inbox for that post, then I can see private and public comments for that post.
-
-
-
-2\. \*\*User story:\*\* As a user, I can manage my account basics (display name, password) so my identity is consistent.
+1\. \*\*User story:\*\* As a user, I can manage my account basics (display name, password) so my identity is consistent.
 
 
 
