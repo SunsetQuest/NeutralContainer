@@ -23,5 +23,20 @@ public class Post
     [MaxLength(2000)]
     public string? ContextText { get; set; }
 
+    public FeedbackMode AllowedFeedbackModes { get; set; }
+
+    public AvoidanceMode AvoidanceModes { get; set; }
+
+    public SensitivityFlag SensitivityFlags { get; set; }
+
+    [MaxLength(2000)]
+    public string? CustomRulesText { get; set; }
+
+    [Required]
+    public VisibilityPolicy VisibilityPolicy { get; set; } = VisibilityPolicy.PrivateOnly;
+
+    [Required]
+    public ModerationLevel ModerationLevel { get; set; } = ModerationLevel.Standard;
+
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

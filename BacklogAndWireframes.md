@@ -53,6 +53,8 @@
 
 3\. \*\*User story:\*\* As a creator, I can configure a structured Response Agreement (what I’m looking for + what to avoid) so moderation can enforce it. 
 
+&nbsp;  \* \*\*Moved to:\*\* \`CompletedBacklog.md\`
+
 
 
 &nbsp;  \* \*\*Acceptance criteria\*\*
@@ -69,6 +71,8 @@
 
 4\. \*\*User story:\*\* As a creator, I can set visibility policy (Private only / Public only / Commenter chooses) so comment visibility is governed.
 
+&nbsp;  \* \*\*Moved to:\*\* \`CompletedBacklog.md\`
+
 
 
 &nbsp;  \* \*\*Acceptance criteria\*\*
@@ -84,6 +88,8 @@
 
 
 5\. \*\*User story:\*\* As a creator, I can choose moderation strictness (Standard/High) so the container can be “extra gentle.”
+
+&nbsp;  \* \*\*Moved to:\*\* \`CompletedBacklog.md\`
 
 
 
