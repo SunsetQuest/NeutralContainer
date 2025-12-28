@@ -46,6 +46,124 @@
             <ValidationMessage For="@(() => model.ContextText)" />
         </div>
 
+        <div class="mb-4">
+            <h2 class="h5">Response Agreement</h2>
+            <p class="text-muted mb-2">Select the tone and type of feedback you want to receive.</p>
+
+            <div class="mb-3">
+                <h3 class="h6">What I’m looking for</h3>
+                <div class="form-check">
+                    <InputCheckbox id="feedbackPresenceOnly" class="form-check-input" @bind-Value="model.FeedbackPresenceOnly" />
+                    <label class="form-check-label" for="feedbackPresenceOnly">Presence-only (witnessing; “I hear you”)</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="feedbackReflectiveListening" class="form-check-input" @bind-Value="model.FeedbackReflectiveListening" />
+                    <label class="form-check-label" for="feedbackReflectiveListening">Reflective listening (summarize what you heard)</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="feedbackClarifyingQuestions" class="form-check-input" @bind-Value="model.FeedbackClarifyingQuestions" />
+                    <label class="form-check-label" for="feedbackClarifyingQuestions">Clarifying questions (gentle, no fixing)</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="feedbackSharePerspective" class="form-check-input" @bind-Value="model.FeedbackSharePerspective" />
+                    <label class="form-check-label" for="feedbackSharePerspective">Share your perspective (non-prescriptive)</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="feedbackAdviceAllowed" class="form-check-input" @bind-Value="model.FeedbackAdviceAllowed" />
+                    <label class="form-check-label" for="feedbackAdviceAllowed">Suggestions/advice allowed (explicit opt-in)</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="feedbackResourcesAllowed" class="form-check-input" @bind-Value="model.FeedbackResourcesAllowed" />
+                    <label class="form-check-label" for="feedbackResourcesAllowed">Resources allowed (explicit opt-in)</label>
+                </div>
+                <ValidationMessage For="@(() => model.FeedbackPresenceOnly)" />
+            </div>
+
+            <div class="mb-3">
+                <h3 class="h6">Please avoid</h3>
+                <div class="form-check">
+                    <InputCheckbox id="avoidDiagnosing" class="form-check-input" @bind-Value="model.AvoidDiagnosingOrLabeling" />
+                    <label class="form-check-label" for="avoidDiagnosing">Diagnosing or labeling</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="avoidMoralizing" class="form-check-input" @bind-Value="model.AvoidMoralizingOrShaming" />
+                    <label class="form-check-label" for="avoidMoralizing">Moralizing or shaming</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="avoidPrescriptive" class="form-check-input" @bind-Value="model.AvoidPrescriptiveLanguage" />
+                    <label class="form-check-label" for="avoidPrescriptive">Prescriptive language if advice not allowed</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="avoidMinimizing" class="form-check-input" @bind-Value="model.AvoidMinimizingOrDismissing" />
+                    <label class="form-check-label" for="avoidMinimizing">Minimizing or dismissing</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="avoidResolution" class="form-check-input" @bind-Value="model.AvoidPushingTowardResolution" />
+                    <label class="form-check-label" for="avoidResolution">Pushing toward resolution if presence-only</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h3 class="h6">Sensitivity toggles</h3>
+                <div class="form-check">
+                    <InputCheckbox id="sensitivityExtraGentle" class="form-check-input" @bind-Value="model.SensitivityExtraGentleContainer" />
+                    <label class="form-check-label" for="sensitivityExtraGentle">Extra gentle container</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="sensitivityNoMentalHealthLabels" class="form-check-input" @bind-Value="model.SensitivityNoMentalHealthLabels" />
+                    <label class="form-check-label" for="sensitivityNoMentalHealthLabels">No mental health labels</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="sensitivityNoRelationshipAdvice" class="form-check-input" @bind-Value="model.SensitivityNoRelationshipAdvice" />
+                    <label class="form-check-label" for="sensitivityNoRelationshipAdvice">No relationship advice</label>
+                </div>
+                <div class="form-check">
+                    <InputCheckbox id="sensitivityNoMedicalAdvice" class="form-check-input" @bind-Value="model.SensitivityNoMedicalAdvice" />
+                    <label class="form-check-label" for="sensitivityNoMedicalAdvice">No medical advice</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="customRulesText">Custom rules (optional)</label>
+                <InputTextArea id="customRulesText"
+                               class="form-control"
+                               rows="3"
+                               @bind-Value="model.CustomRulesText" />
+                <ValidationMessage For="@(() => model.CustomRulesText)" />
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h2 class="h5">Comment visibility policy</h2>
+            <div class="form-check">
+                <InputRadio id="visibilityPrivateOnly" class="form-check-input" @bind-Value="model.VisibilityPolicy" Value="VisibilityPolicy.PrivateOnly" />
+                <label class="form-check-label" for="visibilityPrivateOnly">Private only</label>
+            </div>
+            <div class="form-check">
+                <InputRadio id="visibilityPublicOnly" class="form-check-input" @bind-Value="model.VisibilityPolicy" Value="VisibilityPolicy.PublicOnly" />
+                <label class="form-check-label" for="visibilityPublicOnly">Public only</label>
+            </div>
+            <div class="form-check">
+                <InputRadio id="visibilityCommenterChoice" class="form-check-input" @bind-Value="model.VisibilityPolicy" Value="VisibilityPolicy.CommenterChoice" />
+                <label class="form-check-label" for="visibilityCommenterChoice">Commenter chooses</label>
+            </div>
+            <p class="text-muted mt-2 mb-0">Public visibility requires explicit commenter consent.</p>
+            <ValidationMessage For="@(() => model.VisibilityPolicy)" />
+        </div>
+
+        <div class="mb-4">
+            <h2 class="h5">Moderation strictness</h2>
+            <div class="form-check">
+                <InputRadio id="moderationStandard" class="form-check-input" @bind-Value="model.ModerationLevel" Value="ModerationLevel.Standard" />
+                <label class="form-check-label" for="moderationStandard">Standard</label>
+            </div>
+            <div class="form-check">
+                <InputRadio id="moderationHigh" class="form-check-input" @bind-Value="model.ModerationLevel" Value="ModerationLevel.High" />
+                <label class="form-check-label" for="moderationHigh">High (extra gentle)</label>
+            </div>
+            <ValidationMessage For="@(() => model.ModerationLevel)" />
+        </div>
+
         @if (!string.IsNullOrWhiteSpace(model.VideoId))
         {
             <div class="mb-4">
@@ -125,7 +243,13 @@
             YouTubeUrl = model.YouTubeUrl,
             YouTubeVideoId = videoId,
             Title = string.IsNullOrWhiteSpace(model.Title) ? null : model.Title.Trim(),
-            ContextText = string.IsNullOrWhiteSpace(model.ContextText) ? null : model.ContextText.Trim()
+            ContextText = string.IsNullOrWhiteSpace(model.ContextText) ? null : model.ContextText.Trim(),
+            AllowedFeedbackModes = model.BuildAllowedFeedbackModes(),
+            AvoidanceModes = model.BuildAvoidanceModes(),
+            SensitivityFlags = model.BuildSensitivityFlags(),
+            CustomRulesText = string.IsNullOrWhiteSpace(model.CustomRulesText) ? null : model.CustomRulesText.Trim(),
+            VisibilityPolicy = model.VisibilityPolicy,
+            ModerationLevel = model.ModerationLevel
         };
 
         DbContext.Posts.Add(post);
@@ -147,6 +271,45 @@
         [MaxLength(2000)]
         public string? ContextText { get; set; }
 
+        public bool FeedbackPresenceOnly { get; set; }
+
+        public bool FeedbackReflectiveListening { get; set; }
+
+        public bool FeedbackClarifyingQuestions { get; set; }
+
+        public bool FeedbackSharePerspective { get; set; }
+
+        public bool FeedbackAdviceAllowed { get; set; }
+
+        public bool FeedbackResourcesAllowed { get; set; }
+
+        public bool AvoidDiagnosingOrLabeling { get; set; }
+
+        public bool AvoidMoralizingOrShaming { get; set; }
+
+        public bool AvoidPrescriptiveLanguage { get; set; }
+
+        public bool AvoidMinimizingOrDismissing { get; set; }
+
+        public bool AvoidPushingTowardResolution { get; set; }
+
+        public bool SensitivityExtraGentleContainer { get; set; }
+
+        public bool SensitivityNoMentalHealthLabels { get; set; }
+
+        public bool SensitivityNoRelationshipAdvice { get; set; }
+
+        public bool SensitivityNoMedicalAdvice { get; set; }
+
+        [MaxLength(2000)]
+        public string? CustomRulesText { get; set; }
+
+        [Required]
+        public VisibilityPolicy VisibilityPolicy { get; set; } = VisibilityPolicy.PrivateOnly;
+
+        [Required]
+        public ModerationLevel ModerationLevel { get; set; } = ModerationLevel.Standard;
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (!string.IsNullOrWhiteSpace(YouTubeUrl)
@@ -156,6 +319,111 @@
                     "Enter a valid YouTube URL (youtu.be or youtube.com).",
                     new[] { nameof(YouTubeUrl) });
             }
+
+            if (!FeedbackPresenceOnly
+                && !FeedbackReflectiveListening
+                && !FeedbackClarifyingQuestions
+                && !FeedbackSharePerspective
+                && !FeedbackAdviceAllowed
+                && !FeedbackResourcesAllowed)
+            {
+                yield return new ValidationResult(
+                    "Select at least one feedback mode you are open to receiving.",
+                    new[] { nameof(FeedbackPresenceOnly) });
+            }
+        }
+
+        public FeedbackMode BuildAllowedFeedbackModes()
+        {
+            var modes = FeedbackMode.None;
+            if (FeedbackPresenceOnly)
+            {
+                modes |= FeedbackMode.PresenceOnly;
+            }
+
+            if (FeedbackReflectiveListening)
+            {
+                modes |= FeedbackMode.ReflectiveListening;
+            }
+
+            if (FeedbackClarifyingQuestions)
+            {
+                modes |= FeedbackMode.ClarifyingQuestions;
+            }
+
+            if (FeedbackSharePerspective)
+            {
+                modes |= FeedbackMode.SharePerspective;
+            }
+
+            if (FeedbackAdviceAllowed)
+            {
+                modes |= FeedbackMode.AdviceAllowed;
+            }
+
+            if (FeedbackResourcesAllowed)
+            {
+                modes |= FeedbackMode.ResourcesAllowed;
+            }
+
+            return modes;
+        }
+
+        public AvoidanceMode BuildAvoidanceModes()
+        {
+            var modes = AvoidanceMode.None;
+            if (AvoidDiagnosingOrLabeling)
+            {
+                modes |= AvoidanceMode.DiagnosingOrLabeling;
+            }
+
+            if (AvoidMoralizingOrShaming)
+            {
+                modes |= AvoidanceMode.MoralizingOrShaming;
+            }
+
+            if (AvoidPrescriptiveLanguage)
+            {
+                modes |= AvoidanceMode.PrescriptiveLanguage;
+            }
+
+            if (AvoidMinimizingOrDismissing)
+            {
+                modes |= AvoidanceMode.MinimizingOrDismissing;
+            }
+
+            if (AvoidPushingTowardResolution)
+            {
+                modes |= AvoidanceMode.PushingTowardResolution;
+            }
+
+            return modes;
+        }
+
+        public SensitivityFlag BuildSensitivityFlags()
+        {
+            var flags = SensitivityFlag.None;
+            if (SensitivityExtraGentleContainer)
+            {
+                flags |= SensitivityFlag.ExtraGentleContainer;
+            }
+
+            if (SensitivityNoMentalHealthLabels)
+            {
+                flags |= SensitivityFlag.NoMentalHealthLabels;
+            }
+
+            if (SensitivityNoRelationshipAdvice)
+            {
+                flags |= SensitivityFlag.NoRelationshipAdvice;
+            }
+
+            if (SensitivityNoMedicalAdvice)
+            {
+                flags |= SensitivityFlag.NoMedicalAdvice;
+            }
+
+            return flags;
         }
     }
 }

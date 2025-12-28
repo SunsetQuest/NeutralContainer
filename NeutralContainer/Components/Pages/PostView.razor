@@ -39,6 +39,71 @@
                 </div>
             </div>
         }
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5">Response Agreement</h2>
+                <div class="row g-3">
+                    <div class="col-12 col-lg-6">
+                        <h3 class="h6">What I’m looking for</h3>
+                        @if (allowedFeedbackModes.Count == 0)
+                        {
+                            <p class="text-muted mb-0">No preferences selected.</p>
+                        }
+                        else
+                        {
+                            <ul class="mb-0">
+                                @foreach (var item in allowedFeedbackModes)
+                                {
+                                    <li>@item</li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <h3 class="h6">Please avoid</h3>
+                        @if (avoidanceModes.Count == 0)
+                        {
+                            <p class="text-muted mb-0">No specific avoid list.</p>
+                        }
+                        else
+                        {
+                            <ul class="mb-0">
+                                @foreach (var item in avoidanceModes)
+                                {
+                                    <li>@item</li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+
+                @if (sensitivityFlags.Count > 0)
+                {
+                    <div class="mt-3">
+                        <h3 class="h6">Sensitivity toggles</h3>
+                        <ul class="mb-0">
+                            @foreach (var item in sensitivityFlags)
+                            {
+                                <li>@item</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(post.CustomRulesText))
+                {
+                    <div class="mt-3">
+                        <h3 class="h6">Custom notes</h3>
+                        <p class="mb-0">@post.CustomRulesText</p>
+                    </div>
+                }
+
+                <div class="mt-3">
+                    <p class="mb-1"><strong>Visibility:</strong> @visibilityPolicyLabel</p>
+                    <p class="mb-0"><strong>Moderation:</strong> @moderationLevelLabel</p>
+                </div>
+            </div>
+        </div>
     }
 </div>
 
@@ -49,6 +114,11 @@
     private Post? post;
     private bool isLoading = true;
     private string postTitle = "Untitled";
+    private readonly List<string> allowedFeedbackModes = new();
+    private readonly List<string> avoidanceModes = new();
+    private readonly List<string> sensitivityFlags = new();
+    private string visibilityPolicyLabel = string.Empty;
+    private string moderationLevelLabel = string.Empty;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -57,6 +127,117 @@
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == PostId);
         postTitle = string.IsNullOrWhiteSpace(post?.Title) ? "Untitled" : post.Title;
+        allowedFeedbackModes.Clear();
+        avoidanceModes.Clear();
+        sensitivityFlags.Clear();
+
+        if (post is not null)
+        {
+            allowedFeedbackModes.AddRange(DescribeFeedbackModes(post.AllowedFeedbackModes));
+            avoidanceModes.AddRange(DescribeAvoidanceModes(post.AvoidanceModes));
+            sensitivityFlags.AddRange(DescribeSensitivityFlags(post.SensitivityFlags));
+            visibilityPolicyLabel = DescribeVisibilityPolicy(post.VisibilityPolicy);
+            moderationLevelLabel = DescribeModerationLevel(post.ModerationLevel);
+        }
         isLoading = false;
     }
+
+    private static IEnumerable<string> DescribeFeedbackModes(FeedbackMode modes)
+    {
+        if (modes.HasFlag(FeedbackMode.PresenceOnly))
+        {
+            yield return "Presence-only (witnessing; “I hear you”)";
+        }
+
+        if (modes.HasFlag(FeedbackMode.ReflectiveListening))
+        {
+            yield return "Reflective listening (summarize what you heard)";
+        }
+
+        if (modes.HasFlag(FeedbackMode.ClarifyingQuestions))
+        {
+            yield return "Clarifying questions (gentle, no fixing)";
+        }
+
+        if (modes.HasFlag(FeedbackMode.SharePerspective))
+        {
+            yield return "Share your perspective (non-prescriptive)";
+        }
+
+        if (modes.HasFlag(FeedbackMode.AdviceAllowed))
+        {
+            yield return "Suggestions/advice allowed";
+        }
+
+        if (modes.HasFlag(FeedbackMode.ResourcesAllowed))
+        {
+            yield return "Resources allowed";
+        }
+    }
+
+    private static IEnumerable<string> DescribeAvoidanceModes(AvoidanceMode modes)
+    {
+        if (modes.HasFlag(AvoidanceMode.DiagnosingOrLabeling))
+        {
+            yield return "Diagnosing or labeling";
+        }
+
+        if (modes.HasFlag(AvoidanceMode.MoralizingOrShaming))
+        {
+            yield return "Moralizing or shaming";
+        }
+
+        if (modes.HasFlag(AvoidanceMode.PrescriptiveLanguage))
+        {
+            yield return "Prescriptive language if advice not allowed";
+        }
+
+        if (modes.HasFlag(AvoidanceMode.MinimizingOrDismissing))
+        {
+            yield return "Minimizing or dismissing";
+        }
+
+        if (modes.HasFlag(AvoidanceMode.PushingTowardResolution))
+        {
+            yield return "Pushing toward resolution if presence-only";
+        }
+    }
+
+    private static IEnumerable<string> DescribeSensitivityFlags(SensitivityFlag flags)
+    {
+        if (flags.HasFlag(SensitivityFlag.ExtraGentleContainer))
+        {
+            yield return "Extra gentle container";
+        }
+
+        if (flags.HasFlag(SensitivityFlag.NoMentalHealthLabels))
+        {
+            yield return "No mental health labels";
+        }
+
+        if (flags.HasFlag(SensitivityFlag.NoRelationshipAdvice))
+        {
+            yield return "No relationship advice";
+        }
+
+        if (flags.HasFlag(SensitivityFlag.NoMedicalAdvice))
+        {
+            yield return "No medical advice";
+        }
+    }
+
+    private static string DescribeVisibilityPolicy(VisibilityPolicy policy) => policy switch
+    {
+        VisibilityPolicy.PrivateOnly => "Private feedback only",
+        VisibilityPolicy.PublicOnly => "Public feedback only",
+        VisibilityPolicy.CommenterChoice => "Commenter chooses (with consent)",
+        _ => "Unspecified"
+    };
+
+    private static string DescribeModerationLevel(ModerationLevel level) => level switch
+    {
+        ModerationLevel.High => "High (extra gentle)",
+        ModerationLevel.Standard => "Standard",
+        _ => "Standard"
+    };
 }

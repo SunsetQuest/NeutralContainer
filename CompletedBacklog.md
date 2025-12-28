@@ -62,6 +62,38 @@
 * Added optional title and context fields to posts and the create form.
 * Displayed post titles with an "Untitled" fallback and surfaced context text on the post view.
 
+6. **User story:** As a creator, I can configure a structured Response Agreement (what I’m looking for + what to avoid) so moderation can enforce it.
+
+   * **Acceptance criteria**
+     * Given the “What I’m looking for” list, when I select one or more options, then they are saved and displayed prominently on the post view page.
+     * Given “Suggestions/advice allowed” is not selected, when a comment contains prescriptive advice with high confidence, then the system can Hold or Reject per moderation rules.
+     * Given I add optional custom rules text, when I publish, then it is displayed alongside structured options.
+
+**Completed changes**
+* Added structured Response Agreement selections (feedback modes, avoid list, sensitivity flags, custom rules) to the create post flow.
+* Persisted Response Agreement fields on posts and render them in a dedicated card on the post view page.
+
+7. **User story:** As a creator, I can set visibility policy (Private only / Public only / Commenter chooses) so comment visibility is governed.
+
+   * **Acceptance criteria**
+     * Given Private only, when a commenter composes a comment, then there is no option to make it public.
+     * Given Public only, when a commenter composes a comment, then the comment will be visible publicly upon approval.
+     * Given Commenter chooses, when a commenter selects Public, then the system records commenter consent for public display and never makes it public without that consent.
+
+**Completed changes**
+* Added visibility policy selection to the create post form and stored the choice on the post.
+* Displayed the selected visibility policy on the post view page for reference.
+
+8. **User story:** As a creator, I can choose moderation strictness (Standard/High) so the container can be “extra gentle.”
+
+   * **Acceptance criteria**
+     * Given High, when a comment is borderline on tone thresholds, then the system more often Holds rather than Approves (vs Standard).
+     * Given I view the post, when I open the Response Agreement, then the chosen strictness is visible (at least to the creator; optionally to everyone).
+
+**Completed changes**
+* Added moderation strictness selection to the create post form with a default of Standard.
+* Surface the chosen moderation level in the Response Agreement details on the post view page.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
