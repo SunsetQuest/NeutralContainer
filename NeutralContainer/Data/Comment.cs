@@ -24,6 +24,8 @@ public class Comment
 
     public CommentModerationStatus ModerationStatus { get; set; } = CommentModerationStatus.Approved;
 
+    public bool IsHidden { get; set; }
+
     [MaxLength(4000)]
     public string? ModerationReasonsJson { get; set; }
 

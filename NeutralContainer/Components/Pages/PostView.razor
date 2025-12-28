@@ -415,6 +415,7 @@
             .Include(comment => comment.CommenterUser)
             .Where(comment => comment.PostId == post.Id)
             .Where(comment => comment.ModerationStatus == CommentModerationStatus.Approved)
+            .Where(comment => !comment.IsHidden)
             .Where(comment => comment.Visibility == CommentVisibility.Public)
             .OrderBy(comment => comment.CreatedAt)
             .Select(comment => new CommentListItem(

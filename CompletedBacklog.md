@@ -179,6 +179,16 @@
 * Added status tabs with counts, plus a post filter dropdown.
 * Listed comment details (post, commenter, visibility, status, submitted date, preview) in a responsive table.
 
+2. **User story:** As a creator, I can approve or hide comments to manage what is visible and what stays private.
+
+   * **Acceptance criteria**
+     * Given a comment is Held, when I click Approve, then status becomes Approved and it becomes visible per visibility rules.
+     * Given a comment is Approved, when I click Hide, then it is removed from public display (if public) and remains visible in creator inbox with status Hidden (or Approved + Hidden flag).
+
+**Completed changes**
+* Added per-comment actions in the Creator Inbox to approve held feedback and hide/unhide approved comments.
+* Stored a hidden flag on comments and excluded hidden public feedback from the post view.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
