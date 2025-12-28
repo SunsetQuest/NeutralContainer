@@ -10,23 +10,7 @@
 
 
 
-1\. \*\*User story:\*\* As a visitor, I can register and log in so I can access posts and participate.
-
-
-
-&nbsp;  \* \*\*Acceptance criteria\*\*
-
-
-
-&nbsp;    \* Given I am not authenticated, when I attempt to open any post URL, then I am redirected to login.
-
-&nbsp;    \* Given I register with email + password, when I confirm registration, then I can log in and see the app shell navigation.
-
-&nbsp;    \* Given I log out, when I revisit a protected page, then I am prompted to log in again.
-
-
-
-2\. \*\*User story:\*\* As the system, I enforce roles (Creator/Commenter/Admin) to control page access and actions. 
+1\. \*\*User story:\*\* As the system, I enforce roles (Creator/Commenter/Admin) to control page access and actions. 
 
 
 
@@ -42,7 +26,7 @@
 
 
 
-3\. \*\*User story:\*\* As a user, I can manage my account basics (display name, password) so my identity is consistent.
+2\. \*\*User story:\*\* As a user, I can manage my account basics (display name, password) so my identity is consistent.
 
 
 
