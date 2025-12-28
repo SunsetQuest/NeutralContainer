@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using NeutralContainer.Data
 
-@attribute [Authorize(Roles = $"{RoleNames.Admin},{RoleNames.Moderator}")]
+@attribute [Authorize(Roles = RoleNames.AdminAndModerator)]
 
 <PageTitle>Admin Queue</PageTitle>
 
