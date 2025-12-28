@@ -63,9 +63,7 @@
 ### Epic 5 — Creator inbox (review, triage, and controls)
 **Goal:** Creators can see all inbound feedback (private/public/held/flagged) and act: approve, hide, report, block.
 1. **User story:** As a creator, I can view an inbox grouped by status so I can triage quickly.
-* **Acceptance criteria**
-  * Given I open Creator Inbox, when the page loads, then I see tabs/counters for Approved, Held, Rejected, Flagged.
-  * Given I filter to a specific post, when selected, then the list updates to only that post’s comments.
+* **Moved to:** `CompletedBacklog.md`
 2. **User story:** As a creator, I can approve or hide comments to manage what is visible and what stays private.
 * **Acceptance criteria**
   * Given a comment is Held, when I click Approve, then status becomes Approved and it becomes visible per visibility rules.

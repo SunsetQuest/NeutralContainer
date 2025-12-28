@@ -166,6 +166,19 @@
 * Expanded moderation heuristics to detect minimizing/dismissing language and pushing toward resolution when the creator asked to avoid it.
 * Updated diagnostic-language reasons to reference the “No mental health labels” sensitivity toggle when enabled.
 
+### Epic 5 — Creator inbox (review, triage, and controls)
+
+1. **User story:** As a creator, I can view an inbox grouped by status so I can triage quickly.
+
+   * **Acceptance criteria**
+     * Given I open Creator Inbox, when the page loads, then I see tabs/counters for Approved, Held, Rejected, Flagged.
+     * Given I filter to a specific post, when selected, then the list updates to only that post’s comments.
+
+**Completed changes**
+* Built the Creator Inbox view to load comments for the creator’s posts.
+* Added status tabs with counts, plus a post filter dropdown.
+* Listed comment details (post, commenter, visibility, status, submitted date, preview) in a responsive table.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
