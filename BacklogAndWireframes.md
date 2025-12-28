@@ -70,6 +70,7 @@
   * Given a comment is Held, when I click Approve, then status becomes Approved and it becomes visible per visibility rules.
   * Given a comment is Approved, when I click Hide, then it is removed from public display (if public) and remains visible in creator inbox with status Hidden (or Approved + Hidden flag).
 3. **User story:** As a creator, I can block/report a user or a specific comment to protect my container.
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given I click Block user from a comment, when confirmed, then that user can no longer comment on my posts.
   * Given I report a comment, when submitted, then a Report record is created and appears in the Admin Queue.

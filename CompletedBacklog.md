@@ -189,6 +189,17 @@
 * Added per-comment actions in the Creator Inbox to approve held feedback and hide/unhide approved comments.
 * Stored a hidden flag on comments and excluded hidden public feedback from the post view.
 
+3. **User story:** As a creator, I can block/report a user or a specific comment to protect my container.
+
+   * **Acceptance criteria**
+     * Given I click Block user from a comment, when confirmed, then that user can no longer comment on my posts.
+     * Given I report a comment, when submitted, then a Report record is created and appears in the Admin Queue.
+
+**Completed changes**
+* Added creator-level block records and enforced them in the post comment composer.
+* Added comment reporting from the Creator Inbox, flagging comments and persisting reports.
+* Expanded the Admin Queue to list open reports with resolve actions.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.

@@ -90,7 +90,8 @@
                                 <td>@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</td>
                                 <td>@comment.Preview</td>
                                 <td>
-                                    <div class="btn-group btn-group-sm" role="group">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="btn-group btn-group-sm" role="group">
                                         @if (comment.Status == CommentModerationStatus.Held)
                                         {
                                             <button class="btn btn-outline-success"
@@ -118,12 +119,47 @@
                                                 </button>
                                             }
                                         }
+                                        </div>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button class="btn btn-outline-danger"
+                                                    type="button"
+                                                    disabled="@comment.IsCommenterBlocked"
+                                                    @onclick="(() => BlockCommenterAsync(comment.Id))">
+                                                @(comment.IsCommenterBlocked ? "Blocked" : "Block user")
+                                            </button>
+                                            <button class="btn btn-outline-warning"
+                                                    type="button"
+                                                    @onclick="(() => StartReport(comment.Id))">
+                                                Report
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
                         }
                     </tbody>
                 </table>
+            </div>
+        }
+
+        @if (reportCommentId.HasValue)
+        {
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h2 class="h5">Report comment</h2>
+                    <p class="text-muted">This report will be sent to the admin queue.</p>
+                    <div class="mb-3">
+                        <label class="form-label" for="reportReason">Reason (optional)</label>
+                        <InputTextArea id="reportReason"
+                                       class="form-control"
+                                       rows="3"
+                                       @bind-Value="reportReason" />
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-warning" type="button" @onclick="SubmitReportAsync">Submit report</button>
+                        <button class="btn btn-outline-secondary" type="button" @onclick="CancelReport">Cancel</button>
+                    </div>
+                </div>
             </div>
         }
     }
@@ -149,6 +185,8 @@
     private string? loadError;
     private string? actionMessage;
     private string actionMessageStyle = "alert-info";
+    private int? reportCommentId;
+    private string? reportReason;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -187,6 +225,12 @@
 
             posts.AddRange(creatorPosts);
 
+            var blockedUserIds = await DbContext.CreatorBlocks
+                .AsNoTracking()
+                .Where(block => block.CreatorUserId == user.Id)
+                .Select(block => block.BlockedUserId)
+                .ToHashSetAsync();
+
             var comments = await DbContext.Comments
                 .AsNoTracking()
                 .Include(comment => comment.Post)
@@ -197,10 +241,12 @@
                     comment.Id,
                     comment.PostId,
                     string.IsNullOrWhiteSpace(comment.Post!.Title) ? "Untitled" : comment.Post!.Title,
+                    comment.CommenterUserId,
                     ResolveDisplayName(comment.CommenterUser),
                     comment.Visibility,
                     comment.ModerationStatus,
                     comment.IsHidden,
+                    blockedUserIds.Contains(comment.CommenterUserId),
                     comment.CreatedAt,
                     BuildPreview(comment.Body)))
                 .ToListAsync();
@@ -215,6 +261,127 @@
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private void StartReport(int commentId)
+    {
+        reportCommentId = commentId;
+        reportReason = string.Empty;
+    }
+
+    private void CancelReport()
+    {
+        reportCommentId = null;
+        reportReason = null;
+    }
+
+    private async Task SubmitReportAsync()
+    {
+        if (!reportCommentId.HasValue)
+        {
+            return;
+        }
+
+        actionMessage = null;
+        actionMessageStyle = "alert-info";
+
+        try
+        {
+            var authState = await AuthenticationStateTask;
+            var user = await UserManager.GetUserAsync(authState.User);
+            if (user is null)
+            {
+                actionMessage = "Unable to identify the current user. Please sign in again.";
+                actionMessageStyle = "alert-danger";
+                return;
+            }
+
+            var comment = await DbContext.Comments
+                .Include(current => current.Post)
+                .FirstOrDefaultAsync(current => current.Id == reportCommentId.Value
+                                                && current.Post!.CreatorUserId == user.Id);
+
+            if (comment is null)
+            {
+                actionMessage = "Unable to find that comment. It may have been updated or removed.";
+                actionMessageStyle = "alert-warning";
+                return;
+            }
+
+            var report = new CommentReport
+            {
+                CommentId = comment.Id,
+                ReporterUserId = user.Id,
+                Reason = string.IsNullOrWhiteSpace(reportReason) ? null : reportReason.Trim(),
+                Status = ReportStatus.Open
+            };
+
+            DbContext.CommentReports.Add(report);
+            comment.ModerationStatus = CommentModerationStatus.Flagged;
+            await DbContext.SaveChangesAsync();
+
+            actionMessage = "Report submitted to admins.";
+            actionMessageStyle = "alert-success";
+            CancelReport();
+            await LoadInboxAsync();
+        }
+        catch (Exception ex)
+        {
+            actionMessage = $"Unable to submit the report. {ex.Message}";
+            actionMessageStyle = "alert-danger";
+        }
+    }
+
+    private async Task BlockCommenterAsync(int commentId)
+    {
+        actionMessage = null;
+        actionMessageStyle = "alert-info";
+
+        try
+        {
+            var authState = await AuthenticationStateTask;
+            var user = await UserManager.GetUserAsync(authState.User);
+            if (user is null)
+            {
+                actionMessage = "Unable to identify the current user. Please sign in again.";
+                actionMessageStyle = "alert-danger";
+                return;
+            }
+
+            var comment = await DbContext.Comments
+                .Include(current => current.Post)
+                .FirstOrDefaultAsync(current => current.Id == commentId && current.Post!.CreatorUserId == user.Id);
+
+            if (comment is null)
+            {
+                actionMessage = "Unable to find that comment. It may have been updated or removed.";
+                actionMessageStyle = "alert-warning";
+                return;
+            }
+
+            var existingBlock = await DbContext.CreatorBlocks
+                .FirstOrDefaultAsync(block => block.CreatorUserId == user.Id
+                                              && block.BlockedUserId == comment.CommenterUserId);
+
+            if (existingBlock is null)
+            {
+                DbContext.CreatorBlocks.Add(new CreatorBlock
+                {
+                    CreatorUserId = user.Id,
+                    BlockedUserId = comment.CommenterUserId
+                });
+                await DbContext.SaveChangesAsync();
+            }
+
+            actionMessage = "User blocked from commenting on your posts.";
+            actionMessageStyle = "alert-success";
+            await LoadInboxAsync();
+        }
+        catch (Exception ex)
+        {
+            actionMessage = $"Unable to block the user. {ex.Message}";
+            actionMessageStyle = "alert-danger";
         }
     }
 
@@ -362,10 +529,12 @@
         int Id,
         int PostId,
         string PostTitle,
+        string CommenterUserId,
         string CommenterName,
         CommentVisibility Visibility,
         CommentModerationStatus Status,
         bool IsHidden,
+        bool IsCommenterBlocked,
         DateTimeOffset CreatedAt,
         string Preview);
 }
