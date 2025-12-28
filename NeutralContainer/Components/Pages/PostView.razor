@@ -861,29 +861,29 @@
     {
         [Required]
         [MaxLength(2000)]
+        [CustomValidation(typeof(CommentComposerModel), nameof(ValidateBody))]
         public string Body { get; set; } = string.Empty;
 
         [Required]
         public CommentVisibility Visibility { get; set; } = CommentVisibility.Private;
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        public static ValidationResult? ValidateBody(string? value, ValidationContext context)
         {
-            var trimmedBody = Body?.Trim() ?? string.Empty;
+            var trimmed = value?.Trim() ?? string.Empty;
 
-            if (trimmedBody.Length == 0)
+            if (trimmed.Length == 0)
             {
-                yield return new ValidationResult(
-                    "Comment body is required.",
-                    new[] { nameof(Body) });
-                yield break;
+                return new ValidationResult("The Body field is required.", new[] { nameof(Body) });
             }
 
-            if (trimmedBody.Length < 10)
+            if (trimmed.Length < 10)
             {
-                yield return new ValidationResult(
-                    "Comment must be at least 10 characters.",
+                return new ValidationResult(
+                    "The Body field must be a string or array type with a minimum length of '10'.",
                     new[] { nameof(Body) });
             }
+
+            return ValidationResult.Success;
         }
     }
 }
