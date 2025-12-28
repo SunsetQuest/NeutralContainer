@@ -78,6 +78,7 @@
 ### Epic 6 — Reporting and Admin Queue (held/flagged/reports/users)
 **Goal:** Admin/moderator can resolve held/flagged content, handle reports, and suspend users.
 1. **User story:** As an admin, I can see a queue of Held comments and decide Approve/Reject.
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given I open Admin Queue → Held, when I select an item, then I see comment text, post context, Response Agreement, and triggered reasons.
   * Given I approve, when saved, then the comment becomes Approved and is visible per visibility rules.

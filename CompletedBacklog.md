@@ -200,6 +200,20 @@
 * Added comment reporting from the Creator Inbox, flagging comments and persisting reports.
 * Expanded the Admin Queue to list open reports with resolve actions.
 
+### Epic 6 — Reporting and Admin Queue (held/flagged/reports/users)
+
+1. **User story:** As an admin, I can see a queue of Held comments and decide Approve/Reject.
+
+   * **Acceptance criteria**
+     * Given I open Admin Queue → Held, when I select an item, then I see comment text, post context, Response Agreement, and triggered reasons.
+     * Given I approve, when saved, then the comment becomes Approved and is visible per visibility rules.
+     * Given I reject, when saved, then the comment is set to Rejected and (optionally) rewrite guidance is stored/shown.
+
+**Completed changes**
+* Added a Held comments tab to the Admin Queue with a selectable list and detailed review panel.
+* Surfaced post context, Response Agreement details, and moderation reasons for held comments.
+* Added approve/reject actions that update comment moderation status and refresh the queue.
+
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 
 5. **User story:** As the system, I keep infrastructure secrets (like the SQL Server host/IP) out of source control while still allowing local development.
