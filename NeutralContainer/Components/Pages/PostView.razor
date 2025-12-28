@@ -857,14 +857,33 @@
 
     private sealed record ViewerCommentListItem(string Body, DateTimeOffset CreatedAt, CommentModerationStatus Status);
 
-    private sealed class CommentComposerModel
+    private sealed class CommentComposerModel : IValidatableObject
     {
         [Required]
-        [MinLength(10)]
         [MaxLength(2000)]
         public string Body { get; set; } = string.Empty;
 
         [Required]
         public CommentVisibility Visibility { get; set; } = CommentVisibility.Private;
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var trimmedBody = Body?.Trim() ?? string.Empty;
+
+            if (trimmedBody.Length == 0)
+            {
+                yield return new ValidationResult(
+                    "Comment body is required.",
+                    new[] { nameof(Body) });
+                yield break;
+            }
+
+            if (trimmedBody.Length < 10)
+            {
+                yield return new ValidationResult(
+                    "Comment must be at least 10 characters.",
+                    new[] { nameof(Body) });
+            }
+        }
     }
 }
