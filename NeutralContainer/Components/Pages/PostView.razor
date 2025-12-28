@@ -240,6 +240,28 @@
         {
             <p class="text-muted">Public comments are disabled for this post.</p>
         }
+
+        @if (showViewerPrivateComments)
+        {
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h5">Your private comments</h2>
+                    <p class="text-muted">Only you, the creator, and admins can see these.</p>
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var comment in viewerPrivateComments)
+                        {
+                            <div class="border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge @GetViewerCommentBadgeClass(comment)">@GetViewerCommentLabel(comment)</span>
+                                    <small class="text-muted">@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
+                                </div>
+                                <p class="mb-0">@comment.Body</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -256,12 +278,14 @@
     private string visibilityPolicyLabel = string.Empty;
     private string moderationLevelLabel = string.Empty;
     private readonly List<CommentListItem> publicComments = new();
+    private readonly List<ViewerCommentListItem> viewerPrivateComments = new();
     private readonly CommentComposerModel commentModel = new();
     private EditContext? commentEditContext;
     private string? commentResultMessage;
     private string? commentResultStyle;
     private string? commentError;
     private bool showPublicComments;
+    private bool showViewerPrivateComments;
     private string? checkMessage;
     private string? checkStyle;
     private string? checkError;
@@ -284,7 +308,9 @@
         avoidanceModes.Clear();
         sensitivityFlags.Clear();
         publicComments.Clear();
+        viewerPrivateComments.Clear();
         showPublicComments = false;
+        showViewerPrivateComments = false;
 
         if (post is not null)
         {
@@ -313,6 +339,8 @@
             {
                 await LoadPublicComments();
             }
+
+            await LoadViewerPrivateComments();
         }
         isLoading = false;
     }
@@ -440,6 +468,47 @@
             .ToListAsync();
 
         publicComments.AddRange(comments);
+    }
+
+    private async Task LoadViewerPrivateComments()
+    {
+        if (post is null)
+        {
+            return;
+        }
+
+        var authState = await AuthenticationStateTask;
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user is null)
+        {
+            return;
+        }
+
+        if (user.Id == post.CreatorUserId)
+        {
+            return;
+        }
+
+        var comments = await DbContext.Comments
+            .AsNoTracking()
+            .Where(comment => comment.PostId == post.Id)
+            .Where(comment => comment.CommenterUserId == user.Id)
+            .Where(comment => comment.Visibility == CommentVisibility.Private)
+            .Where(comment => comment.ModerationStatus != CommentModerationStatus.Rejected)
+            .OrderBy(comment => comment.CreatedAt)
+            .Select(comment => new ViewerCommentListItem(
+                comment.Body,
+                comment.CreatedAt,
+                comment.ModerationStatus))
+            .ToListAsync();
+
+        if (comments.Count == 0)
+        {
+            return;
+        }
+
+        viewerPrivateComments.AddRange(comments);
+        showViewerPrivateComments = true;
     }
 
     private async Task HandleValidCommentSubmit()
@@ -642,6 +711,24 @@
     }
 
     private sealed record CommentListItem(string Body, DateTimeOffset CreatedAt, string DisplayName);
+
+    private static string GetViewerCommentLabel(ViewerCommentListItem comment) => comment.Status switch
+    {
+        CommentModerationStatus.Held => "Pending review",
+        CommentModerationStatus.Flagged => "Flagged",
+        CommentModerationStatus.Approved => "Approved",
+        _ => "Pending review"
+    };
+
+    private static string GetViewerCommentBadgeClass(ViewerCommentListItem comment) => comment.Status switch
+    {
+        CommentModerationStatus.Held => "text-bg-warning",
+        CommentModerationStatus.Flagged => "text-bg-danger",
+        CommentModerationStatus.Approved => "text-bg-success",
+        _ => "text-bg-secondary"
+    };
+
+    private sealed record ViewerCommentListItem(string Body, DateTimeOffset CreatedAt, CommentModerationStatus Status);
 
     private sealed class CommentComposerModel
     {

@@ -96,6 +96,7 @@
 ### Epic 7 — Non-functional hardening (privacy, abuse prevention, observability)
 **Goal:** Privacy definitions are enforced, abuse controls are present, and the system is supportable.
 1. **User story:** As the system, I enforce privacy rules for private comments (creator + commenter + admins).
+* **Moved to:** `CompletedBacklog.md`
 * **Acceptance criteria**
   * Given a private comment, when a different authenticated user views the post, then they cannot access that comment via UI or direct URL.
   * Given an admin views moderation detail, when they open the item, then they can see private comments for enforcement purposes.
