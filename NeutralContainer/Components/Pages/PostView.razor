@@ -59,6 +59,12 @@
         <p class="text-muted">
             Posted @post.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")
         </p>
+        @if (isCreatorViewing)
+        {
+            <div class="mb-3">
+                <a class="btn btn-outline-secondary btn-sm" href="@creatorInboxLink">View in Inbox</a>
+            </div>
+        }
         @if (post.PostType == PostType.YouTubeBacked && !string.IsNullOrWhiteSpace(post.ContextText))
         {
             <div class="card mb-4">
@@ -386,6 +392,8 @@
     private bool isUserBlocked;
     private bool isUserSuspended;
     private string suspensionMessage = "Your account is suspended and cannot post comments right now.";
+    private bool isCreatorViewing;
+    private string? creatorInboxLink;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -405,9 +413,16 @@
         viewerPrivateComments.Clear();
         showPublicComments = false;
         showViewerPrivateComments = false;
+        isCreatorViewing = false;
+        creatorInboxLink = null;
 
         if (post is not null)
         {
+            var authState = await AuthenticationStateTask;
+            var user = await UserManager.GetUserAsync(authState.User);
+            isCreatorViewing = user is not null && user.Id == post.CreatorUserId;
+            creatorInboxLink = isCreatorViewing ? $"/creator/inbox?postId={post.Id}" : null;
+
             allowedFeedbackModes.AddRange(DescribeFeedbackModes(post.AllowedFeedbackModes));
             avoidanceModes.AddRange(DescribeAvoidanceModes(post.AvoidanceModes));
             sensitivityFlags.AddRange(DescribeSensitivityFlags(post.SensitivityFlags));

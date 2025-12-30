@@ -1,5 +1,6 @@
 @page "/creator/inbox"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
@@ -204,6 +205,9 @@
     private int? reportCommentId;
     private string? reportReason;
 
+    [SupplyParameterFromQuery(Name = "postId")]
+    public int? PostId { get; set; }
+
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
 
@@ -240,6 +244,11 @@
                 .ToListAsync();
 
             posts.AddRange(creatorPosts);
+            selectedPostId = PostId;
+            if (selectedPostId.HasValue && !posts.Any(post => post.Id == selectedPostId.Value))
+            {
+                selectedPostId = null;
+            }
 
             var blockedUserIds = await DbContext.CreatorBlocks
                 .AsNoTracking()
