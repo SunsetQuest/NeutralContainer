@@ -310,3 +310,18 @@
 
 **Notable decisions**
 * Defaulted existing posts to YouTube-backed via the `PostType` column default.
+
+2. **ID:** NC-E08-002 — As a viewer, I can view a post whether it is Text-only or YouTube-backed. (2025-12-30)
+
+**Summary**
+* Made text-only post bodies display prominently on the post view without a video embed.
+* Labeled YouTube supporting text explicitly when provided.
+
+**Key files**
+* `NeutralContainer/Components/Pages/PostView.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Kept the empty-state text for text-only posts to avoid blank views.

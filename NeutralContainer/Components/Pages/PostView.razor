@@ -45,18 +45,15 @@
         }
         else
         {
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="h5">Post</h2>
-                    @if (string.IsNullOrWhiteSpace(post.ContextText))
-                    {
-                        <p class="text-muted mb-0">No text was provided.</p>
-                    }
-                    else
-                    {
-                        <p class="mb-0">@post.ContextText</p>
-                    }
-                </div>
+            <div class="mb-4">
+                @if (string.IsNullOrWhiteSpace(post.ContextText))
+                {
+                    <p class="text-muted mb-0">No text was provided.</p>
+                }
+                else
+                {
+                    <p class="fs-5 mb-0">@post.ContextText</p>
+                }
             </div>
         }
         <p class="text-muted">
@@ -66,7 +63,7 @@
         {
             <div class="card mb-4">
                 <div class="card-body">
-                    <h2 class="h5">Context</h2>
+                    <h2 class="h5">Supporting text</h2>
                     <p class="mb-0">@post.ContextText</p>
                 </div>
             </div>

@@ -71,7 +71,7 @@ When moving an item to CompletedBacklog.md, include:
 
 2. **ID:** NC-E08-002
 * **User story:** As a viewer, I can view a post whether it is Text-only or YouTube-backed.
-* **Status:** Next
+* **Status:** Moved to CompletedBacklog.md
 * **Acceptance criteria**
   * Given a Text-only post, when I open the Post View, then there is no video embed and the post body displays prominently.
   * Given a YouTube-backed post, when I open the Post View, then the video embed displays and the supporting text displays if provided.
@@ -81,8 +81,9 @@ When moving an item to CompletedBacklog.md, include:
 ### Epic 9 — Response Agreement acknowledgement before comment submission
 **Goal:** Commenters explicitly acknowledge the creator’s Response Agreement before submitting.
 
-1. **User story:** As a commenter, I must acknowledge the Response Agreement before I can submit a comment.
-* **Status:** Not started
+1. **ID:** NC-E09-001
+* **User story:** As a commenter, I must acknowledge the Response Agreement before I can submit a comment.
+* **Status:** Next
 * **Acceptance criteria**
   * Given I am viewing a post, when I open the composer, then I see a short acknowledgement checkbox tied to the Response Agreement (e.g., “I will respond within these boundaries”).
   * Given the acknowledgement is unchecked, when I click Submit, then submission is blocked with a clear validation message.
