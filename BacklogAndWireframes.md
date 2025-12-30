@@ -57,6 +57,18 @@ When moving an item to CompletedBacklog.md, include:
 
 ## Active backlog (top-down)
 
+### Epic 12 — Moderation rejection reasons
+**Goal:** Require template reasons when admins reject comments to keep feedback grounded.
+
+1. **ID:** NC-E12-001
+* **User story:** As an admin, I must select a rejection reason template before rejecting a comment so moderation feedback stays clear and consistent.
+* **Status:** Moved to CompletedBacklog.md
+* **Wireframe reference:** Admin Queue (Held/Flagged detail)
+* **Acceptance criteria**
+  * Given I review a held or flagged comment, when I choose Reject, then I must select a rejection reason template before the action completes.
+  * Given I reject a comment with a selected reason, when the action is saved, then the reason is recorded in the moderation log.
+  * Given I attempt to reject without a reason, when I submit, then the UI blocks the action with a clear prompt.
+
 ### Epic 11 — Safety messaging (not crisis support)
 **Goal:** Set clear expectations that NeutralContainer is not a crisis support service.
 

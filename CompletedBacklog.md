@@ -394,3 +394,21 @@
 
 **Notable decisions**
 * Used a lightweight `<details>` disclosure to keep the create/comment flow intact while exposing resource links.
+
+### Epic 12 — Moderation rejection reasons
+
+1. **ID:** NC-E12-001 — As an admin, I must select a rejection reason template before rejecting a comment so moderation feedback stays clear and consistent. (2025-12-30)
+
+**Summary**
+* Added rejection reason templates to the Admin Queue for held and flagged comments.
+* Blocked rejection actions unless a template reason is selected.
+* Logged admin rejection reasons in the moderation log for auditability.
+
+**Key files**
+* `NeutralContainer/Components/Pages/AdminQueue.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Stored rejection reasons in moderation logs to avoid expanding the comment schema.
