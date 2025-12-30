@@ -71,7 +71,7 @@ When moving an item to CompletedBacklog.md, include:
 
 2. **ID:** NC-E11-002
 * **User story:** As a member, I can access local crisis resources from the safety notice so I know where to go for urgent help.
-* **Status:** Next
+* **Status:** Moved to CompletedBacklog.md
 * **Wireframe reference:** Create Post (header), Post View (comment composer)
 * **Acceptance criteria**
   * Given I see the safety notice, when I look for more help, then I can open a list of crisis resources (or a link to a resources page).

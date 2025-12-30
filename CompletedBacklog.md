@@ -378,3 +378,19 @@
 
 **Notable decisions**
 * Used neutral, non-alarmist copy consistent with product principles.
+
+2. **ID:** NC-E11-002 — As a member, I can access local crisis resources from the safety notice so I know where to go for urgent help. (2025-12-30)
+
+**Summary**
+* Added expandable crisis resource details beneath the safety notice on Create Post and the post comment composer.
+* Included a global directory link, regional examples, and a reminder to use local emergency services for urgent help.
+
+**Key files**
+* `NeutralContainer/Components/Pages/CreatePost.razor`
+* `NeutralContainer/Components/Pages/PostView.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Used a lightweight `<details>` disclosure to keep the create/comment flow intact while exposing resource links.
