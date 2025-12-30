@@ -28,11 +28,11 @@
         <div class="row g-3 align-items-end mb-4">
             <div class="col-12 col-md-6">
                 <label class="form-label" for="postFilter">Filter by post</label>
-                <select id="postFilter" class="form-select" @onchange="HandlePostFilterChanged">
+                <select id="postFilter" class="form-select" @bind-Value="selectedPostId" @bind-Value:after="UpdateFilters">
                     <option value="">All posts</option>
                     @foreach (var post in posts)
                     {
-                        <option value="@post.Id" selected="@(post.Id == selectedPostId)">@post.Title</option>
+                        <option value="@post.Id">@post.Title</option>
                     }
                 </select>
             </div>
@@ -254,7 +254,8 @@
                 .AsNoTracking()
                 .Where(block => block.CreatorUserId == user.Id)
                 .Select(block => block.BlockedUserId)
-                .ToHashSetAsync();
+                .ToListAsync();
+            var blockedUserIdSet = blockedUserIds.ToHashSet();
 
             var comments = await DbContext.Comments
                 .AsNoTracking()
@@ -272,7 +273,7 @@
                     comment.ModerationStatus,
                     comment.IsHidden,
                     comment.IsHighlighted,
-                    blockedUserIds.Contains(comment.CommenterUserId),
+                    blockedUserIdSet.Contains(comment.CommenterUserId),
                     comment.CreatedAt,
                     BuildPreview(comment.Body)))
                 .ToListAsync();
@@ -410,14 +411,6 @@
             actionMessage = $"Unable to block the user. {ex.Message}";
             actionMessageStyle = "alert-danger";
         }
-    }
-
-    private void HandlePostFilterChanged(ChangeEventArgs args)
-    {
-        selectedPostId = int.TryParse(args.Value?.ToString(), out var postId)
-            ? postId
-            : null;
-        UpdateFilters();
     }
 
     private void SelectStatus(CommentModerationStatus status)
