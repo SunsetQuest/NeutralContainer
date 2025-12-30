@@ -197,6 +197,19 @@
                         <p class="text-muted">Your comment will be visible publicly after approval.</p>
                     }
 
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <InputCheckbox id="commentAcknowledgement"
+                                           class="form-check-input"
+                                           @bind-Value="commentModel.Acknowledged"
+                                           disabled="@(isUserBlocked || isUserSuspended)" />
+                            <label class="form-check-label" for="commentAcknowledgement">
+                                I will respond within these boundaries.
+                            </label>
+                        </div>
+                        <ValidationMessage For="@(() => commentModel.Acknowledged)" />
+                    </div>
+
                     @if (!string.IsNullOrWhiteSpace(checkMessage))
                     {
                         <div class="alert @checkStyle">
@@ -391,6 +404,7 @@
             checkError = null;
             checkReasons.Clear();
             commentModel.Body = string.Empty;
+            commentModel.Acknowledged = false;
             commentEditContext = new EditContext(commentModel);
             commentModel.Visibility = post.VisibilityPolicy == VisibilityPolicy.PublicOnly
                 ? CommentVisibility.Public
@@ -670,6 +684,7 @@
                     : "Thanks! Your comment was sent privately to the creator.";
                 commentResultStyle = "alert-success";
                 commentModel.Body = string.Empty;
+                commentModel.Acknowledged = false;
                 commentEditContext = new EditContext(commentModel);
                 if (showPublicComments && visibility == CommentVisibility.Public)
                 {
@@ -682,6 +697,7 @@
                     moderationResult);
                 commentResultStyle = "alert-warning";
                 commentModel.Body = string.Empty;
+                commentModel.Acknowledged = false;
                 commentEditContext = new EditContext(commentModel);
                 break;
             case CommentModerationStatus.Rejected:
@@ -693,6 +709,7 @@
                 commentResultMessage = "Thanks! Your comment was received.";
                 commentResultStyle = "alert-success";
                 commentModel.Body = string.Empty;
+                commentModel.Acknowledged = false;
                 commentEditContext = new EditContext(commentModel);
                 break;
         }
@@ -889,6 +906,9 @@
 
         [Required]
         public CommentVisibility Visibility { get; set; } = CommentVisibility.Private;
+
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Please acknowledge the Response Agreement before submitting.")]
+        public bool Acknowledged { get; set; }
 
         public static ValidationResult? ValidateBody(string? value, ValidationContext context)
         {
