@@ -10,12 +10,13 @@ public class Post
     public string CreatorUserId { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(200)]
-    public string YouTubeUrl { get; set; } = string.Empty;
+    public PostType PostType { get; set; } = PostType.YouTubeBacked;
 
-    [Required]
+    [MaxLength(200)]
+    public string? YouTubeUrl { get; set; }
+
     [MaxLength(32)]
-    public string YouTubeVideoId { get; set; } = string.Empty;
+    public string? YouTubeVideoId { get; set; }
 
     [MaxLength(200)]
     public string? Title { get; set; }

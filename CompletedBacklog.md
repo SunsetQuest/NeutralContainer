@@ -289,3 +289,24 @@
 * Removed the production connection string from `appsettings.json` so production requires environment variables.
 * Added a development-only connection string to `appsettings.Development.json`.
 * Updated the connection-string error message in `Program.cs` to point to environment configuration.
+
+### Epic 8 — Support text-only posts (alongside YouTube-backed posts)
+
+1. **ID:** NC-E08-001 — As a creator, I can choose a post type (Text-only or YouTube-backed) when creating a post. (2025-03-20)
+
+**Summary**
+* Added post type selection to the create post flow and enforced YouTube URL validation only for YouTube-backed posts.
+* Stored the post type in persistence while allowing text-only posts to omit YouTube data.
+* Updated post viewing to render text-only posts without a video embed and show body text when available.
+
+**Key files**
+* `NeutralContainer/Components/Pages/CreatePost.razor`
+* `NeutralContainer/Components/Pages/PostView.razor`
+* `NeutralContainer/Data/Post.cs`
+* `NeutralContainer/Data/PostType.cs`
+
+**Migrations**
+* `20250320000000_AddPostTypeAndOptionalVideoFields`
+
+**Notable decisions**
+* Defaulted existing posts to YouTube-backed via the `PostType` column default.

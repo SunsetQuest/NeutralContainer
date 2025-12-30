@@ -14,19 +14,31 @@
 
 <div class="container py-4">
     <h1>Create Post</h1>
-    <p class="text-muted">Use an Unlisted YouTube video; disable YouTube comments.</p>
 
     <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
         <div class="mb-3">
-            <label class="form-label" for="youtubeUrl">YouTube URL</label>
-            <InputText id="youtubeUrl"
-                       class="form-control"
-                       @bind-Value="model.YouTubeUrl"
-                       @oninput="HandleUrlInput" />
-            <ValidationMessage For="@(() => model.YouTubeUrl)" />
+            <h2 class="h5">Post type</h2>
+            <InputRadioGroup @bind-Value="SelectedPostType">
+                <div class="form-check">
+                    <InputRadio id="postTypeTextOnly" class="form-check-input" Value="PostType.TextOnly" />
+                    <label class="form-check-label" for="postTypeTextOnly">Text-only</label>
+                </div>
+                <div class="form-check">
+                    <InputRadio id="postTypeYouTube" class="form-check-input" Value="PostType.YouTubeBacked" />
+                    <label class="form-check-label" for="postTypeYouTube">YouTube-backed</label>
+                </div>
+            </InputRadioGroup>
+            @if (model.PostType == PostType.YouTubeBacked)
+            {
+                <p class="text-muted mt-2 mb-0">Use an Unlisted YouTube video; disable YouTube comments.</p>
+            }
+            else
+            {
+                <p class="text-muted mt-2 mb-0">This post will not include a video.</p>
+            }
         </div>
 
         <div class="mb-3">
@@ -38,13 +50,25 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label" for="contextText">Context (optional)</label>
+            <label class="form-label" for="contextText">@GetBodyLabel()</label>
             <InputTextArea id="contextText"
                            class="form-control"
                            rows="4"
                            @bind-Value="model.ContextText" />
             <ValidationMessage For="@(() => model.ContextText)" />
         </div>
+
+        @if (model.PostType == PostType.YouTubeBacked)
+        {
+            <div class="mb-3">
+                <label class="form-label" for="youtubeUrl">YouTube URL</label>
+                <InputText id="youtubeUrl"
+                           class="form-control"
+                           @bind-Value="model.YouTubeUrl"
+                           @oninput="HandleUrlInput" />
+                <ValidationMessage For="@(() => model.YouTubeUrl)" />
+            </div>
+        }
 
         <div class="mb-4">
             <h2 class="h5">Response Agreement</h2>
@@ -164,7 +188,7 @@
             <ValidationMessage For="@(() => model.ModerationLevel)" />
         </div>
 
-        @if (!string.IsNullOrWhiteSpace(model.VideoId))
+        @if (model.PostType == PostType.YouTubeBacked && !string.IsNullOrWhiteSpace(model.VideoId))
         {
             <div class="mb-4">
                 <label class="form-label">Preview</label>
@@ -198,6 +222,28 @@
         editContext = new EditContext(model);
     }
 
+    private PostType SelectedPostType
+    {
+        get => model.PostType;
+        set
+        {
+            if (model.PostType == value)
+            {
+                return;
+            }
+
+            model.PostType = value;
+            if (model.PostType == PostType.TextOnly)
+            {
+                model.YouTubeUrl = string.Empty;
+                model.VideoId = null;
+            }
+
+            saveError = null;
+            editContext?.NotifyValidationStateChanged();
+        }
+    }
+
     private void HandleUrlInput(ChangeEventArgs args)
     {
         model.YouTubeUrl = args.Value?.ToString() ?? string.Empty;
@@ -223,10 +269,14 @@
             return;
         }
 
-        if (!YouTubeUrlHelper.TryExtractVideoId(model.YouTubeUrl, out var videoId))
+        string? videoId = null;
+        if (model.PostType == PostType.YouTubeBacked)
         {
-            saveError = "Please enter a valid YouTube URL.";
-            return;
+            if (!YouTubeUrlHelper.TryExtractVideoId(model.YouTubeUrl, out videoId))
+            {
+                saveError = "Please enter a valid YouTube URL.";
+                return;
+            }
         }
 
         var authState = await AuthenticationStateTask;
@@ -240,8 +290,9 @@
         var post = new Post
         {
             CreatorUserId = user.Id,
-            YouTubeUrl = model.YouTubeUrl,
-            YouTubeVideoId = videoId,
+            PostType = model.PostType,
+            YouTubeUrl = model.PostType == PostType.YouTubeBacked ? model.YouTubeUrl?.Trim() : null,
+            YouTubeVideoId = model.PostType == PostType.YouTubeBacked ? videoId : null,
             Title = string.IsNullOrWhiteSpace(model.Title) ? null : model.Title.Trim(),
             ContextText = string.IsNullOrWhiteSpace(model.ContextText) ? null : model.ContextText.Trim(),
             AllowedFeedbackModes = model.BuildAllowedFeedbackModes(),
@@ -261,7 +312,9 @@
     private sealed class CreatePostModel : IValidatableObject
     {
         [Required]
-        public string YouTubeUrl { get; set; } = string.Empty;
+        public PostType PostType { get; set; } = PostType.YouTubeBacked;
+
+        public string? YouTubeUrl { get; set; }
 
         public string? VideoId { get; set; }
 
@@ -312,12 +365,20 @@
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (!string.IsNullOrWhiteSpace(YouTubeUrl)
-                && !YouTubeUrlHelper.TryExtractVideoId(YouTubeUrl, out _))
+            if (PostType == PostType.YouTubeBacked)
             {
-                yield return new ValidationResult(
-                    "Enter a valid YouTube URL (youtu.be or youtube.com).",
-                    new[] { nameof(YouTubeUrl) });
+                if (string.IsNullOrWhiteSpace(YouTubeUrl))
+                {
+                    yield return new ValidationResult(
+                        "Enter a YouTube URL for a YouTube-backed post.",
+                        new[] { nameof(YouTubeUrl) });
+                }
+                else if (!YouTubeUrlHelper.TryExtractVideoId(YouTubeUrl, out _))
+                {
+                    yield return new ValidationResult(
+                        "Enter a valid YouTube URL (youtu.be or youtube.com).",
+                        new[] { nameof(YouTubeUrl) });
+                }
             }
 
             if (!FeedbackPresenceOnly
@@ -426,4 +487,8 @@
             return flags;
         }
     }
+
+    private string GetBodyLabel() => model.PostType == PostType.TextOnly
+        ? "Body (optional)"
+        : "Context (optional)";
 }
