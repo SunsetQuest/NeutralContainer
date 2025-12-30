@@ -325,3 +325,20 @@
 
 **Notable decisions**
 * Kept the empty-state text for text-only posts to avoid blank views.
+
+### Epic 9 — Response Agreement acknowledgement before comment submission
+
+1. **ID:** NC-E09-001 — As a commenter, I must acknowledge the Response Agreement before I can submit a comment. (2025-12-30)
+
+**Summary**
+* Added a required acknowledgement checkbox to the post comment composer tied to the Response Agreement.
+* Blocked comment submission unless the acknowledgement is checked, with a clear validation message.
+
+**Key files**
+* `NeutralContainer/Components/Pages/PostView.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Kept the acknowledgement client-side only, as it is not stored with the comment for MVP.
