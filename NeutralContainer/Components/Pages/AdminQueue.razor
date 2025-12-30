@@ -197,6 +197,18 @@
                                     }
                                 </div>
 
+                                <div class="mb-3">
+                                    <h4 class="h6">Rejection reason</h4>
+                                    <select class="form-select" @bind="heldRejectionReason">
+                                        <option value="">Select a reason (required to reject)</option>
+                                        @foreach (var reason in RejectionReasons)
+                                        {
+                                            <option value="@reason">@reason</option>
+                                        }
+                                    </select>
+                                    <div class="form-text">Choose a neutral reason template to keep feedback grounded.</div>
+                                </div>
+
                                 <div class="d-flex flex-wrap gap-2">
                                     <button class="btn btn-success"
                                             type="button"
@@ -349,6 +361,18 @@
                                             }
                                         </ul>
                                     }
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Rejection reason</h4>
+                                    <select class="form-select" @bind="flaggedRejectionReason">
+                                        <option value="">Select a reason (required to reject)</option>
+                                        @foreach (var reason in RejectionReasons)
+                                        {
+                                            <option value="@reason">@reason</option>
+                                        }
+                                    </select>
+                                    <div class="form-text">Choose a neutral reason template to keep feedback grounded.</div>
                                 </div>
 
                                 <div class="d-flex flex-wrap gap-2">
@@ -594,12 +618,25 @@
     private string? loadError;
     private string? actionMessage;
     private string actionMessageStyle = "alert-info";
+    private string? heldRejectionReason;
+    private string? flaggedRejectionReason;
     private QueueTab selectedTab = QueueTab.Held;
     private HeldCommentItem? selectedHeldComment;
     private HeldCommentItem? selectedFlaggedComment;
     private ReportListItem? selectedReport;
     private UserListItem? selectedUser;
     private string? suspensionReason;
+
+    private static readonly string[] RejectionReasons =
+    [
+        "Harassment, disrespect, or hostile tone",
+        "Unsolicited advice outside the Response Agreement",
+        "Diagnostic or labeling language",
+        "Moralizing, shaming, or judgmental framing",
+        "Minimizing or dismissive language",
+        "Spam or promotional content",
+        "Off-topic or unrelated to the post"
+    ];
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -622,6 +659,8 @@
         selectedFlaggedComment = null;
         selectedReport = null;
         selectedUser = null;
+        heldRejectionReason = null;
+        flaggedRejectionReason = null;
         suspensionReason = null;
 
         try
@@ -798,11 +837,13 @@
     private void SelectHeldComment(int commentId)
     {
         selectedHeldComment = heldComments.FirstOrDefault(comment => comment.Id == commentId);
+        heldRejectionReason = null;
     }
 
     private void SelectFlaggedComment(int commentId)
     {
         selectedFlaggedComment = flaggedComments.FirstOrDefault(comment => comment.Id == commentId);
+        flaggedRejectionReason = null;
     }
 
     private void SelectReport(int reportId)
@@ -820,6 +861,13 @@
     {
         actionMessage = null;
 
+        if (!approve && string.IsNullOrWhiteSpace(heldRejectionReason))
+        {
+            actionMessage = "Select a rejection reason before rejecting a comment.";
+            actionMessageStyle = "alert-warning";
+            return;
+        }
+
         try
         {
             var comment = await DbContext.Comments.FirstOrDefaultAsync(item => item.Id == commentId);
@@ -836,7 +884,8 @@
                 comment.IsHighlighted = false;
             }
             await DbContext.SaveChangesAsync();
-            await LogModerationActionAsync("Comment", comment.Id.ToString(), approve ? "Approve" : "Reject", null);
+            var reason = approve ? null : heldRejectionReason?.Trim();
+            await LogModerationActionAsync("Comment", comment.Id.ToString(), approve ? "Approve" : "Reject", reason);
 
             actionMessage = approve ? "Comment approved and published per visibility rules." : "Comment rejected and removed from the held queue.";
             actionMessageStyle = "alert-success";
@@ -852,6 +901,13 @@
     {
         actionMessage = null;
 
+        if (!approve && string.IsNullOrWhiteSpace(flaggedRejectionReason))
+        {
+            actionMessage = "Select a rejection reason before rejecting a comment.";
+            actionMessageStyle = "alert-warning";
+            return;
+        }
+
         try
         {
             var comment = await DbContext.Comments.FirstOrDefaultAsync(item => item.Id == commentId);
@@ -868,7 +924,8 @@
                 comment.IsHighlighted = false;
             }
             await DbContext.SaveChangesAsync();
-            await LogModerationActionAsync("Comment", comment.Id.ToString(), approve ? "Approve" : "Reject", null);
+            var reason = approve ? null : flaggedRejectionReason?.Trim();
+            await LogModerationActionAsync("Comment", comment.Id.ToString(), approve ? "Approve" : "Reject", reason);
 
             actionMessage = approve ? "Comment approved and published per visibility rules." : "Comment rejected and removed from the flagged queue.";
             actionMessageStyle = "alert-success";
