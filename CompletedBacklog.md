@@ -342,3 +342,21 @@
 
 **Notable decisions**
 * Kept the acknowledgement client-side only, as it is not stored with the comment for MVP.
+
+### Epic 10 — Home post list (bounded navigation)
+
+1. **ID:** NC-E10-001 — As a logged-in member, I can view a recent-posts list on the home page so I can open posts without needing a direct link. (2025-12-30)
+
+**Summary**
+* Replaced the placeholder home page with a signed-in recent posts list showing titles, creators, post types, and dates.
+* Added a signed-out prompt and a signed-in empty state with a create-post call to action.
+
+**Key files**
+* `NeutralContainer/Components/Pages/Home.razor`
+* `Plan.md`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Kept the list bounded to authenticated users to avoid a public discovery feed.

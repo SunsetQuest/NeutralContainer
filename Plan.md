@@ -58,6 +58,7 @@ This repo is building an MVP that supports:
 - Clear reasons required for rejects (template-based to reduce tone escalation).
 
 **UX pages (minimum set)**
+- Home (recent posts list for logged-in users)
 - Create Post
 - Post View (read post + Response Agreement + response composer)
 - Creator Inbox (responses awaiting creator review/visibility decisions)

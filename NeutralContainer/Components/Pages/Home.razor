@@ -1,7 +1,155 @@
 ﻿@page "/"
 
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using NeutralContainer.Data
+@inject ApplicationDbContext DbContext
+
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container py-4">
+    <h1>Welcome</h1>
+    <p class="text-muted">Browse recent posts inside the container.</p>
 
-Welcome to your new app.
+    <AuthorizeView>
+        <Authorized>
+            @if (isLoading)
+            {
+                <p class="text-muted">Loading posts…</p>
+            }
+            else if (!string.IsNullOrWhiteSpace(loadError))
+            {
+                <div class="alert alert-danger">@loadError</div>
+            }
+            else if (posts.Count == 0)
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <p class="mb-2">No posts yet.</p>
+                        <a class="btn btn-primary" href="posts/create">Create the first post</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="list-group">
+                    @foreach (var post in posts)
+                    {
+                        <a class="list-group-item list-group-item-action" href="@($"posts/{post.Id}")">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h2 class="h5 mb-1">@post.Title</h2>
+                                <small class="text-muted">@post.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
+                            </div>
+                            <p class="mb-1 text-muted">@post.CreatorDisplayName · @post.PostTypeLabel</p>
+                            @if (!string.IsNullOrWhiteSpace(post.ContextPreview))
+                            {
+                                <p class="mb-0">@post.ContextPreview</p>
+                            }
+                        </a>
+                    }
+                </div>
+            }
+        </Authorized>
+        <NotAuthorized>
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h5">Sign in to view posts</h2>
+                    <p class="text-muted">Posts are visible only to authenticated members of the container.</p>
+                    <a class="btn btn-primary me-2" href="Account/Login">Log in</a>
+                    <a class="btn btn-outline-secondary" href="Account/Register">Create an account</a>
+                </div>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    private readonly List<PostListItem> posts = new();
+    private bool isLoading = true;
+    private string? loadError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var recentPosts = await DbContext.Posts
+                .AsNoTracking()
+                .OrderByDescending(post => post.CreatedAt)
+                .Take(20)
+                .ToListAsync();
+
+            if (recentPosts.Count == 0)
+            {
+                return;
+            }
+
+            var creatorIds = recentPosts
+                .Select(post => post.CreatorUserId)
+                .Distinct()
+                .ToList();
+
+            var creators = await DbContext.Users
+                .AsNoTracking()
+                .Where(user => creatorIds.Contains(user.Id))
+                .ToDictionaryAsync(user => user.Id, user => user);
+
+            foreach (var post in recentPosts)
+            {
+                creators.TryGetValue(post.CreatorUserId, out var creator);
+                posts.Add(new PostListItem
+                {
+                    Id = post.Id,
+                    Title = string.IsNullOrWhiteSpace(post.Title) ? "Untitled" : post.Title.Trim(),
+                    CreatorDisplayName = ResolveDisplayName(creator),
+                    PostTypeLabel = post.PostType == PostType.TextOnly ? "Text-only" : "YouTube-backed",
+                    ContextPreview = BuildPreview(post.ContextText),
+                    CreatedAt = post.CreatedAt
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            loadError = $"Unable to load posts. {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private static string ResolveDisplayName(ApplicationUser? user)
+    {
+        if (user is null)
+        {
+            return "Creator";
+        }
+
+        if (!string.IsNullOrWhiteSpace(user.DisplayName))
+        {
+            return user.DisplayName;
+        }
+
+        return string.IsNullOrWhiteSpace(user.UserName) ? "Creator" : user.UserName;
+    }
+
+    private static string? BuildPreview(string? contextText)
+    {
+        if (string.IsNullOrWhiteSpace(contextText))
+        {
+            return null;
+        }
+
+        var normalized = contextText.Trim();
+        return normalized.Length <= 160 ? normalized : $"{normalized[..157]}…";
+    }
+
+    private sealed class PostListItem
+    {
+        public int Id { get; init; }
+        public string Title { get; init; } = string.Empty;
+        public string CreatorDisplayName { get; init; } = string.Empty;
+        public string PostTypeLabel { get; init; } = string.Empty;
+        public string? ContextPreview { get; init; }
+        public DateTimeOffset CreatedAt { get; init; }
+    }
+}
