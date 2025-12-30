@@ -57,6 +57,18 @@ When moving an item to CompletedBacklog.md, include:
 
 ## Active backlog (top-down)
 
+### Epic 10 — Home post list (bounded navigation)
+**Goal:** Logged-in users can browse recent posts without a public discovery feed.
+
+1. **ID:** NC-E10-001
+* **User story:** As a logged-in member, I can view a recent-posts list on the home page so I can open posts without needing a direct link.
+* **Status:** Moved to CompletedBacklog.md
+* **Wireframe reference:** Home (new)
+* **Acceptance criteria**
+  * Given I am logged in, when I open Home, then I see a list of recent posts with title, creator name, post type, and created date, each linking to the post view.
+  * Given I am logged out, when I open Home, then I see a prompt to sign in and no post list.
+  * Given there are no posts, when I open Home, then I see an empty state with a link to create a post.
+
 ### Epic 8 — Support text-only posts (alongside YouTube-backed posts)
 **Goal:** Posts can be either text-only or YouTube-backed, while keeping the same Response Agreement + moderation model from `Plan.md`.
 
