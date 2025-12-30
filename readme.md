@@ -7,7 +7,26 @@ The core idea is simple:
 - Listeners should be able to stay *present* without immediately classifying, correcting, rescuing, or moralizing.
 - Ambiguity should be allowed—at least long enough to understand what someone actually means.
 
-> This repo currently contains a prototype website implementation and planning artifacts. See `Plan.md`, `BacklogAndWireframes.md`, and `CompletedBacklog.md` for ongoing work tracking.
+> This repo contains a prototype website implementation and planning artifacts. See `Plan.md`, `BacklogAndWireframes.md`, and `CompletedBacklog.md` for ongoing work tracking.
+
+## MVP in this repo (concrete implementation)
+
+This repository is currently building a **consent-based “neutral container” publishing and discussion flow**:
+
+- **Posts** are created by an author and can be:
+  - **Text-only**, or
+  - A **YouTube-hosted video** (typically *unlisted*) plus optional supporting text.
+- **Video hosting is intentionally external**:
+  - Creators upload/manage videos in YouTube.
+  - Creators are expected to **disable YouTube comments** and use NeutralContainer for discussion.
+- **Responses are text-only in the MVP** (no video replies).
+- Each post includes an **author-defined Response Agreement** (the “what kind of response do you want?” intent model):
+  - e.g., Witness only, Questions welcome, Perspective welcome, Advice welcome, Resource suggestions—without diagnosis.
+- **Login is required to view posts** (to keep the container bounded and reduce drive-by behavior).
+- **Moderation is part of the product**:
+  - Responses can be reviewed/queued (admin queue) and surfaced to the creator (creator inbox) before they appear publicly, depending on configuration.
+
+This section is intentionally specific: it describes the product currently being implemented in this repo, while the rest of this README describes the broader concept and principles.
 
 ---
 

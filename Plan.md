@@ -1,297 +1,194 @@
-## Working name
+# NeutralContainer — Implementation Plan (MVP in this repo)
 
-**Neutral Container** (or “Container” internally)
+## Source of truth
+The product intent and principles are defined in `readme.md` (the “neutral container” concept: postponed judgment, author-defined intent, neutral language, context optional, presence over policing).
+This `Plan.md` describes the concrete MVP implementation that expresses those principles in software.
 
-## Product summary
-
-A web platform where creators embed **unlisted YouTube videos** (with YouTube comments disabled) and receive **consent-based, presence-first feedback**. Each post includes a structured “Response Agreement” (what the creator wants/doesn’t want, and visibility rules). Comments pass through automated moderation designed to reduce disrespect, unsolicited advice, and labeling/diagnosing. The platform is not therapy/coaching; it is an informal container for nuanced sharing without pressure to resolve.
-
----
-
-## Core principles (the “why” translated into product rules)
-
-1. **Consent-based responses:** The creator chooses what types of responses are welcome.
-2. **Presence before interpretation:** Encourage clarifying questions and reflection before advice.
-3. **Ambiguity is allowed:** No forced narrative (no “fixing,” no “wrap-up” requirement).
-4. **Private is first-class:** Many creators will prefer private feedback by default.
-5. **Behavior-based moderation:** The same comment can be acceptable or not depending on the creator’s chosen container rules.
+If there is a conflict between README intent and implementation details here, update this plan to match the README.
 
 ---
 
-## User roles
+## Product definition (what we are building)
+NeutralContainer is a bounded space where people can share nuanced, unresolved, hard-to-classify experiences without being forced into diagnosis, moral sorting, or premature resolution.
 
-* **Creator/Author**
+This repo is building an MVP that supports:
+- Posts that are text-only OR reference externally hosted media (initially YouTube unlisted videos).
+- A visible, author-chosen “Response Agreement” that defines what kinds of replies are welcome.
+- Text-only responses that respect the Response Agreement.
+- Moderation workflows that prioritize “presence without labeling” while still enabling enforcement against abuse.
 
-  * Creates posts (YouTube embed + response agreement)
-  * Reviews comments (private + public + held)
-  * Can hide/approve/highlight; can block/report users
-* **Commenter**
+---
 
-  * Watches video, reads rules, writes comment
-  * Optionally runs “AI check” before submitting
-  * Selects comment visibility if allowed
-* **Moderator/Admin**
+## Core principles to preserve in the implementation
+1. **Postpone judgment**: UI copy and interaction design should bias toward clarification before evaluation.
+2. **Author-defined intent**: the author selects a Response Agreement; responders must see it and respond within it.
+3. **Neutral language by default**: tone should be matter-of-fact; avoid crisis framing or inspirational framing by default.
+4. **Context optional**: authors can post fragments; the system should not force backstory or a “lesson learned.”
+5. **Presence over policing**: moderation should target harassment/coercion/unsolicited diagnosis, not disagreement alone.
 
-  * Handles held/flagged queues, reports, appeals
-  * User management (suspensions, spam controls)
-  * Adjusts system-wide moderation thresholds and policy text
+---
+
+## MVP scope statement
+### In scope (MVP)
+**Content**
+- Post types:
+  - Text-only post
+  - YouTube-backed post (YouTube URL + optional text)
+- Responses: text-only comments/replies.
+
+**Access & roles**
+- Login required to view posts.
+- Roles:
+  - Author/Creator (can create posts; manages responses to their posts)
+  - Commenter (can respond to posts)
+  - Admin/Moderator (handles moderation queue)
+
+**Response Agreement**
+- Authors choose one “agreement” per post (extensible later).
+- Responders must explicitly acknowledge it before submitting.
+- Agreements are displayed prominently on the post view.
+
+**Moderation**
+- Admin queue for review of new responses (and optionally new posts if desired).
+- Creator inbox to review responses associated with their posts (especially if moderation is “pre-publication”).
+- Moderation outcomes include:
+  - Allow / Approve
+  - Hold (needs review or clarification)
+  - Reject (policy violation / mismatch)
+- Clear reasons required for rejects (template-based to reduce tone escalation).
+
+**UX pages (minimum set)**
+- Create Post
+- Post View (read post + Response Agreement + response composer)
+- Creator Inbox (responses awaiting creator review/visibility decisions)
+- Admin Queue (global moderation queue)
+
+### Explicitly out of scope (MVP)
+- Hosting or uploading video directly to NeutralContainer.
+- Video replies.
+- DMs / private messaging.
+- Public “viral” discovery feed (keep bounded).
+- Clinical or diagnostic tooling (no labeling workflows).
+- Real-time chat.
+
+---
+
+## YouTube integration (hosting strategy)
+### Why YouTube
+YouTube is used only as a hosting/streaming platform to avoid building video storage, encoding, and delivery.
+
+### Required creator behavior (product-guided)
+When creating a YouTube-backed post, the creator is guided to:
+- Upload video to YouTube
+- Set visibility to **Unlisted** (recommended default)
+- **Disable YouTube comments** (discussion happens in NeutralContainer)
+- Paste the YouTube URL into the NeutralContainer “Create Post” form
+
+### What NeutralContainer stores
+- The YouTube URL (and derived video ID if needed)
+- Post metadata (title, optional text, timestamps, author, status)
+- Response Agreement selection
+- Comments/responses and moderation events
+
+### What NeutralContainer does not store
+- The video file
+- YouTube account tokens (MVP)
+- YouTube comments
 
 ---
 
 ## Key user flows
 
-### Flow A: Creator creates a post
+### Flow A — Create Post (text-only)
+1. Author clicks “Create Post”
+2. Enters title + body (body optional)
+3. Selects Response Agreement (required)
+4. Publishes post
+5. Post becomes viewable to logged-in users
 
-1. Creator uploads video to YouTube → sets **Unlisted** → **disables YouTube comments**.
-2. Creator logs in → “Create Post”
-3. Pastes YouTube URL (platform extracts/stores **VideoId**).
-4. Creator sets:
+### Flow B — Create Post (YouTube-backed)
+1. Author clicks “Create Post”
+2. Enters title + optional supporting text
+3. Pastes YouTube URL (validated)
+4. Selects Response Agreement (required)
+5. Publishes post
+6. Post view embeds the video (or shows a safe link if embed fails)
 
-   * Title (optional)
-   * Context prompt (optional; short; avoids forcing a narrative)
-   * **Response Agreement** (structured options + optional custom text)
-   * Comment visibility policy:
+### Flow C — Respond to a post
+1. Logged-in user opens a post
+2. Sees Response Agreement prominently
+3. Clicks “Respond”
+4. Acknowledges agreement (“I will respond within these boundaries”)
+5. Submits text response
+6. Response enters moderation pipeline (see below)
 
-     * **Private only**
-     * **Public only**
-     * **Commenter chooses**
-   * Moderation strictness: **Standard / High**
-5. Post is published with a shareable platform URL.
+### Flow D — Moderation pipeline (recommended default for MVP)
+- New response defaults to **Held** (not publicly visible)
+- Admin can:
+  - Allow → visible (or routed to creator decision if configured)
+  - Hold → remains hidden; request edit/clarification
+  - Reject → hidden; reason recorded
+- Creator inbox:
+  - Sees responses tied to their posts
+  - Can optionally mark an allowed response as “Featured” later (post-MVP)
 
-### Flow B: Commenter leaves feedback
-
-1. Commenter opens post page → sees embedded video and Response Agreement.
-2. Commenter writes comment.
-3. Optional: clicks **“Check my comment”** (AI self-check + alignment with creator rules).
-4. Selects Private/Public (only if creator allows commenter choice).
-5. Submit → moderation pipeline returns:
-
-   * **Approved** (posted)
-   * **Held** (pending review)
-   * **Rejected with rewrite guidance** (edit required)
-
-### Flow C: Creator reviews comments
-
-Creator dashboard shows inbox by status:
-
-* Approved (Private/Public)
-* Held (Pending moderation)
-* Flagged (Violation detected)
-  Actions:
-* Approve / Hide
-* Highlight (optional “promote”)
-* Block user / Report
-* Reply (optional; can be Phase 2)
-
-**Privacy best practice:** Do not allow converting private → public unless commenter explicitly consented (recommended: store consent at comment creation).
+This pipeline can be simplified later (e.g., post-moderation) once norms are stable.
 
 ---
 
-## Response Agreement (structured options)
-
-Avoid relying only on free-form text. Give creators selectable preferences that map cleanly to moderation.
-
-### “What I’m looking for” (choose 1+)
-
-* **Presence-only** (witnessing; “I hear you”)
-* **Reflective listening** (summarize what you heard)
-* **Clarifying questions** (gentle questions; no fixing)
-* **Share your perspective** (non-prescriptive; “in my experience…”)
-* **Suggestions/advice allowed** (explicit opt-in; default OFF)
-* **Resources allowed** (explicit opt-in; default OFF)
-
-### “Please avoid”
-
-* Diagnosing or labeling (clinical or armchair)
-* Moralizing/shaming
-* Prescriptive language (“you should…”) if advice not allowed
-* Minimizing/dismissing
-* Pushing toward resolution if creator chose presence-only
-
-### Visibility settings
-
-* Private only / Public only / Commenter chooses
-
-### Sensitivity toggles (optional but useful)
-
-* “Extra gentle container” (stricter tone thresholds)
-* “No mental health labels”
-* “No relationship advice”
-* “No medical advice”
+## Minimal data model (conceptual)
+- User
+  - Id, Email, Role(s)
+- Post
+  - Id, AuthorId, Title, Body (optional), MediaType (None|YouTube), YouTubeUrl (optional)
+  - ResponseAgreementId
+  - Visibility/Status (Draft|Published|Archived)
+  - CreatedAt, UpdatedAt
+- ResponseAgreement
+  - Id, Name, Description, AllowedResponseTypes (enum flags), Examples
+- Comment/Response
+  - Id, PostId, AuthorId, Body, Status (Held|Allowed|Rejected)
+  - CreatedAt, UpdatedAt
+- ModerationEvent
+  - Id, TargetType (Post|Response), TargetId, Action (Hold|Allow|Reject), ReasonCode, Notes, ActorId, Timestamp
 
 ---
 
-## Page layout (commenter view)
-
-Post page structure (YouTube-like familiarity, but container-first):
-
-1. Embedded YouTube player (top)
-2. Creator header (name, title optional, date)
-3. **Response Agreement card** (bulleted, scannable; above comment box)
-4. Comment composer:
-
-   * Text area
-   * Visibility selector (if allowed)
-   * Buttons:
-
-     * “Check my comment”
-     * “Submit”
-5. Public comments list (only if public comments enabled)
-6. Report/Flag on each comment
+## Content policy (MVP-level)
+This plan assumes a lightweight but explicit policy:
+- Prohibit harassment, coercion, threats, doxxing.
+- Prohibit unsolicited diagnosis/labeling as a norm violation (and optionally as a moderation category).
+- Encourage clarification questions aligned with the Response Agreement.
+- Provide “not crisis support” messaging and standard crisis resources when appropriate.
 
 ---
 
-## Moderation design (two-layer approach)
+## Technical implementation notes (high-level)
+- Platform: .NET 8 web app (Blazor Server is consistent with current repo configuration).
+- Auth: ASP.NET Core Identity (Individual Accounts).
+- DB: SQL Server (Developer Edition for local development is reasonable) + EF Core.
+- Deployment: Windows Server is acceptable; Cloudflare proxy in front is compatible.
 
-### Layer 1: Commenter-facing “AI Check Tools” (coaching, not writing-for-them)
-
-Two tools (can be combined in UI, but conceptually distinct):
-
-1. **Boundary check**
-
-   * Flags likely advice/diagnosis/harshness/shaming
-   * Offers rewrite *patterns* (advice → reflection; label → observation + question)
-2. **Alignment check**
-
-   * Compares the comment to the creator’s Response Agreement
-   * Example: “Your comment reads as advice; creator requested presence-only.”
-
-### Layer 2: Server-side enforcement (decisions)
-
-Pipeline (recommended order):
-
-1. Spam/profanity/rate-limit heuristics
-2. Policy classification:
-
-   * Disrespect/harassment
-   * Labeling/diagnosing
-   * Unsolicited advice / prescriptive language
-   * Moralizing/shaming/minimization
-3. Decision outcomes:
-
-   * **Allow** (publish)
-   * **Hold** (creator/mod review; safest default when uncertain)
-   * **Reject with rewrite guidance** (clear violation)
-   * (Optional) **Allow but warn** (use sparingly; can create confusion—best for Phase 2)
-
-**Container-based enforcement:** If advice is enabled for a post, advice detection is informational; if advice is disabled, it triggers hold/reject depending on confidence.
+(Keep details here minimal; the backlog should drive concrete engineering tasks.)
 
 ---
 
-## MVP scope (build first)
-
-### Must-have (MVP)
-
-* Auth: register/login/logout (ASP.NET Identity)
-* Create Post: YouTube URL + Response Agreement + visibility + moderation strictness
-* View Post: embed + rules + comment composer + public comments
-* Commenting:
-
-  * Private/public storage and display rules
-  * Creator inbox (see all comments)
-  * Statuses: Approved / Held / Rejected / Flagged
-* Moderation v1:
-
-  * Basic automated checks with reason codes
-  * “Hold + explain” default when uncertain
-* Reporting:
-
-  * Flag comment flow
-* Admin:
-
-  * Minimal moderation queue (held/flagged)
-  * Approve/reject + user suspension
-
-### Phase 2 (should-have)
-
-* Creator highlight/promote comments
-* Notifications (email/in-app): new comments, held items
-* Comment replies/threads (optional)
-* Stronger AI check UX (better rewrite guidance, examples)
-* Per-creator blocklist / keyword filters
-* Post discoverability controls:
-
-  * public directory vs “unlisted on our platform”
-
-### Phase 3 (nice-to-have)
-
-* Structured comment templates (Reflection / Question / Resonance fields)
-* Small “circles” / groups with stronger norms
-* Reputation signals for aligned commenters
+## Definition of done (for MVP)
+MVP is “done” when:
+- A logged-in author can create a text or YouTube-backed post with a required Response Agreement.
+- A logged-in commenter can submit a text response after acknowledging the agreement.
+- Admin can Allow/Hold/Reject responses in an admin queue.
+- Creator can view responses for their posts in a creator inbox.
+- Post view renders agreement + responses according to moderation status.
+- Basic abuse reporting exists OR a minimum moderator workflow exists to handle reports.
+- Basic audit trail exists for moderation actions (who did what, when, why).
 
 ---
 
-## Data model (conceptual, minimal)
+## Open questions (tracked in backlog, not blocking the plan)
+- Should moderation be pre-publication for all responses, or only for new accounts?
+- Should creators have veto power over allowed responses (recommended: yes for MVP if bounded/private)?
+- Should posts themselves require moderation in MVP, or only responses?
+- What is the initial set of Response Agreements and the exact copy?
 
-* **User**: Id, DisplayName, Email, Role, Status, CreatedAt
-* **Post**: Id, CreatorUserId, YouTubeVideoId, Title, ContextText, CreatedAt, Status
-* **ResponseAgreement** (1:1 with Post):
-
-  * AllowedFeedbackModes (enum list/bitmask)
-  * DisallowedModes (enum list)
-  * VisibilityPolicy (PrivateOnly/PublicOnly/CommenterChoice)
-  * ModerationLevel (Standard/High)
-  * SensitivityFlags (optional)
-  * CustomRulesText (optional)
-* **Comment**:
-
-  * Id, PostId, CommenterUserId
-  * Body
-  * Visibility (Private/Public)
-  * ModerationStatus (Approved/Held/Rejected/Flagged)
-  * ModerationReasons (JSON)
-  * CommenterPublicConsent (bool) if “commenter chooses”
-  * CreatedAt
-* **Report**: Id, ReporterUserId, CommentId, Reason, CreatedAt, Status
-* **ModerationLog**: Id, EntityType, EntityId, Action, Actor, Reasons, Timestamp
-
-**Privacy definition to specify in copy and code:**
-Private comments are visible to **creator + the commenter + moderators/admin** (recommended). Public comments are visible to all visitors to the post (or all logged-in users, depending on product choice).
-
----
-
-## Technical approach (.NET / Blazor)
-
-* **Frontend:** Blazor Server for MVP speed (WASM later if desired)
-* **Backend:** ASP.NET Core
-* **Auth:** ASP.NET Core Identity (+ optional Google OAuth later)
-* **DB:** SQL Server 2025 Developer
-* **Hosting:** Windows Server 2022
-* **YouTube embed:** store VideoId; iframe embed; validate youtu.be and youtube.com formats
-
-**YouTube note to surface in UX:** Unlisted videos can still be shared by link; the platform link effectively shares access.
-
----
-
-## Engineering milestones (implementation plan)
-
-1. **Scaffold**
-
-   * Blazor + Identity + EF Core + base layout
-2. **Posts**
-
-   * Create Post, Post view, Response Agreement storage
-3. **Comments**
-
-   * Submit + visibility + public list + creator inbox
-4. **Moderation v1**
-
-   * Heuristics + reason codes + hold/reject flows
-5. **AI Check (optional in MVP, or Phase 2)**
-
-   * Boundary/alignment checks + UI integration
-6. **Admin & Reporting**
-
-   * Flag queue, approvals, suspensions, audit logs
-7. **Hardening**
-
-   * Rate limiting, spam controls, abuse prevention, security review
-
----
-
-## Key risks to flag early
-
-* **Moderation calibration:** aim for “Hold + explain” rather than hard reject when uncertain.
-* **Privacy expectations:** define clearly what private means and who can see it.
-* **Abuse/spam:** rate limits + account throttles are not optional.
-* **Scope creep:** keep MVP to posts + comments + moderation + creator review.
+These should be resolved by backlog sequencing and user testing, not by expanding this plan.
