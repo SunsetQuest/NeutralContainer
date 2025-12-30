@@ -57,6 +57,27 @@ When moving an item to CompletedBacklog.md, include:
 
 ## Active backlog (top-down)
 
+### Epic 11 — Safety messaging (not crisis support)
+**Goal:** Set clear expectations that NeutralContainer is not a crisis support service.
+
+1. **ID:** NC-E11-001
+* **User story:** As a creator or commenter, I see a clear “not crisis support” notice so I understand the platform’s limits.
+* **Status:** Moved to CompletedBacklog.md
+* **Wireframe reference:** Create Post (header), Post View (comment composer)
+* **Acceptance criteria**
+  * Given I open Create Post, when the page loads, then I see a brief notice that NeutralContainer is not crisis support with guidance to seek local emergency help if needed.
+  * Given I view a post, when I reach the comment composer, then I see the same notice near the composer without blocking submission.
+  * Given the notice is displayed, when I scan it, then it uses neutral, non-alarmist language consistent with product principles.
+
+2. **ID:** NC-E11-002
+* **User story:** As a member, I can access local crisis resources from the safety notice so I know where to go for urgent help.
+* **Status:** Next
+* **Wireframe reference:** Create Post (header), Post View (comment composer)
+* **Acceptance criteria**
+  * Given I see the safety notice, when I look for more help, then I can open a list of crisis resources (or a link to a resources page).
+  * Given the resource list is shown, when I read it, then it includes a clear “local emergency services” reminder and a note that resources vary by region.
+  * Given I open the resource list, when I return to the page, then the create/comment flow remains intact.
+
 ### Epic 10 — Home post list (bounded navigation)
 **Goal:** Logged-in users can browse recent posts without a public discovery feed.
 
