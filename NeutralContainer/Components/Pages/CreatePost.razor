@@ -177,32 +177,36 @@
 
         <div class="mb-4">
             <h2 class="h5">Comment visibility policy</h2>
-            <div class="form-check">
-                <InputRadio id="visibilityPrivateOnly" class="form-check-input" @bind-Value="model.VisibilityPolicy" Value="VisibilityPolicy.PrivateOnly" />
-                <label class="form-check-label" for="visibilityPrivateOnly">Private only</label>
-            </div>
-            <div class="form-check">
-                <InputRadio id="visibilityPublicOnly" class="form-check-input" @bind-Value="model.VisibilityPolicy" Value="VisibilityPolicy.PublicOnly" />
-                <label class="form-check-label" for="visibilityPublicOnly">Public only</label>
-            </div>
-            <div class="form-check">
-                <InputRadio id="visibilityCommenterChoice" class="form-check-input" @bind-Value="model.VisibilityPolicy" Value="VisibilityPolicy.CommenterChoice" />
-                <label class="form-check-label" for="visibilityCommenterChoice">Commenter chooses</label>
-            </div>
+            <InputRadioGroup @bind-Value="model.VisibilityPolicy">
+                <div class="form-check">
+                    <InputRadio id="visibilityPrivateOnly" class="form-check-input" Value="VisibilityPolicy.PrivateOnly" />
+                    <label class="form-check-label" for="visibilityPrivateOnly">Private only</label>
+                </div>
+                <div class="form-check">
+                    <InputRadio id="visibilityPublicOnly" class="form-check-input" Value="VisibilityPolicy.PublicOnly" />
+                    <label class="form-check-label" for="visibilityPublicOnly">Public only</label>
+                </div>
+                <div class="form-check">
+                    <InputRadio id="visibilityCommenterChoice" class="form-check-input" Value="VisibilityPolicy.CommenterChoice" />
+                    <label class="form-check-label" for="visibilityCommenterChoice">Commenter chooses</label>
+                </div>
+            </InputRadioGroup>
             <p class="text-muted mt-2 mb-0">Public visibility requires explicit commenter consent.</p>
             <ValidationMessage For="@(() => model.VisibilityPolicy)" />
         </div>
 
         <div class="mb-4">
             <h2 class="h5">Moderation strictness</h2>
-            <div class="form-check">
-                <InputRadio id="moderationStandard" class="form-check-input" @bind-Value="model.ModerationLevel" Value="ModerationLevel.Standard" />
-                <label class="form-check-label" for="moderationStandard">Standard</label>
-            </div>
-            <div class="form-check">
-                <InputRadio id="moderationHigh" class="form-check-input" @bind-Value="model.ModerationLevel" Value="ModerationLevel.High" />
-                <label class="form-check-label" for="moderationHigh">High (extra gentle)</label>
-            </div>
+            <InputRadioGroup @bind-Value="model.ModerationLevel">
+                <div class="form-check">
+                    <InputRadio id="moderationStandard" class="form-check-input" Value="ModerationLevel.Standard" />
+                    <label class="form-check-label" for="moderationStandard">Standard</label>
+                </div>
+                <div class="form-check">
+                    <InputRadio id="moderationHigh" class="form-check-input" Value="ModerationLevel.High" />
+                    <label class="form-check-label" for="moderationHigh">High (extra gentle)</label>
+                </div>
+            </InputRadioGroup>
             <ValidationMessage For="@(() => model.ModerationLevel)" />
         </div>
 

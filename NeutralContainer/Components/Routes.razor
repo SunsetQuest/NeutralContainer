@@ -4,7 +4,7 @@
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
                 <AuthorizeView>
-                    <Authorized>
+                    <Authorized Context="authState">
                         <LayoutView Layout="typeof(Layout.MainLayout)">
                             <PageTitle>Access denied</PageTitle>
                             <div class="container py-4">
@@ -13,7 +13,7 @@
                             </div>
                         </LayoutView>
                     </Authorized>
-                    <NotAuthorized>
+                    <NotAuthorized Context="authState">
                         <RedirectToLogin />
                     </NotAuthorized>
                 </AuthorizeView>

@@ -187,22 +187,22 @@
                     {
                         <div class="mb-3">
                             <label class="form-label">Visibility</label>
-                            <div class="form-check">
-                                <InputRadio id="commentVisibilityPrivate"
-                                            class="form-check-input"
-                                            @bind-Value="commentModel.Visibility"
-                                            disabled="@(isUserBlocked || isUserSuspended)"
-                                            Value="CommentVisibility.Private" />
-                                <label class="form-check-label" for="commentVisibilityPrivate">Private (creator only)</label>
-                            </div>
-                            <div class="form-check">
-                                <InputRadio id="commentVisibilityPublic"
-                                            class="form-check-input"
-                                            @bind-Value="commentModel.Visibility"
-                                            disabled="@(isUserBlocked || isUserSuspended)"
-                                            Value="CommentVisibility.Public" />
-                                <label class="form-check-label" for="commentVisibilityPublic">Public (shows on this post)</label>
-                            </div>
+                            <InputRadioGroup @bind-Value="commentModel.Visibility">
+                                <div class="form-check">
+                                    <InputRadio id="commentVisibilityPrivate"
+                                                class="form-check-input"
+                                                disabled="@(isUserBlocked || isUserSuspended)"
+                                                Value="CommentVisibility.Private" />
+                                    <label class="form-check-label" for="commentVisibilityPrivate">Private (creator only)</label>
+                                </div>
+                                <div class="form-check">
+                                    <InputRadio id="commentVisibilityPublic"
+                                                class="form-check-input"
+                                                disabled="@(isUserBlocked || isUserSuspended)"
+                                                Value="CommentVisibility.Public" />
+                                    <label class="form-check-label" for="commentVisibilityPublic">Public (shows on this post)</label>
+                                </div>
+                            </InputRadioGroup>
                             <ValidationMessage For="@(() => commentModel.Visibility)" />
                         </div>
                     }
@@ -945,6 +945,11 @@
             }
 
             return ValidationResult.Success;
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            return Array.Empty<ValidationResult>();
         }
     }
 }
