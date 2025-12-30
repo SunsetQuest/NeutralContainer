@@ -60,16 +60,18 @@ When moving an item to CompletedBacklog.md, include:
 ### Epic 8 — Support text-only posts (alongside YouTube-backed posts)
 **Goal:** Posts can be either text-only or YouTube-backed, while keeping the same Response Agreement + moderation model from `Plan.md`.
 
-1. **User story:** As a creator, I can choose a post type (Text-only or YouTube-backed) when creating a post.
-* **Status:** Next
+1. **ID:** NC-E08-001
+* **User story:** As a creator, I can choose a post type (Text-only or YouTube-backed) when creating a post.
+* **Status:** Moved to CompletedBacklog.md
 * **Acceptance criteria**
   * Given I open Create Post, when the page loads, then I can select **Text-only** or **YouTube-backed**.
   * Given I choose **Text-only**, when I publish, then no YouTube URL is required and the post saves successfully.
   * Given I choose **YouTube-backed**, when I publish, then a valid YouTube URL is required and the VideoId is stored.
   * Given I switch post types, when I publish, then irrelevant fields are ignored (e.g., YouTube URL is not required for Text-only).
 
-2. **User story:** As a viewer, I can view a post whether it is Text-only or YouTube-backed.
-* **Status:** Not started
+2. **ID:** NC-E08-002
+* **User story:** As a viewer, I can view a post whether it is Text-only or YouTube-backed.
+* **Status:** Next
 * **Acceptance criteria**
   * Given a Text-only post, when I open the Post View, then there is no video embed and the post body displays prominently.
   * Given a YouTube-backed post, when I open the Post View, then the video embed displays and the supporting text displays if provided.
