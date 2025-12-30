@@ -1,10 +1,100 @@
-## Backlog starter
+# Backlog and Wireframes
+
+This file is the executable work queue plus minimal wireframe spec for the NeutralContainer prototype.
+
+**Source of truth:** product intent and principles live in `readme.md`; the concrete MVP shape lives in `Plan.md`. Items moved to `CompletedBacklog.md` are considered done.
+
+## How to process this backlog
+- Work **top-down** from the **Active backlog** section.
+- Keep scope tight: implement one small vertical slice at a time (UI → domain → persistence).
+- Maintain exactly **one** item in **Next** at any time.
+- When an item is done:
+  1) Move its implementation notes to `CompletedBacklog.md` (what changed + key files/migrations).
+  2) Mark the item here as **Moved to:** `CompletedBacklog.md`.
+
+## Backlog conventions (short)
+These conventions exist to keep the backlog “agent-friendly” and to prevent drift.
+
+### IDs
+- Every backlog item must have a stable ID, used everywhere (PRs, commit messages, CompletedBacklog).
+- Format: `NC-E<epic>-<nnn>` (example: `NC-E08-001`).
+- If you split an item, keep the parent ID and create children (example: `NC-E08-001a`, `NC-E08-001b`).
+
+### Status (canonical)
+Use only these statuses (and keep them consistent):
+- **Next** (exactly one item in the entire file)
+- **In progress** (0–1 items; should usually match Next)
+- **Blocked** (must include a “Blocked by:” note)
+- **Not started** (default)
+- **Moved to CompletedBacklog.md** (done)
+
+### Item template
+Each user story should follow this structure:
+
+- **ID:** `NC-E##-###`
+- **User story:** As a <role>, I can <capability> so that <benefit>.
+- **Status:** Not started | Next | In progress | Blocked | Moved to CompletedBacklog.md
+- **Wireframe reference:** (page + section) OR “N/A”
+- **Acceptance criteria**
+  - Given / When / Then …
+- **Notes / Dependencies** (optional)
+  - Blocked by: …
+  - Tech notes: …
+
+### “Next” marker rule (work ordering)
+- “Top of Active backlog” is the default ordering, but **Next is the single source of truth** for what should be implemented now.
+- If you reprioritize, move the Next marker; do not reorder large sections casually.
+
+### Completion logging (CompletedBacklog.md)
+When moving an item to CompletedBacklog.md, include:
+- The item ID + title
+- Summary of behavior change
+- Key files touched
+- DB migrations (if any)
+- Notable decisions (especially auth/privacy/moderation)
+
+---
+
+## Active backlog (top-down)
+
+### Epic 8 — Support text-only posts (alongside YouTube-backed posts)
+**Goal:** Posts can be either text-only or YouTube-backed, while keeping the same Response Agreement + moderation model from `Plan.md`.
+
+1. **User story:** As a creator, I can choose a post type (Text-only or YouTube-backed) when creating a post.
+* **Status:** Next
+* **Acceptance criteria**
+  * Given I open Create Post, when the page loads, then I can select **Text-only** or **YouTube-backed**.
+  * Given I choose **Text-only**, when I publish, then no YouTube URL is required and the post saves successfully.
+  * Given I choose **YouTube-backed**, when I publish, then a valid YouTube URL is required and the VideoId is stored.
+  * Given I switch post types, when I publish, then irrelevant fields are ignored (e.g., YouTube URL is not required for Text-only).
+
+2. **User story:** As a viewer, I can view a post whether it is Text-only or YouTube-backed.
+* **Status:** Not started
+* **Acceptance criteria**
+  * Given a Text-only post, when I open the Post View, then there is no video embed and the post body displays prominently.
+  * Given a YouTube-backed post, when I open the Post View, then the video embed displays and the supporting text displays if provided.
+
+---
+
+### Epic 9 — Response Agreement acknowledgement before comment submission
+**Goal:** Commenters explicitly acknowledge the creator’s Response Agreement before submitting.
+
+1. **User story:** As a commenter, I must acknowledge the Response Agreement before I can submit a comment.
+* **Status:** Not started
+* **Acceptance criteria**
+  * Given I am viewing a post, when I open the composer, then I see a short acknowledgement checkbox tied to the Response Agreement (e.g., “I will respond within these boundaries”).
+  * Given the acknowledgement is unchecked, when I click Submit, then submission is blocked with a clear validation message.
+  * Given the acknowledgement is checked, when I submit, then the comment proceeds through moderation as normal.
+
+---
+
+## Backlog starter (historical; most items have moved to CompletedBacklog.md)
 ### Epic 1 — Identity, access control, and roles
 **Goal:** Only authenticated users can access posts and participate; role-based access for creator vs admin/moderator.
 1. **User story:** As a user, I can manage my account basics (display name, password) so my identity is consistent.
 * **Moved to:** `CompletedBacklog.md`
 ---
-### Epic 2 — Create post with YouTube embed + Response Agreement
+### Epic 2 — Create YouTube-backed post + Response Agreement (implemented)
 **Goal:** Creators can publish a post by providing an unlisted YouTube URL plus structured consent settings (“Response Agreement”).
 1. **User story:** As a creator, I can create a post by pasting a YouTube URL so the app stores the VideoId and renders an embed.
 * **Moved to:** `CompletedBacklog.md`
@@ -120,23 +210,33 @@
 ### Page 1 — Create Post
 **Route:** `/posts/create`
 **Access:** Authenticated users only; Creator capability (any logged-in user can create unless you later restrict).
-**Primary job:** Capture YouTube URL → preview → Response Agreement → publish.
+**Primary job:** Choose post type (Text-only or YouTube-backed) → (if YouTube) capture URL + preview → Response Agreement → publish.
 **Layout (top to bottom)**
 1. **Header**
 * Page title: “Create Post”
 * Secondary: “Draft saved” indicator (optional MVP)
-2. **YouTube Video**
-* Field: `YouTubeUrl` (text input)
-* Helper text: “Use an Unlisted YouTube video; disable YouTube comments.”
-* Button (optional): “Preview”
-* **Preview panel** (hidden until valid URL): embedded player using extracted VideoId
-* Validation states:
-  * Invalid URL format
-  * URL valid but no VideoId extracted
+2. **Post type**
+* Radio group: `PostType`
+  * Text-only
+  * YouTube-backed
+* Helper text (shown when YouTube-backed): “Videos are hosted on YouTube. Use an Unlisted video and disable YouTube comments; discussion happens here.”
+
 3. **Post Details**
 * Field: `Title` (optional)
-* Field: `ContextText` (textarea, optional; character limit)
-4. **Response Agreement (structured)**
+* Field: `BodyText` (textarea, optional; character limit). For Text-only posts this is the primary content; for YouTube-backed posts this is supporting context.
+
+4. **Media (conditional)**
+* If `PostType == YouTube-backed`:
+  * Field: `YouTubeUrl` (text input)
+  * Button (optional): “Preview”
+  * **Preview panel** (hidden until valid URL): embedded player using extracted VideoId
+  * Validation states:
+    * Invalid URL format
+    * URL valid but no VideoId extracted
+* If `PostType == Text-only`:
+  * No YouTube URL field (show a small note: “This post has no video.”)
+
+5. **Response Agreement (structured)**
 * **What I’m looking for** (multi-select checkboxes)
   * Presence-only
   * Reflective listening
@@ -156,15 +256,15 @@
   * No relationship advice
   * No medical advice
 * Field: `CustomRulesText` (optional textarea)
-5. **Comment visibility policy**
+6. **Comment visibility policy**
 * Radio group: `VisibilityPolicy`
   * Private only
   * Public only
   * Commenter chooses
 * Inline note: “Public requires commenter consent.”
-6. **Moderation strictness**
+7. **Moderation strictness**
 * Radio group: `ModerationLevel` = Standard / High
-7. **Actions**
+8. **Actions**
 * Primary: `Publish`
 * Secondary: `Cancel` (returns to dashboard/home)
 * Optional MVP: `Save Draft` (if you want drafts; otherwise omit)
@@ -175,10 +275,11 @@
 ### Page 2 — Post View (viewer/commenter experience)
 **Route:** `/posts/{postId}`
 **Access:** Authenticated users only (per your earlier decision).
-**Primary job:** Watch video, read Response Agreement, write a comment (text-only), see public comments if enabled.
+**Primary job:** View post content (video or text), read Response Agreement, write a comment (text-only), see public comments if enabled.
 **Layout (top to bottom)**
-1. **Video**
-* Embedded YouTube player (iframe) using stored VideoId
+1. **Post content**
+* If YouTube-backed: embedded YouTube player (iframe) using stored VideoId
+* If Text-only: no video; render the post body (and any supporting text) as the primary content
 2. **Post header**
 * Creator display name
 * Title (or “Untitled”)
@@ -191,6 +292,7 @@
 * Moderation strictness label (optional to show publicly; always visible to creator)
 4. **Comment composer**
 * Textarea: `CommentBody`
+* Acknowledgement: checkbox “I will respond within these boundaries” (required before Submit)
 * Visibility selector:
   * Shown only if `VisibilityPolicy == CommenterChoice`
   * Otherwise show fixed label (e.g., “This will be private”)
