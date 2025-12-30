@@ -360,3 +360,21 @@
 
 **Notable decisions**
 * Kept the list bounded to authenticated users to avoid a public discovery feed.
+
+### Epic 11 — Safety messaging (not crisis support)
+
+1. **ID:** NC-E11-001 — As a creator or commenter, I see a clear “not crisis support” notice so I understand the platform’s limits. (2025-12-30)
+
+**Summary**
+* Added a neutral “not crisis support” notice on Create Post and within the post comment composer.
+* Kept the message informational without blocking posting or commenting.
+
+**Key files**
+* `NeutralContainer/Components/Pages/CreatePost.razor`
+* `NeutralContainer/Components/Pages/PostView.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Used neutral, non-alarmist copy consistent with product principles.
