@@ -57,6 +57,18 @@ When moving an item to CompletedBacklog.md, include:
 
 ## Active backlog (top-down)
 
+### Epic 13 — Creator shortcuts from post view
+**Goal:** Make it easy for creators to jump from a post to its inbox context.
+
+1. **ID:** NC-E13-001
+* **User story:** As a creator viewing my post, I can jump to the Creator Inbox filtered to that post so I can review feedback quickly.
+* **Status:** Moved to CompletedBacklog.md
+* **Wireframe reference:** Post View (edge case: “View in Inbox” shortcut)
+* **Acceptance criteria**
+  * Given I am the creator of a post, when I view the post, then I see a “View in Inbox” link or button.
+  * Given I select “View in Inbox,” when the Creator Inbox loads, then it filters to the post I came from.
+  * Given I am not the creator, when I view the post, then the link is not shown.
+
 ### Epic 12 — Moderation rejection reasons
 **Goal:** Require template reasons when admins reject comments to keep feedback grounded.
 

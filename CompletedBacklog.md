@@ -412,3 +412,21 @@
 
 **Notable decisions**
 * Stored rejection reasons in moderation logs to avoid expanding the comment schema.
+
+### Epic 13 — Creator shortcuts from post view
+
+1. **ID:** NC-E13-001 — As a creator viewing my post, I can jump to the Creator Inbox filtered to that post so I can review feedback quickly. (2025-03-21)
+
+**Summary**
+* Added a creator-only “View in Inbox” shortcut on the post view.
+* Supported filtering the Creator Inbox by post via a `postId` query string.
+
+**Key files**
+* `NeutralContainer/Components/Pages/PostView.razor`
+* `NeutralContainer/Components/Pages/CreatorInbox.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Ignored invalid post filters by clearing the query-derived post selection.
