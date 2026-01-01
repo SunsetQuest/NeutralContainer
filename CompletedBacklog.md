@@ -447,3 +447,18 @@
 
 **Notable decisions**
 * Added a TODO for report submission rate limiting while enforcing server-side validation and comment scoping.
+
+2. **ID:** NC-E14-002 — As a viewer, I encounter rate limits when filing multiple reports quickly so the reporting flow resists abuse. (2026-01-01)
+
+**Summary**
+* Added a per-user rate limit window for report submissions from the post view.
+* Returned a clear error message when the report limit is exceeded.
+
+**Key files**
+* `NeutralContainer/Components/Pages/PostView.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Reused the post view report flow for rate-limit enforcement without adding new tables.

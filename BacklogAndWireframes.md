@@ -69,6 +69,15 @@ When moving an item to CompletedBacklog.md, include:
   * Given I submit a report, when the action completes, then a report record is created and appears in the Admin Queue.
   * Given I submit a report, when it succeeds, then I see a confirmation and the composer resets.
 
+2. **ID:** NC-E14-002
+* **User story:** As a viewer, I encounter rate limits when filing multiple reports quickly so the reporting flow resists abuse.
+* **Status:** Moved to CompletedBacklog.md
+* **Wireframe reference:** Post View → Public comments section
+* **Acceptance criteria**
+  * Given I submit several reports in a short window, when I try another report, then the system blocks it with a clear message.
+  * Given I am within the rate limits, when I submit a report, then the report is saved as normal.
+  * Given a report is rate-limited, when I wait for the window to pass, then I can submit again.
+
 ### Epic 13 — Creator shortcuts from post view
 **Goal:** Make it easy for creators to jump from a post to its inbox context.
 
