@@ -462,3 +462,20 @@
 
 **Notable decisions**
 * Reused the post view report flow for rate-limit enforcement without adding new tables.
+
+### Epic 15 — Admin Queue audit log visibility
+
+1. **ID:** NC-E15-001 — As an admin, I can see recent moderation log entries for the selected item so I can understand prior actions. (2026-01-01)
+
+**Summary**
+* Added a moderation log panel to Admin Queue detail views for held comments, flagged comments, reports, and users.
+* Loaded the latest moderation actions with actor names and reasons to provide audit context.
+
+**Key files**
+* `NeutralContainer/Components/Pages/AdminQueue.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Limited the log display to the most recent 10 actions to keep the detail panel compact.
