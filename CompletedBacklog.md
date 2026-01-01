@@ -1,5 +1,22 @@
 ## Completed backlog items
 
+### Epic 17 — Repository licensing
+
+1. **ID:** NC-E17-001 — As a maintainer, I have an explicit license file so usage and contribution terms are clear.
+
+**Completed changes**
+* Added a root LICENSE file stating the repository is all rights reserved unless otherwise noted.
+* Clarified usage restrictions explicitly in the license text.
+
+**Key files**
+* `LICENSE`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Used an all-rights-reserved notice to match the existing README guidance.
+
 ### Epic 1 — Identity, access control, and roles
 
 1. **User story:** As a visitor, I can register and log in so I can access posts and participate.

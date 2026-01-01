@@ -57,6 +57,17 @@ When moving an item to CompletedBacklog.md, include:
 
 ## Active backlog (top-down)
 
+### Epic 17 — Repository licensing
+**Goal:** Make repository usage explicit with a LICENSE file.
+
+1. **ID:** NC-E17-001
+* **User story:** As a maintainer, I have an explicit license file so usage and contribution terms are clear.
+* **Status:** Moved to CompletedBacklog.md
+* **Wireframe reference:** N/A
+* **Acceptance criteria**
+  * Given the repository root, when I open the LICENSE file, then it clearly states the project is all rights reserved unless otherwise noted.
+  * Given a contributor views the LICENSE file, when they read it, then the usage restrictions are explicit and unambiguous.
+
 ### Epic 16 — YouTube fallback link on post view
 **Goal:** Make it easy to open YouTube-backed posts in case the embed fails.
 
