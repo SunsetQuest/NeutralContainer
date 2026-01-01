@@ -479,3 +479,20 @@
 
 **Notable decisions**
 * Limited the log display to the most recent 10 actions to keep the detail panel compact.
+
+### Epic 16 — YouTube fallback link on post view
+
+1. **ID:** NC-E16-001 — As a viewer, I can open the YouTube video directly from the post view so I can still watch if the embed does not load. (2026-01-01)
+
+**Summary**
+* Added an “Open on YouTube” link beneath YouTube-backed post embeds to provide a fallback when embeds fail.
+* Reused the stored YouTube URL when available and derived a short link from the video ID when needed.
+
+**Key files**
+* `NeutralContainer/Components/Pages/PostView.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Displayed the fallback link only for YouTube-backed posts to avoid clutter on text-only content.
