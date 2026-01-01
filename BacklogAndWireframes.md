@@ -57,6 +57,18 @@ When moving an item to CompletedBacklog.md, include:
 
 ## Active backlog (top-down)
 
+### Epic 15 — Admin Queue audit log visibility
+**Goal:** Admins can review recent moderation history for items in the queue.
+
+1. **ID:** NC-E15-001
+* **User story:** As an admin, I can see recent moderation log entries for the selected item so I can understand prior actions.
+* **Status:** Moved to CompletedBacklog.md
+* **Wireframe reference:** Admin Queue → Detail panel → Audit/logging section
+* **Acceptance criteria**
+  * Given I select a held or flagged comment, when the detail panel loads, then I see recent moderation log entries for that comment (or an empty state if none exist).
+  * Given I select an open report, when the detail panel loads, then I see moderation log entries for that report if any exist.
+  * Given I select a user, when the detail panel loads, then I see recent moderation log entries for that user (including suspensions/unsuspensions).
+
 ### Epic 14 — Public comment reporting from post view
 **Goal:** Let any viewer report a public comment directly from the post view.
 

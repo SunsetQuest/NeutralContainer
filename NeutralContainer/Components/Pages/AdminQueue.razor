@@ -94,7 +94,7 @@
                                             <td>
                                                 <button class="btn btn-sm btn-outline-primary"
                                                         type="button"
-                                                        @onclick="(() => SelectHeldComment(comment.Id))">
+                                                        @onclick="(() => SelectHeldCommentAsync(comment.Id))">
                                                     Review
                                                 </button>
                                             </td>
@@ -198,6 +198,31 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <h4 class="h6">Moderation log</h4>
+                                    @if (moderationLogs.Count == 0)
+                                    {
+                                        <p class="text-muted mb-0">No moderation actions recorded yet.</p>
+                                    }
+                                    else
+                                    {
+                                        <ul class="mb-0">
+                                            @foreach (var log in moderationLogs)
+                                            {
+                                                <li>
+                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
+                                                    @log.Action
+                                                    <span class="text-muted">by @log.ActorName</span>
+                                                    @if (!string.IsNullOrWhiteSpace(log.Reason))
+                                                    {
+                                                        <span class="text-muted">— @log.Reason</span>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+
+                                <div class="mb-3">
                                     <h4 class="h6">Rejection reason</h4>
                                     <select class="form-select" @bind="heldRejectionReason">
                                         <option value="">Select a reason (required to reject)</option>
@@ -260,7 +285,7 @@
                                             <td>
                                                 <button class="btn btn-sm btn-outline-primary"
                                                         type="button"
-                                                        @onclick="(() => SelectFlaggedComment(comment.Id))">
+                                                        @onclick="(() => SelectFlaggedCommentAsync(comment.Id))">
                                                     Review
                                                 </button>
                                             </td>
@@ -364,6 +389,31 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <h4 class="h6">Moderation log</h4>
+                                    @if (moderationLogs.Count == 0)
+                                    {
+                                        <p class="text-muted mb-0">No moderation actions recorded yet.</p>
+                                    }
+                                    else
+                                    {
+                                        <ul class="mb-0">
+                                            @foreach (var log in moderationLogs)
+                                            {
+                                                <li>
+                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
+                                                    @log.Action
+                                                    <span class="text-muted">by @log.ActorName</span>
+                                                    @if (!string.IsNullOrWhiteSpace(log.Reason))
+                                                    {
+                                                        <span class="text-muted">— @log.Reason</span>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+
+                                <div class="mb-3">
                                     <h4 class="h6">Rejection reason</h4>
                                     <select class="form-select" @bind="flaggedRejectionReason">
                                         <option value="">Select a reason (required to reject)</option>
@@ -427,7 +477,7 @@
                                             <td>
                                                 <button class="btn btn-sm btn-outline-primary"
                                                         type="button"
-                                                        @onclick="(() => SelectReport(report.Id))">
+                                                        @onclick="(() => SelectReportAsync(report.Id))">
                                                     Review
                                                 </button>
                                             </td>
@@ -477,6 +527,31 @@
                                 <div class="mb-3">
                                     <h4 class="h6">Post context</h4>
                                     <p class="mb-1 text-muted">@selectedReport.ContextText</p>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h4 class="h6">Moderation log</h4>
+                                    @if (moderationLogs.Count == 0)
+                                    {
+                                        <p class="text-muted mb-0">No moderation actions recorded yet.</p>
+                                    }
+                                    else
+                                    {
+                                        <ul class="mb-0">
+                                            @foreach (var log in moderationLogs)
+                                            {
+                                                <li>
+                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
+                                                    @log.Action
+                                                    <span class="text-muted">by @log.ActorName</span>
+                                                    @if (!string.IsNullOrWhiteSpace(log.Reason))
+                                                    {
+                                                        <span class="text-muted">— @log.Reason</span>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
                                 </div>
 
                                 <div class="d-flex flex-wrap gap-2">
@@ -530,7 +605,7 @@
                                             <td>
                                                 <button class="btn btn-sm btn-outline-primary"
                                                         type="button"
-                                                        @onclick="(() => SelectUser(user.Id))">
+                                                        @onclick="(() => SelectUserAsync(user.Id))">
                                                     Review
                                                 </button>
                                             </td>
@@ -582,6 +657,31 @@
                                                    @bind-Value="suspensionReason" />
                                 </div>
 
+                                <div class="mb-3">
+                                    <h4 class="h6">Moderation log</h4>
+                                    @if (moderationLogs.Count == 0)
+                                    {
+                                        <p class="text-muted mb-0">No moderation actions recorded yet.</p>
+                                    }
+                                    else
+                                    {
+                                        <ul class="mb-0">
+                                            @foreach (var log in moderationLogs)
+                                            {
+                                                <li>
+                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
+                                                    @log.Action
+                                                    <span class="text-muted">by @log.ActorName</span>
+                                                    @if (!string.IsNullOrWhiteSpace(log.Reason))
+                                                    {
+                                                        <span class="text-muted">— @log.Reason</span>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+
                                 <div class="d-flex flex-wrap gap-2">
                                     @if (selectedUser.IsSuspended)
                                     {
@@ -614,6 +714,7 @@
     private readonly List<HeldCommentItem> heldComments = new();
     private readonly List<HeldCommentItem> flaggedComments = new();
     private readonly List<UserListItem> users = new();
+    private readonly List<ModerationLogItem> moderationLogs = new();
     private bool isLoading = true;
     private string? loadError;
     private string? actionMessage;
@@ -655,6 +756,7 @@
         heldComments.Clear();
         flaggedComments.Clear();
         users.Clear();
+        moderationLogs.Clear();
         selectedHeldComment = null;
         selectedFlaggedComment = null;
         selectedReport = null;
@@ -834,27 +936,47 @@
         actionMessageStyle = "alert-info";
     }
 
-    private void SelectHeldComment(int commentId)
+    private async Task SelectHeldCommentAsync(int commentId)
     {
         selectedHeldComment = heldComments.FirstOrDefault(comment => comment.Id == commentId);
         heldRejectionReason = null;
+        moderationLogs.Clear();
+        if (selectedHeldComment is not null)
+        {
+            await LoadModerationLogsAsync("Comment", selectedHeldComment.Id.ToString());
+        }
     }
 
-    private void SelectFlaggedComment(int commentId)
+    private async Task SelectFlaggedCommentAsync(int commentId)
     {
         selectedFlaggedComment = flaggedComments.FirstOrDefault(comment => comment.Id == commentId);
         flaggedRejectionReason = null;
+        moderationLogs.Clear();
+        if (selectedFlaggedComment is not null)
+        {
+            await LoadModerationLogsAsync("Comment", selectedFlaggedComment.Id.ToString());
+        }
     }
 
-    private void SelectReport(int reportId)
+    private async Task SelectReportAsync(int reportId)
     {
         selectedReport = reports.FirstOrDefault(report => report.Id == reportId);
+        moderationLogs.Clear();
+        if (selectedReport is not null)
+        {
+            await LoadModerationLogsAsync("Report", selectedReport.Id.ToString());
+        }
     }
 
-    private void SelectUser(string userId)
+    private async Task SelectUserAsync(string userId)
     {
         selectedUser = users.FirstOrDefault(user => user.Id == userId);
         suspensionReason = selectedUser?.SuspensionReason;
+        moderationLogs.Clear();
+        if (selectedUser is not null)
+        {
+            await LoadModerationLogsAsync("User", selectedUser.Id);
+        }
     }
 
     private async Task ResolveHeldCommentAsync(int commentId, bool approve)
@@ -1054,6 +1176,38 @@
             ActorUserId = actor.Id
         });
         await DbContext.SaveChangesAsync();
+    }
+
+    private async Task LoadModerationLogsAsync(string entityType, string entityId)
+    {
+        moderationLogs.Clear();
+
+        var logs = await DbContext.ModerationLogs
+            .AsNoTracking()
+            .Where(log => log.EntityType == entityType && log.EntityId == entityId)
+            .OrderByDescending(log => log.CreatedAt)
+            .Take(10)
+            .ToListAsync();
+
+        if (logs.Count == 0)
+        {
+            return;
+        }
+
+        var actorIds = logs.Select(log => log.ActorUserId).Distinct().ToList();
+        var actors = await DbContext.Users
+            .AsNoTracking()
+            .Where(user => actorIds.Contains(user.Id))
+            .ToDictionaryAsync(user => user.Id, ResolveDisplayName);
+
+        foreach (var log in logs)
+        {
+            moderationLogs.Add(new ModerationLogItem(
+                log.Action,
+                log.Reason,
+                actors.TryGetValue(log.ActorUserId, out var name) ? name : "Unknown",
+                log.CreatedAt));
+        }
     }
 
     private static string ResolveDisplayName(ApplicationUser? user)
@@ -1261,4 +1415,10 @@
         DateTimeOffset? SuspendedAt,
         DateTimeOffset? SuspendedUntil,
         string? SuspensionReason);
+
+    private sealed record ModerationLogItem(
+        string Action,
+        string? Reason,
+        string ActorName,
+        DateTimeOffset CreatedAt);
 }
