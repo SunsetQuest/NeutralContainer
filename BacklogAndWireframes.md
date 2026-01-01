@@ -57,6 +57,18 @@ When moving an item to CompletedBacklog.md, include:
 
 ## Active backlog (top-down)
 
+### Epic 14 — Public comment reporting from post view
+**Goal:** Let any viewer report a public comment directly from the post view.
+
+1. **ID:** NC-E14-001
+* **User story:** As a viewer, I can report a public comment from the post view so moderators can review it.
+* **Status:** Moved to CompletedBacklog.md
+* **Wireframe reference:** Post View → Public comments section
+* **Acceptance criteria**
+  * Given I view a post with public comments, when I scan a public comment, then I see a Report action.
+  * Given I submit a report, when the action completes, then a report record is created and appears in the Admin Queue.
+  * Given I submit a report, when it succeeds, then I see a confirmation and the composer resets.
+
 ### Epic 13 — Creator shortcuts from post view
 **Goal:** Make it easy for creators to jump from a post to its inbox context.
 
