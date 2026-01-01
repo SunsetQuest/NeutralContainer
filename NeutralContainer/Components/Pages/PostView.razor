@@ -416,6 +416,8 @@
     private readonly List<ModerationReason> checkReasons = new();
     private static readonly TimeSpan CommentRateLimitWindow = TimeSpan.FromMinutes(2);
     private const int CommentRateLimitCount = 3;
+    private static readonly TimeSpan ReportRateLimitWindow = TimeSpan.FromMinutes(10);
+    private const int ReportRateLimitCount = 3;
     private static readonly TimeSpan NewAccountHoldWindow = TimeSpan.FromHours(6);
     private const int NewAccountHoldCount = 2;
     private bool isUserBlocked;
@@ -833,6 +835,18 @@
             return;
         }
 
+        var recentReportCount = await DbContext.CommentReports
+            .AsNoTracking()
+            .Where(report => report.ReporterUserId == user.Id)
+            .Where(report => report.CreatedAt >= DateTimeOffset.UtcNow.Subtract(ReportRateLimitWindow))
+            .CountAsync();
+
+        if (recentReportCount >= ReportRateLimitCount)
+        {
+            reportError = "You have submitted several reports recently. Please wait before sending another.";
+            return;
+        }
+
         var commentExists = await DbContext.Comments
             .AsNoTracking()
             .AnyAsync(comment =>
@@ -848,7 +862,6 @@
             return;
         }
 
-        // TODO: Add rate limiting to report submissions.
         DbContext.CommentReports.Add(new CommentReport
         {
             CommentId = reportCommentId.Value,
