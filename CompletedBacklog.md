@@ -430,3 +430,20 @@
 
 **Notable decisions**
 * Ignored invalid post filters by clearing the query-derived post selection.
+
+### Epic 14 — Public comment reporting from post view
+
+1. **ID:** NC-E14-001 — As a viewer, I can report a public comment from the post view so moderators can review it. (2025-12-30)
+
+**Summary**
+* Added a Report action on public comments in the post view with an optional reason field.
+* Persisted comment reports from post view submissions so they appear in the Admin Queue.
+
+**Key files**
+* `NeutralContainer/Components/Pages/PostView.razor`
+
+**Migrations**
+* None
+
+**Notable decisions**
+* Added a TODO for report submission rate limiting while enforcing server-side validation and comment scoping.

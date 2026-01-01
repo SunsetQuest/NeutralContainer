@@ -302,6 +302,14 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h2 class="h5">Public comments</h2>
+                    @if (!string.IsNullOrWhiteSpace(reportMessage))
+                    {
+                        <div class="alert alert-success">@reportMessage</div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(reportError))
+                    {
+                        <div class="alert alert-danger">@reportError</div>
+                    }
                     @if (publicComments.Count == 0)
                     {
                         <p class="text-muted mb-0">No public comments yet.</p>
@@ -323,6 +331,27 @@
                                         <small class="text-muted">@comment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
                                     </div>
                                     <p class="mb-0">@comment.Body</p>
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-outline-warning"
+                                                type="button"
+                                                @onclick="(() => StartReport(comment.Id))">
+                                            Report
+                                        </button>
+                                    </div>
+                                    @if (reportCommentId == comment.Id)
+                                    {
+                                        <div class="mt-3">
+                                            <label class="form-label" for="reportReason">Reason (optional)</label>
+                                            <InputTextArea id="reportReason"
+                                                           class="form-control"
+                                                           rows="3"
+                                                           @bind-Value="reportReason" />
+                                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                                <button class="btn btn-warning btn-sm" type="button" @onclick="SubmitReportAsync">Submit report</button>
+                                                <button class="btn btn-outline-secondary btn-sm" type="button" @onclick="CancelReport">Cancel</button>
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
                             }
                         </div>
@@ -394,6 +423,10 @@
     private string suspensionMessage = "Your account is suspended and cannot post comments right now.";
     private bool isCreatorViewing;
     private string? creatorInboxLink;
+    private int? reportCommentId;
+    private string? reportReason;
+    private string? reportMessage;
+    private string? reportError;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -436,6 +469,10 @@
             checkStyle = null;
             checkError = null;
             checkReasons.Clear();
+            reportCommentId = null;
+            reportReason = null;
+            reportMessage = null;
+            reportError = null;
             commentModel.Body = string.Empty;
             commentModel.Acknowledged = false;
             commentEditContext = new EditContext(commentModel);
@@ -574,6 +611,7 @@
             .Where(comment => comment.Visibility == CommentVisibility.Public)
             .OrderBy(comment => comment.CreatedAt)
             .Select(comment => new CommentListItem(
+                comment.Id,
                 comment.Body,
                 comment.CreatedAt,
                 comment.IsHighlighted,
@@ -748,6 +786,83 @@
         }
     }
 
+    private void StartReport(int commentId)
+    {
+        reportCommentId = commentId;
+        reportReason = string.Empty;
+        reportMessage = null;
+        reportError = null;
+    }
+
+    private void CancelReport()
+    {
+        reportCommentId = null;
+        reportReason = null;
+        reportMessage = null;
+        reportError = null;
+    }
+
+    private async Task SubmitReportAsync()
+    {
+        reportMessage = null;
+        reportError = null;
+
+        if (post is null)
+        {
+            reportError = "Unable to submit a report because the post could not be loaded.";
+            return;
+        }
+
+        if (!reportCommentId.HasValue)
+        {
+            reportError = "Select a comment to report.";
+            return;
+        }
+
+        var authState = await AuthenticationStateTask;
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user is null)
+        {
+            reportError = "Unable to identify the current user. Please sign in again.";
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(reportReason) && reportReason.Length > 1000)
+        {
+            reportError = "Report reasons must be 1,000 characters or fewer.";
+            return;
+        }
+
+        var commentExists = await DbContext.Comments
+            .AsNoTracking()
+            .AnyAsync(comment =>
+                comment.Id == reportCommentId.Value
+                && comment.PostId == post.Id
+                && comment.ModerationStatus == CommentModerationStatus.Approved
+                && comment.Visibility == CommentVisibility.Public
+                && !comment.IsHidden);
+
+        if (!commentExists)
+        {
+            reportError = "That comment is no longer available to report.";
+            return;
+        }
+
+        // TODO: Add rate limiting to report submissions.
+        DbContext.CommentReports.Add(new CommentReport
+        {
+            CommentId = reportCommentId.Value,
+            ReporterUserId = user.Id,
+            Reason = string.IsNullOrWhiteSpace(reportReason) ? null : reportReason.Trim()
+        });
+
+        await DbContext.SaveChangesAsync();
+
+        reportMessage = "Thanks. Your report has been sent to the admin queue.";
+        reportCommentId = null;
+        reportReason = null;
+    }
+
     private void HandleCheckComment()
     {
         checkError = null;
@@ -910,7 +1025,7 @@
         return new CommentModerationResult(CommentModerationStatus.Held, reasons);
     }
 
-    private sealed record CommentListItem(string Body, DateTimeOffset CreatedAt, bool IsHighlighted, string DisplayName);
+    private sealed record CommentListItem(int Id, string Body, DateTimeOffset CreatedAt, bool IsHighlighted, string DisplayName);
 
     private static string GetViewerCommentLabel(ViewerCommentListItem comment) => comment.Status switch
     {
