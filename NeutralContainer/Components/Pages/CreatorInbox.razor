@@ -28,7 +28,7 @@
         <div class="row g-3 align-items-end mb-4">
             <div class="col-12 col-md-6">
                 <label class="form-label" for="postFilter">Filter by post</label>
-                <select id="postFilter" class="form-select" @bind-value="selectedPostId" @bind-value:after="UpdateFilters">
+                <select id="postFilter" class="form-select" @bind="selectedPostId" @bind:after="UpdateFilters">
                     <option value="">All posts</option>
                     @foreach (var post in posts)
                     {
