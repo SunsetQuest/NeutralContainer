@@ -57,6 +57,18 @@ When moving an item to CompletedBacklog.md, include:
 
 ## Active backlog (top-down)
 
+### Epic 16 — YouTube fallback link on post view
+**Goal:** Make it easy to open YouTube-backed posts in case the embed fails.
+
+1. **ID:** NC-E16-001
+* **User story:** As a viewer, I can open the YouTube video directly from the post view so I can still watch if the embed does not load.
+* **Status:** Moved to CompletedBacklog.md
+* **Wireframe reference:** Post View → Post content
+* **Acceptance criteria**
+  * Given I view a YouTube-backed post, when the post content renders, then I see a clear “Open on YouTube” link.
+  * Given the YouTube embed is missing or blocked, when I select the link, then I can still reach the video on YouTube.
+  * Given I view a text-only post, then no YouTube link is shown.
+
 ### Epic 15 — Admin Queue audit log visibility
 **Goal:** Admins can review recent moderation history for items in the queue.
 

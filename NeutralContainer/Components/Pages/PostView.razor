@@ -42,6 +42,13 @@
                             allowfullscreen></iframe>
                 </div>
             }
+
+            @if (!string.IsNullOrWhiteSpace(youtubeLink))
+            {
+                <p class="mb-4">
+                    <a href="@youtubeLink" target="_blank" rel="noreferrer">Open on YouTube</a>
+                </p>
+            }
         }
         else
         {
@@ -425,6 +432,7 @@
     private string suspensionMessage = "Your account is suspended and cannot post comments right now.";
     private bool isCreatorViewing;
     private string? creatorInboxLink;
+    private string? youtubeLink;
     private int? reportCommentId;
     private string? reportReason;
     private string? reportMessage;
@@ -450,6 +458,7 @@
         showViewerPrivateComments = false;
         isCreatorViewing = false;
         creatorInboxLink = null;
+        youtubeLink = null;
 
         if (post is not null)
         {
@@ -457,6 +466,7 @@
             var user = await UserManager.GetUserAsync(authState.User);
             isCreatorViewing = user is not null && user.Id == post.CreatorUserId;
             creatorInboxLink = isCreatorViewing ? $"/creator/inbox?postId={post.Id}" : null;
+            youtubeLink = BuildYouTubeLink(post);
 
             allowedFeedbackModes.AddRange(DescribeFeedbackModes(post.AllowedFeedbackModes));
             avoidanceModes.AddRange(DescribeAvoidanceModes(post.AvoidanceModes));
@@ -526,6 +536,26 @@
         {
             yield return "Resources allowed";
         }
+    }
+
+    private static string? BuildYouTubeLink(Post post)
+    {
+        if (post.PostType != PostType.YouTubeBacked)
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(post.YouTubeUrl))
+        {
+            return post.YouTubeUrl;
+        }
+
+        if (!string.IsNullOrWhiteSpace(post.YouTubeVideoId))
+        {
+            return $"https://youtu.be/{post.YouTubeVideoId}";
+        }
+
+        return null;
     }
 
     private static IEnumerable<string> DescribeAvoidanceModes(AvoidanceMode modes)
