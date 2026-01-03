@@ -1,63 +1,72 @@
-Available domain names: 
+# some available domain names (or search for others)
 
-boundedfeedback.com
-boundedfeedback.org
-boxless.social
-boxless.space
-boxlessco.com
-boxlessco.org
-calmcorner.app
-consentcomments.com
-consentcomments.org
-contextcomments.com
-contextcomments.org
-contextfirst.app
-contextkind.com
-contextkind.org
-gentlefeedback.app
-gentlefeedback.com
-gentlefeedback.org
-gentleroom.app
-gentleroom.org
-heldhere.app
-heldhere.org
-justberoom.com
-justberoom.org
-justwitness.app
-justwitness.space
-lingerspace.app
-lingerspace.org
-listenfirst.app
-listenfirst.space
-middlevoice.app
-nodiagnosis.app
-nofix.app
-no-fix.app
-nofix.org
-nofixspace.com
-nofixzone.com
-nofixzone.org
-nonarrative.app
-nonarrative.org
-notaclinic.org
-nuanceroom.app
-nuanceroom.com
-nuance-room.com
-nuanceroom.org
-nuanceroom.space
-plainspeak.app
-presencefirst.app
-quietcontext.com
-quietcontext.org
-quietharbor.app
-quietmirror.app
-quiet-mirror.com
-reflectroom.app
-reflectroom.org
-safetosay.app
-soft-landing.app
-tenderthread.org
-unlabelspace.com
-unscriptedroom.org
-witnesswall.app
-witnesswall.org
+## com
+ - boundedfeedback.com
+ - boxlessco.com
+ - consentcomments.com
+ - contextcomments.com
+ - contextkind.com
+ - gentlefeedback.com
+ - justberoom.com
+ - nofixspace.com
+ - nofixzone.com
+ - nuanceroom.com
+ - nuance-room.com
+ - quietcontext.com
+ - quiet-mirror.com
+ - unlabelspace.com
+
+## org
+ - boundedfeedback.org
+ - boxlessco.org
+ - consentcomments.org
+ - contextcomments.org
+ - contextkind.org
+ - gentlefeedback.org
+ - gentleroom.org
+ - heldhere.org
+ - justberoom.org
+ - lingerspace.org
+ - nofix.org
+ - nofixzone.org
+ - nonarrative.org
+ - notaclinic.org
+ - nuanceroom.org
+ - quietcontext.org
+ - reflectroom.org
+ - tenderthread.org
+ - unscriptedroom.org
+ - witnesswall.org
+
+## space
+ - boxless.space
+ - justwitness.space
+ - listenfirst.space
+ - nuanceroom.space
+ 
+## app
+ - calmcorner.app
+ - contextfirst.app
+ - gentlefeedback.app
+ - gentleroom.app
+ - heldhere.app
+ - justwitness.app
+ - lingerspace.app
+ - listenfirst.app
+ - middlevoice.app
+ - nodiagnosis.app
+ - nofix.app
+ - no-fix.app
+ - nonarrative.app
+ - nuanceroom.app
+ - plainspeak.app
+ - presencefirst.app
+ - quietharbor.app
+ - quietmirror.app
+ - reflectroom.app
+ - safetosay.app
+ - soft-landing.app
+ - witnesswall.app
+ 
+## social
+ - boxless.social
