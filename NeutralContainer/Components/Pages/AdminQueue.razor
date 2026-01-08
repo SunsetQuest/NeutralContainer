@@ -1,4 +1,4 @@
-ï»¿@page "/admin/queue"
+@page "/admin/queue"
 @using System.Text.Json
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
@@ -17,7 +17,7 @@
 
     @if (isLoading)
     {
-        <p class="text-muted">Loading queueâ€¦</p>
+        <p class="text-muted">Loading queue…</p>
     }
     else if (!string.IsNullOrWhiteSpace(loadError))
     {
@@ -119,7 +119,7 @@
                                     <div>
                                         <h3 class="h6 mb-1">@selectedHeldComment.PostTitle</h3>
                                         <div class="text-muted small">
-                                            Creator: @selectedHeldComment.CreatorName Â· Commenter: @selectedHeldComment.CommenterName
+                                            Creator: @selectedHeldComment.CreatorName · Commenter: @selectedHeldComment.CommenterName
                                         </div>
                                     </div>
                                     <span class="badge text-bg-warning">Held</span>
@@ -129,7 +129,7 @@
                                     <h4 class="h6">Comment</h4>
                                     <p class="mb-1">@selectedHeldComment.Body</p>
                                     <div class="text-muted small">
-                                        Visibility: @selectedHeldComment.VisibilityLabel Â· Submitted @selectedHeldComment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                        Visibility: @selectedHeldComment.VisibilityLabel · Submitted @selectedHeldComment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
                                     </div>
                                 </div>
 
@@ -209,12 +209,12 @@
                                             @foreach (var log in moderationLogs)
                                             {
                                                 <li>
-                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") Â·
+                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
                                                     @log.Action
                                                     <span class="text-muted">by @log.ActorName</span>
                                                     @if (!string.IsNullOrWhiteSpace(log.Reason))
                                                     {
-                                                        <span class="text-muted">â€” @log.Reason</span>
+                                                        <span class="text-muted">— @log.Reason</span>
                                                     }
                                                 </li>
                                             }
@@ -310,7 +310,7 @@
                                     <div>
                                         <h3 class="h6 mb-1">@selectedFlaggedComment.PostTitle</h3>
                                         <div class="text-muted small">
-                                            Creator: @selectedFlaggedComment.CreatorName Â· Commenter: @selectedFlaggedComment.CommenterName
+                                            Creator: @selectedFlaggedComment.CreatorName · Commenter: @selectedFlaggedComment.CommenterName
                                         </div>
                                     </div>
                                     <span class="badge text-bg-danger">Flagged</span>
@@ -320,7 +320,7 @@
                                     <h4 class="h6">Comment</h4>
                                     <p class="mb-1">@selectedFlaggedComment.Body</p>
                                     <div class="text-muted small">
-                                        Visibility: @selectedFlaggedComment.VisibilityLabel Â· Submitted @selectedFlaggedComment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                        Visibility: @selectedFlaggedComment.VisibilityLabel · Submitted @selectedFlaggedComment.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
                                     </div>
                                 </div>
 
@@ -400,12 +400,12 @@
                                             @foreach (var log in moderationLogs)
                                             {
                                                 <li>
-                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") Â·
+                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
                                                     @log.Action
                                                     <span class="text-muted">by @log.ActorName</span>
                                                     @if (!string.IsNullOrWhiteSpace(log.Reason))
                                                     {
-                                                        <span class="text-muted">â€” @log.Reason</span>
+                                                        <span class="text-muted">— @log.Reason</span>
                                                     }
                                                 </li>
                                             }
@@ -502,7 +502,7 @@
                                     <div>
                                         <h3 class="h6 mb-1">@selectedReport.PostTitle</h3>
                                         <div class="text-muted small">
-                                            Creator: @selectedReport.CreatorName Â· Commenter: @selectedReport.CommenterName
+                                            Creator: @selectedReport.CreatorName · Commenter: @selectedReport.CommenterName
                                         </div>
                                     </div>
                                     <span class="badge text-bg-secondary">Open report</span>
@@ -512,14 +512,14 @@
                                     <h4 class="h6">Comment</h4>
                                     <p class="mb-1">@selectedReport.CommentBody</p>
                                     <div class="text-muted small">
-                                        Visibility: @selectedReport.VisibilityLabel Â· Submitted @selectedReport.CommentCreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                        Visibility: @selectedReport.VisibilityLabel · Submitted @selectedReport.CommentCreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <h4 class="h6">Report</h4>
                                     <div class="text-muted small mb-1">
-                                        Reporter: @selectedReport.ReporterName Â· Created @selectedReport.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                        Reporter: @selectedReport.ReporterName · Created @selectedReport.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
                                     </div>
                                     <p class="mb-0">@selectedReport.ReasonLabel</p>
                                 </div>
@@ -541,12 +541,12 @@
                                             @foreach (var log in moderationLogs)
                                             {
                                                 <li>
-                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") Â·
+                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
                                                     @log.Action
                                                     <span class="text-muted">by @log.ActorName</span>
                                                     @if (!string.IsNullOrWhiteSpace(log.Reason))
                                                     {
-                                                        <span class="text-muted">â€” @log.Reason</span>
+                                                        <span class="text-muted">— @log.Reason</span>
                                                     }
                                                 </li>
                                             }
@@ -669,12 +669,12 @@
                                             @foreach (var log in moderationLogs)
                                             {
                                                 <li>
-                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") Â·
+                                                    @log.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt") ·
                                                     @log.Action
                                                     <span class="text-muted">by @log.ActorName</span>
                                                     @if (!string.IsNullOrWhiteSpace(log.Reason))
                                                     {
-                                                        <span class="text-muted">â€” @log.Reason</span>
+                                                        <span class="text-muted">— @log.Reason</span>
                                                     }
                                                 </li>
                                             }
@@ -804,7 +804,7 @@
         var creators = await DbContext.Users
             .AsNoTracking()
             .Where(user => creatorIds.Contains(user.Id))
-            .ToDictionaryAsync(user => user.Id, ResolveDisplayName);
+            .ToDictionaryAsync(user => user.Id, user => UiText.ResolveDisplayName(user, "Unknown"));
 
         foreach (var report in reportEntities)
         {
@@ -813,14 +813,14 @@
             reports.Add(new ReportListItem(
                 report.Id,
                 string.IsNullOrWhiteSpace(post?.Title) ? "Untitled" : post!.Title!,
-                BuildPreview(comment?.Body ?? string.Empty),
-                ResolveDisplayName(report.ReporterUser),
-                ResolveDisplayName(comment?.CommenterUser),
+                UiText.BuildPreview(comment?.Body, 118, "."),
+                UiText.ResolveDisplayName(report.ReporterUser, "Unknown"),
+                UiText.ResolveDisplayName(comment?.CommenterUser, "Unknown"),
                 ResolveCreatorName(post, creators),
                 comment?.Body ?? string.Empty,
                 comment?.Visibility.ToString() ?? "Unknown",
                 comment?.CreatedAt ?? DateTimeOffset.MinValue,
-                ResolveContextText(post),
+                UiText.ResolveContextText(post),
                 string.IsNullOrWhiteSpace(report.Reason) ? "No reason provided." : report.Reason,
                 report.CreatedAt));
         }
@@ -844,23 +844,23 @@
         var creators = await DbContext.Users
             .AsNoTracking()
             .Where(user => creatorIds.Contains(user.Id))
-            .ToDictionaryAsync(user => user.Id, ResolveDisplayName);
+            .ToDictionaryAsync(user => user.Id, user => UiText.ResolveDisplayName(user, "Unknown"));
 
         foreach (var comment in comments)
         {
             heldComments.Add(new HeldCommentItem(
                 comment.Id,
-                ResolvePostTitle(comment.Post),
+                UiText.ResolvePostTitle(comment.Post),
                 ResolveCreatorName(comment.Post, creators),
-                ResolveDisplayName(comment.CommenterUser),
-                BuildPreview(comment.Body),
+                UiText.ResolveDisplayName(comment.CommenterUser, "Unknown"),
+                UiText.BuildPreview(comment.Body, 118, "."),
                 comment.Body,
-                ResolveContextText(comment.Post),
+                UiText.ResolveContextText(comment.Post),
                 comment.Visibility.ToString(),
                 comment.CreatedAt,
-                DescribeFeedbackModes(comment.Post!.AllowedFeedbackModes).ToList(),
-                DescribeAvoidanceModes(comment.Post!.AvoidanceModes).ToList(),
-                DescribeSensitivityFlags(comment.Post!.SensitivityFlags).ToList(),
+                UiText.DescribeFeedbackModes(comment.Post!.AllowedFeedbackModes).ToList(),
+                UiText.DescribeAvoidanceModes(comment.Post!.AvoidanceModes).ToList(),
+                UiText.DescribeSensitivityFlags(comment.Post!.SensitivityFlags).ToList(),
                 comment.Post!.ModerationLevel.ToString(),
                 comment.Post!.CustomRulesText,
                 ParseReasons(comment.ModerationReasonsJson)));
@@ -885,23 +885,23 @@
         var creators = await DbContext.Users
             .AsNoTracking()
             .Where(user => creatorIds.Contains(user.Id))
-            .ToDictionaryAsync(user => user.Id, ResolveDisplayName);
+            .ToDictionaryAsync(user => user.Id, user => UiText.ResolveDisplayName(user, "Unknown"));
 
         foreach (var comment in comments)
         {
             flaggedComments.Add(new HeldCommentItem(
                 comment.Id,
-                ResolvePostTitle(comment.Post),
+                UiText.ResolvePostTitle(comment.Post),
                 ResolveCreatorName(comment.Post, creators),
-                ResolveDisplayName(comment.CommenterUser),
-                BuildPreview(comment.Body),
+                UiText.ResolveDisplayName(comment.CommenterUser, "Unknown"),
+                UiText.BuildPreview(comment.Body, 118, "."),
                 comment.Body,
-                ResolveContextText(comment.Post),
+                UiText.ResolveContextText(comment.Post),
                 comment.Visibility.ToString(),
                 comment.CreatedAt,
-                DescribeFeedbackModes(comment.Post!.AllowedFeedbackModes).ToList(),
-                DescribeAvoidanceModes(comment.Post!.AvoidanceModes).ToList(),
-                DescribeSensitivityFlags(comment.Post!.SensitivityFlags).ToList(),
+                UiText.DescribeFeedbackModes(comment.Post!.AllowedFeedbackModes).ToList(),
+                UiText.DescribeAvoidanceModes(comment.Post!.AvoidanceModes).ToList(),
+                UiText.DescribeSensitivityFlags(comment.Post!.SensitivityFlags).ToList(),
                 comment.Post!.ModerationLevel.ToString(),
                 comment.Post!.CustomRulesText,
                 ParseReasons(comment.ModerationReasonsJson)));
@@ -919,7 +919,7 @@
         {
             users.Add(new UserListItem(
                 user.Id,
-                ResolveDisplayName(user),
+                UiText.ResolveDisplayName(user, "Unknown"),
                 user.Email ?? user.UserName ?? "Unknown",
                 user.CreatedAt,
                 user.IsSuspended,
@@ -1198,7 +1198,7 @@
         var actors = await DbContext.Users
             .AsNoTracking()
             .Where(user => actorIds.Contains(user.Id))
-            .ToDictionaryAsync(user => user.Id, ResolveDisplayName);
+            .ToDictionaryAsync(user => user.Id, user => UiText.ResolveDisplayName(user, "Unknown"));
 
         foreach (var log in logs)
         {
@@ -1210,31 +1210,6 @@
         }
     }
 
-    private static string ResolveDisplayName(ApplicationUser? user)
-    {
-        if (user is null)
-        {
-            return "Unknown";
-        }
-
-        if (!string.IsNullOrWhiteSpace(user.DisplayName))
-        {
-            return user.DisplayName;
-        }
-
-        return string.IsNullOrWhiteSpace(user.UserName) ? "Unknown" : user.UserName;
-    }
-
-    private static string ResolvePostTitle(Post? post)
-    {
-        if (post is null || string.IsNullOrWhiteSpace(post.Title))
-        {
-            return "Untitled";
-        }
-
-        return post.Title;
-    }
-
     private static string ResolveCreatorName(Post? post, IReadOnlyDictionary<string, string> creators)
     {
         if (post is null)
@@ -1243,27 +1218,6 @@
         }
 
         return creators.TryGetValue(post.CreatorUserId, out var name) ? name : "Unknown";
-    }
-
-    private static string ResolveContextText(Post? post)
-    {
-        if (post is null || string.IsNullOrWhiteSpace(post.ContextText))
-        {
-            return "No additional context provided.";
-        }
-
-        return post.ContextText;
-    }
-
-    private static string BuildPreview(string body)
-    {
-        if (string.IsNullOrWhiteSpace(body))
-        {
-            return string.Empty;
-        }
-
-        var normalized = body.Trim();
-        return normalized.Length <= 120 ? normalized : $"{normalized[..117]}â€¦";
     }
 
     private static List<ModerationReason> ParseReasons(string? reasonsJson)
@@ -1280,90 +1234,6 @@
         catch (JsonException)
         {
             return new List<ModerationReason>();
-        }
-    }
-
-    private static IEnumerable<string> DescribeFeedbackModes(FeedbackMode modes)
-    {
-        if (modes.HasFlag(FeedbackMode.PresenceOnly))
-        {
-            yield return "Presence-only";
-        }
-
-        if (modes.HasFlag(FeedbackMode.ReflectiveListening))
-        {
-            yield return "Reflective listening";
-        }
-
-        if (modes.HasFlag(FeedbackMode.ClarifyingQuestions))
-        {
-            yield return "Clarifying questions";
-        }
-
-        if (modes.HasFlag(FeedbackMode.SharePerspective))
-        {
-            yield return "Share your perspective";
-        }
-
-        if (modes.HasFlag(FeedbackMode.AdviceAllowed))
-        {
-            yield return "Suggestions/advice allowed";
-        }
-
-        if (modes.HasFlag(FeedbackMode.ResourcesAllowed))
-        {
-            yield return "Resources allowed";
-        }
-    }
-
-    private static IEnumerable<string> DescribeAvoidanceModes(AvoidanceMode modes)
-    {
-        if (modes.HasFlag(AvoidanceMode.DiagnosingOrLabeling))
-        {
-            yield return "Diagnosing or labeling";
-        }
-
-        if (modes.HasFlag(AvoidanceMode.MoralizingOrShaming))
-        {
-            yield return "Moralizing/shaming";
-        }
-
-        if (modes.HasFlag(AvoidanceMode.PrescriptiveLanguage))
-        {
-            yield return "Prescriptive language";
-        }
-
-        if (modes.HasFlag(AvoidanceMode.MinimizingOrDismissing))
-        {
-            yield return "Minimizing/dismissing";
-        }
-
-        if (modes.HasFlag(AvoidanceMode.PushingTowardResolution))
-        {
-            yield return "Pushing toward resolution";
-        }
-    }
-
-    private static IEnumerable<string> DescribeSensitivityFlags(SensitivityFlag flags)
-    {
-        if (flags.HasFlag(SensitivityFlag.ExtraGentleContainer))
-        {
-            yield return "Extra gentle container";
-        }
-
-        if (flags.HasFlag(SensitivityFlag.NoMentalHealthLabels))
-        {
-            yield return "No mental health labels";
-        }
-
-        if (flags.HasFlag(SensitivityFlag.NoRelationshipAdvice))
-        {
-            yield return "No relationship advice";
-        }
-
-        if (flags.HasFlag(SensitivityFlag.NoMedicalAdvice))
-        {
-            yield return "No medical advice";
         }
     }
 
@@ -1422,3 +1292,4 @@
         string ActorName,
         DateTimeOffset CreatedAt);
 }
+

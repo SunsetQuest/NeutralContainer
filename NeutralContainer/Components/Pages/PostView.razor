@@ -1,4 +1,4 @@
-﻿@page "/posts/{PostId:int}"
+@page "/posts/{PostId:int}"
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authorization
@@ -18,7 +18,7 @@
 <div class="container py-4">
     @if (isLoading)
     {
-        <p class="text-muted">Loading post…</p>
+        <p class="text-muted">Loading post�</p>
     }
     else if (post is null)
     {
@@ -86,7 +86,7 @@
                 <h2 class="h5">Response Agreement</h2>
                 <div class="row g-3">
                     <div class="col-12 col-lg-6">
-                        <h3 class="h6">What I’m looking for</h3>
+                        <h3 class="h6">What I�m looking for</h3>
                         @if (allowedFeedbackModes.Count == 0)
                         {
                             <p class="text-muted mb-0">No preferences selected.</p>
@@ -151,7 +151,7 @@
             <div class="card-body">
                 <h2 class="h5">Leave a comment</h2>
                 <div class="alert alert-secondary" role="status">
-                    NeutralContainer is not crisis support. If you’re in immediate danger or need urgent help,
+                    NeutralContainer is not crisis support. If you�re in immediate danger or need urgent help,
                     contact local emergency services or a crisis line in your area.
                     <details class="mt-2">
                         <summary>Find crisis resources</summary>
@@ -466,13 +466,13 @@
             var user = await UserManager.GetUserAsync(authState.User);
             isCreatorViewing = user is not null && user.Id == post.CreatorUserId;
             creatorInboxLink = isCreatorViewing ? $"/creator/inbox?postId={post.Id}" : null;
-            youtubeLink = BuildYouTubeLink(post);
+            youtubeLink = UiText.BuildYouTubeLink(post);
 
-            allowedFeedbackModes.AddRange(DescribeFeedbackModes(post.AllowedFeedbackModes));
-            avoidanceModes.AddRange(DescribeAvoidanceModes(post.AvoidanceModes));
-            sensitivityFlags.AddRange(DescribeSensitivityFlags(post.SensitivityFlags));
-            visibilityPolicyLabel = DescribeVisibilityPolicy(post.VisibilityPolicy);
-            moderationLevelLabel = DescribeModerationLevel(post.ModerationLevel);
+            allowedFeedbackModes.AddRange(UiText.DescribeFeedbackModes(post.AllowedFeedbackModes));
+            avoidanceModes.AddRange(UiText.DescribeAvoidanceModes(post.AvoidanceModes));
+            sensitivityFlags.AddRange(UiText.DescribeSensitivityFlags(post.SensitivityFlags));
+            visibilityPolicyLabel = UiText.DescribeVisibilityPolicy(post.VisibilityPolicy);
+            moderationLevelLabel = UiText.DescribeModerationLevel(post.ModerationLevel);
             showPublicComments = post.VisibilityPolicy is VisibilityPolicy.PublicOnly or VisibilityPolicy.CommenterChoice;
             commentResultMessage = null;
             commentResultStyle = null;
@@ -504,125 +504,6 @@
         }
         isLoading = false;
     }
-
-    private static IEnumerable<string> DescribeFeedbackModes(FeedbackMode modes)
-    {
-        if (modes.HasFlag(FeedbackMode.PresenceOnly))
-        {
-            yield return "Presence-only (witnessing; “I hear you”)";
-        }
-
-        if (modes.HasFlag(FeedbackMode.ReflectiveListening))
-        {
-            yield return "Reflective listening (summarize what you heard)";
-        }
-
-        if (modes.HasFlag(FeedbackMode.ClarifyingQuestions))
-        {
-            yield return "Clarifying questions (gentle, no fixing)";
-        }
-
-        if (modes.HasFlag(FeedbackMode.SharePerspective))
-        {
-            yield return "Share your perspective (non-prescriptive)";
-        }
-
-        if (modes.HasFlag(FeedbackMode.AdviceAllowed))
-        {
-            yield return "Suggestions/advice allowed";
-        }
-
-        if (modes.HasFlag(FeedbackMode.ResourcesAllowed))
-        {
-            yield return "Resources allowed";
-        }
-    }
-
-    private static string? BuildYouTubeLink(Post post)
-    {
-        if (post.PostType != PostType.YouTubeBacked)
-        {
-            return null;
-        }
-
-        if (!string.IsNullOrWhiteSpace(post.YouTubeUrl))
-        {
-            return post.YouTubeUrl;
-        }
-
-        if (!string.IsNullOrWhiteSpace(post.YouTubeVideoId))
-        {
-            return $"https://youtu.be/{post.YouTubeVideoId}";
-        }
-
-        return null;
-    }
-
-    private static IEnumerable<string> DescribeAvoidanceModes(AvoidanceMode modes)
-    {
-        if (modes.HasFlag(AvoidanceMode.DiagnosingOrLabeling))
-        {
-            yield return "Diagnosing or labeling";
-        }
-
-        if (modes.HasFlag(AvoidanceMode.MoralizingOrShaming))
-        {
-            yield return "Moralizing or shaming";
-        }
-
-        if (modes.HasFlag(AvoidanceMode.PrescriptiveLanguage))
-        {
-            yield return "Prescriptive language if advice not allowed";
-        }
-
-        if (modes.HasFlag(AvoidanceMode.MinimizingOrDismissing))
-        {
-            yield return "Minimizing or dismissing";
-        }
-
-        if (modes.HasFlag(AvoidanceMode.PushingTowardResolution))
-        {
-            yield return "Pushing toward resolution if presence-only";
-        }
-    }
-
-    private static IEnumerable<string> DescribeSensitivityFlags(SensitivityFlag flags)
-    {
-        if (flags.HasFlag(SensitivityFlag.ExtraGentleContainer))
-        {
-            yield return "Extra gentle container";
-        }
-
-        if (flags.HasFlag(SensitivityFlag.NoMentalHealthLabels))
-        {
-            yield return "No mental health labels";
-        }
-
-        if (flags.HasFlag(SensitivityFlag.NoRelationshipAdvice))
-        {
-            yield return "No relationship advice";
-        }
-
-        if (flags.HasFlag(SensitivityFlag.NoMedicalAdvice))
-        {
-            yield return "No medical advice";
-        }
-    }
-
-    private static string DescribeVisibilityPolicy(VisibilityPolicy policy) => policy switch
-    {
-        VisibilityPolicy.PrivateOnly => "Private feedback only",
-        VisibilityPolicy.PublicOnly => "Public feedback only",
-        VisibilityPolicy.CommenterChoice => "Commenter chooses (with consent)",
-        _ => "Unspecified"
-    };
-
-    private static string DescribeModerationLevel(ModerationLevel level) => level switch
-    {
-        ModerationLevel.High => "High (extra gentle)",
-        ModerationLevel.Standard => "Standard",
-        _ => "Standard"
-    };
 
     private async Task LoadPublicComments()
     {
@@ -1126,3 +1007,4 @@
         }
     }
 }
+

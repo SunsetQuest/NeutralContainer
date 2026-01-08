@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using NeutralContainer.Data
+@using NeutralContainer.Utilities
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
 
@@ -257,26 +258,27 @@
                 .ToListAsync();
             var blockedUserIdSet = blockedUserIds.ToHashSet();
 
-            var comments = await DbContext.Comments
+            var commentEntities = await DbContext.Comments
                 .AsNoTracking()
                 .Include(comment => comment.Post)
                 .Include(comment => comment.CommenterUser)
                 .Where(comment => comment.Post!.CreatorUserId == user.Id)
                 .OrderByDescending(comment => comment.CreatedAt)
-                .Select(comment => new CommentInboxItem(
-                    comment.Id,
-                    comment.PostId,
-                    string.IsNullOrWhiteSpace(comment.Post!.Title) ? "Untitled" : comment.Post!.Title,
-                    comment.CommenterUserId,
-                    ResolveDisplayName(comment.CommenterUser),
-                    comment.Visibility,
-                    comment.ModerationStatus,
-                    comment.IsHidden,
-                    comment.IsHighlighted,
-                    blockedUserIdSet.Contains(comment.CommenterUserId),
-                    comment.CreatedAt,
-                    BuildPreview(comment.Body)))
                 .ToListAsync();
+
+            var comments = commentEntities.Select(comment => new CommentInboxItem(
+                comment.Id,
+                comment.PostId,
+                UiText.ResolvePostTitle(comment.Post),
+                comment.CommenterUserId,
+                UiText.ResolveDisplayName(comment.CommenterUser, "Commenter"),
+                comment.Visibility,
+                comment.ModerationStatus,
+                comment.IsHidden,
+                comment.IsHighlighted,
+                blockedUserIdSet.Contains(comment.CommenterUserId),
+                comment.CreatedAt,
+                UiText.BuildPreview(comment.Body, 120)));
 
             allComments.AddRange(comments);
             UpdateFilters();
@@ -546,32 +548,6 @@
         await DbContext.SaveChangesAsync();
     }
 
-    private static string ResolveDisplayName(ApplicationUser? user)
-    {
-        if (user is null)
-        {
-            return "Commenter";
-        }
-
-        if (!string.IsNullOrWhiteSpace(user.DisplayName))
-        {
-            return user.DisplayName;
-        }
-
-        return string.IsNullOrWhiteSpace(user.UserName) ? "Commenter" : user.UserName;
-    }
-
-    private static string BuildPreview(string body)
-    {
-        if (string.IsNullOrWhiteSpace(body))
-        {
-            return string.Empty;
-        }
-
-        var normalized = body.Trim();
-        return normalized.Length <= 120 ? normalized : $"{normalized[..117]}…";
-    }
-
     private static string GetStatusLabel(CommentInboxItem comment)
         => comment.IsHidden ? "Hidden" : comment.Status.ToString();
 
@@ -610,3 +586,4 @@
         DateTimeOffset CreatedAt,
         string Preview);
 }
+

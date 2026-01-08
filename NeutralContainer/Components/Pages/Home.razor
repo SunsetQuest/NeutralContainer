@@ -1,8 +1,9 @@
-﻿@page "/"
+@page "/"
 
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
 @using NeutralContainer.Data
+@using NeutralContainer.Utilities
 @inject ApplicationDbContext DbContext
 
 <PageTitle>Home</PageTitle>
@@ -15,7 +16,7 @@
         <Authorized>
             @if (isLoading)
             {
-                <p class="text-muted">Loading posts…</p>
+                <p class="text-muted">Loading posts�</p>
             }
             else if (!string.IsNullOrWhiteSpace(loadError))
             {
@@ -40,7 +41,7 @@
                                 <h2 class="h5 mb-1">@post.Title</h2>
                                 <small class="text-muted">@post.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
                             </div>
-                            <p class="mb-1 text-muted">@post.CreatorDisplayName · @post.PostTypeLabel</p>
+                            <p class="mb-1 text-muted">@post.CreatorDisplayName � @post.PostTypeLabel</p>
                             @if (!string.IsNullOrWhiteSpace(post.ContextPreview))
                             {
                                 <p class="mb-0">@post.ContextPreview</p>
@@ -96,13 +97,14 @@
             foreach (var post in recentPosts)
             {
                 creators.TryGetValue(post.CreatorUserId, out var creator);
+                var preview = UiText.BuildPreview(post.ContextText, 158, ".");
                 posts.Add(new PostListItem
                 {
                     Id = post.Id,
                     Title = string.IsNullOrWhiteSpace(post.Title) ? "Untitled" : post.Title.Trim(),
-                    CreatorDisplayName = ResolveDisplayName(creator),
+                    CreatorDisplayName = UiText.ResolveDisplayName(creator, "Creator"),
                     PostTypeLabel = post.PostType == PostType.TextOnly ? "Text-only" : "YouTube-backed",
-                    ContextPreview = BuildPreview(post.ContextText),
+                    ContextPreview = string.IsNullOrWhiteSpace(preview) ? null : preview,
                     CreatedAt = post.CreatedAt
                 });
             }
@@ -117,32 +119,6 @@
         }
     }
 
-    private static string ResolveDisplayName(ApplicationUser? user)
-    {
-        if (user is null)
-        {
-            return "Creator";
-        }
-
-        if (!string.IsNullOrWhiteSpace(user.DisplayName))
-        {
-            return user.DisplayName;
-        }
-
-        return string.IsNullOrWhiteSpace(user.UserName) ? "Creator" : user.UserName;
-    }
-
-    private static string? BuildPreview(string? contextText)
-    {
-        if (string.IsNullOrWhiteSpace(contextText))
-        {
-            return null;
-        }
-
-        var normalized = contextText.Trim();
-        return normalized.Length <= 160 ? normalized : $"{normalized[..157]}…";
-    }
-
     private sealed class PostListItem
     {
         public int Id { get; init; }
@@ -153,3 +129,4 @@
         public DateTimeOffset CreatedAt { get; init; }
     }
 }
+
