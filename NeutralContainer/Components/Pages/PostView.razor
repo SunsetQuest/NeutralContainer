@@ -18,7 +18,7 @@
 <div class="container py-4">
     @if (isLoading)
     {
-        <p class="text-muted">Loading post…</p>
+        <p class="text-muted">Loading postï¿½</p>
     }
     else if (post is null)
     {
@@ -86,7 +86,7 @@
                 <h2 class="h5">Response Agreement</h2>
                 <div class="row g-3">
                     <div class="col-12 col-lg-6">
-                        <h3 class="h6">What I’m looking for</h3>
+                        <h3 class="h6">What Iï¿½m looking for</h3>
                         @if (allowedFeedbackModes.Count == 0)
                         {
                             <p class="text-muted mb-0">No preferences selected.</p>
@@ -151,7 +151,7 @@
             <div class="card-body">
                 <h2 class="h5">Leave a comment</h2>
                 <div class="alert alert-secondary" role="status">
-                    NeutralContainer is not crisis support. If you’re in immediate danger or need urgent help,
+                    NeutralContainer is not crisis support. If youï¿½re in immediate danger or need urgent help,
                     contact local emergency services or a crisis line in your area.
                     <details class="mt-2">
                         <summary>Find crisis resources</summary>
@@ -182,7 +182,7 @@
                     </div>
                 }
 
-                <EditForm EditContext="commentEditContext" OnValidSubmit="HandleValidCommentSubmit">
+                <EditForm EditContext="commentEditContext" OnValidSubmit="HandleValidCommentSubmit" FormName="commentForm">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
 
@@ -1008,3 +1008,5 @@
     }
 }
 
+ 
+ 

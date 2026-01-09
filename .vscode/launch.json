@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "NeutralContainer (launch)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/NeutralContainer/bin/Debug/net8.0/NeutralContainer.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/NeutralContainer",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "NeutralContainer (attach)",
+      "type": "coreclr",
+      "request": "attach"
+    }
+  ]
+}
