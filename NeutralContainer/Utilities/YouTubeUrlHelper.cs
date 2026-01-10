@@ -31,7 +31,8 @@ public static class YouTubeUrlHelper
             return false;
         }
 
-        if (host is "youtube.com" or "www.youtube.com" or "m.youtube.com")
+        if (host is "youtube.com" or "www.youtube.com" or "m.youtube.com" or "music.youtube.com" or "youtube-nocookie.com" ||
+            host.EndsWith(".youtube.com", StringComparison.OrdinalIgnoreCase))
         {
             if (uri.AbsolutePath.Equals("/watch", StringComparison.OrdinalIgnoreCase))
             {
@@ -47,17 +48,34 @@ public static class YouTubeUrlHelper
                 }
             }
 
-            if (uri.AbsolutePath.StartsWith("/embed/", StringComparison.OrdinalIgnoreCase))
+            if (TryGetVideoIdFromPath(uri.AbsolutePath, "/embed/", out var embeddedId) ||
+                TryGetVideoIdFromPath(uri.AbsolutePath, "/shorts/", out embeddedId) ||
+                TryGetVideoIdFromPath(uri.AbsolutePath, "/live/", out embeddedId))
             {
-                var candidate = uri.AbsolutePath["/embed/".Length..].Trim('/');
-                if (!string.IsNullOrWhiteSpace(candidate))
-                {
-                    videoId = candidate;
-                    return true;
-                }
+                videoId = embeddedId;
+                return true;
             }
         }
 
         return false;
+    }
+
+    private static bool TryGetVideoIdFromPath(string path, string prefix, out string? videoId)
+    {
+        videoId = null;
+
+        if (!path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var candidate = path[prefix.Length..].Trim('/');
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            return false;
+        }
+
+        videoId = candidate;
+        return true;
     }
 }

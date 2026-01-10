@@ -88,7 +88,7 @@ public sealed class CommentModerationService
 
     public CommentModerationResult Evaluate(Post post, string body)
     {
-        var normalized = body.Trim().ToLowerInvariant();
+        var normalized = body.Trim();
         var reasons = new List<ModerationReason>();
 
         var spamMatches = CountMatches(normalized, SpamSignals);
