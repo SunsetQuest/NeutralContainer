@@ -47,12 +47,22 @@ public static class UiText
         }
 
         var normalized = text.Trim();
+        if (maxLength <= 0)
+        {
+            return string.Empty;
+        }
+
         if (normalized.Length <= maxLength)
         {
             return normalized;
         }
 
-        var trimmedLength = Math.Max(0, maxLength - suffix.Length);
+        if (suffix.Length >= maxLength)
+        {
+            return normalized[..maxLength];
+        }
+
+        var trimmedLength = maxLength - suffix.Length;
         return $"{normalized[..trimmedLength]}{suffix}";
     }
 
