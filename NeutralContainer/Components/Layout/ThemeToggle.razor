@@ -1,8 +1,8 @@
 @inject IJSRuntime JsRuntime
 
-<div class="theme-toggle">
+<div class="theme-toggle @Class">
     <label class="form-label mb-0" for="themeSelect">Theme</label>
-    <select id="themeSelect" class="form-select form-select-sm" @onchange="OnThemeChanged" value="@selectedPreference">
+    <select id="themeSelect" class="form-select form-select-sm" @bind="selectedPreference" @bind:after="OnPreferenceChanged">
         <option value="system">System</option>
         <option value="light">Light</option>
         <option value="dark">Dark</option>
@@ -10,6 +10,9 @@
 </div>
 
 @code {
+    [Parameter]
+    public string? Class { get; set; }
+
     private string selectedPreference = "system";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -23,9 +26,8 @@
         StateHasChanged();
     }
 
-    private async Task OnThemeChanged(ChangeEventArgs args)
+    private async Task OnPreferenceChanged()
     {
-        var preference = args.Value?.ToString() ?? "system";
-        selectedPreference = await JsRuntime.InvokeAsync<string>("neutralTheme.setPreference", preference);
+        selectedPreference = await JsRuntime.InvokeAsync<string>("neutralTheme.setPreference", selectedPreference);
     }
 }
