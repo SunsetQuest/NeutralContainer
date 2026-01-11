@@ -12,6 +12,10 @@
     const applyTheme = (theme) => {
         document.documentElement.setAttribute("data-theme", theme);
         document.documentElement.style.colorScheme = theme;
+        if (document.body) {
+            document.body.setAttribute("data-theme", theme);
+            document.body.style.colorScheme = theme;
+        }
     };
 
     const getPreference = () => localStorage.getItem(storageKey) ?? "system";
@@ -29,6 +33,12 @@
         return preference;
     };
 
+    const refresh = () => {
+        const preference = getPreference();
+        applyTheme(resolveTheme(preference));
+        return preference;
+    };
+
     const init = () => {
         const preference = getPreference();
         applyTheme(resolveTheme(preference));
@@ -42,6 +52,7 @@
 
     window.neutralTheme = {
         init,
+        refresh,
         getPreference,
         setPreference,
     };
