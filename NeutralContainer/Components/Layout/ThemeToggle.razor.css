@@ -47,6 +47,7 @@
 }
 
 .theme-toggle--icon .form-select {
+    appearance: none;
     min-width: 2.5rem;
     width: 2.5rem;
     height: 2.5rem;
@@ -58,6 +59,7 @@
     text-indent: 100%;
     white-space: nowrap;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .theme-toggle--icon .form-select:focus {
