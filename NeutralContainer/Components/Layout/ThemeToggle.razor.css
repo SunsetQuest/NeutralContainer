@@ -1,0 +1,67 @@
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--nc-text-muted);
+    font-size: 0.78rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 10px;
+    background-color: color-mix(in srgb, var(--nc-surface) 75%, transparent);
+    border: 1px solid color-mix(in srgb, var(--nc-border) 75%, transparent);
+}
+
+.theme-toggle .form-select {
+    background-color: var(--nc-surface);
+    color: var(--nc-text);
+    border-color: var(--nc-border-strong);
+    min-width: 6.5rem;
+    font-weight: 600;
+}
+
+.theme-toggle .form-select:focus {
+    border-color: var(--nc-focus);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--nc-focus) 55%, transparent);
+}
+
+.theme-toggle .form-select option {
+    color: #1b1f23;
+}
+
+.theme-toggle--icon {
+    padding: 0.2rem;
+    border-radius: 999px;
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.theme-toggle--icon .form-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.theme-toggle--icon .form-select {
+    appearance: none;
+    min-width: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border-radius: 999px;
+    border-color: var(--nc-border);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M12 4.75a.75.75 0 0 1 .75-.75 7 7 0 1 1-6.787 8.625.75.75 0 1 1 1.46-.35 5.5 5.5 0 1 0 5.327-6.775.75.75 0 0 1-.75-.75Z'/%3E%3Cpath d='M12 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 2Zm7.25 9.25a.75.75 0 0 1 .75.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-1.5Zm-16.5 0a.75.75 0 0 1 .75-.75H5a.75.75 0 0 1 0 1.5H3.5a.75.75 0 0 1-.75-.75Zm14.03-5.78a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06Zm-10.68 10.68a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06Zm10.68 1.06a.75.75 0 0 1 0-1.06l1.06-1.06a.75.75 0 1 1 1.06 1.06l-1.06 1.06a.75.75 0 0 1-1.06 0Zm-10.68-10.68a.75.75 0 0 1 0-1.06L7.16 4.41a.75.75 0 1 1 1.06 1.06L7.16 6.53a.75.75 0 0 1-1.06 0Z'/%3E%3C/svg%3E") no-repeat center/1.2rem var(--nc-surface);
+    color: var(--nc-text-muted);
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.theme-toggle--icon .form-select:focus {
+    border-color: var(--nc-focus);
+}
