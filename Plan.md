@@ -74,6 +74,39 @@ This direction translates the README principles into a calm, neutral visual syst
 
 ---
 
+## UI plan update: layout patterns (step 3)
+Updated layout patterns for key screens emphasize clarity, warmth, and reduced cognitive load while keeping the “container” feeling bounded.
+
+### Home / feed
+- Structure: single-column reading rail with optional narrow sidebar for filters (desktop only).
+- Card pattern: title, short excerpt, response agreement chip, and a calm meta row (author, date).
+- CTA: “Open post” button is primary; “Respond later” secondary link.
+- Empty state: reassure neutrality (“No posts yet. This space stays quiet until someone shares.”).
+
+### Post detail
+- Layout: centered content column (max 760–840px), with generous vertical spacing.
+- Response Agreement block: always above responses, visually distinct (soft panel with icon + agreement label).
+- Media: embedded video in a framed surface with muted controls; fallback to link if embed fails.
+- Response list: compact cards with subtle separators; highlight moderation status only when needed.
+
+### Response flow (composer)
+- Stepper-lite: “Agreement → Compose → Review” inline, not a modal, to reduce friction.
+- Agreement acknowledgment: checkbox + short reminder copy, placed directly above the editor.
+- Editor: comfortable line height, low chrome, clear focus ring; helper text for tone guidance.
+- Submission: primary action aligned right; secondary “Save draft” if enabled later.
+
+### Login / register
+- Calm, minimal form surfaces; avoid heavy branding or sales copy.
+- Soft panel with supportive microcopy (“This is a quiet, account-bound space.”).
+- Clear error presentation without alarmist color use; keep labels always visible.
+
+### Global layout notes
+- Navigation: reduce emphasis on gradients; aim for neutral surfaces and legible contrast.
+- Use consistent section headers and spacing for moderation screens (admin queue, creator inbox).
+- Prefer inline status tags over banners to avoid over-alerting.
+
+---
+
 ## MVP scope statement
 ### In scope (MVP)
 **Content**
