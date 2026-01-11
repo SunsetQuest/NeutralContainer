@@ -28,6 +28,85 @@ This repo is building an MVP that supports:
 
 ---
 
+## UI plan update: visual direction (step 2)
+This direction translates the README principles into a calm, neutral visual system that emphasizes presence, clarity, and low cognitive load.
+
+### Palette
+**Light theme**
+- Base: soft parchment white (#F7F5F2), pure white surfaces (#FFFFFF).
+- Ink: charcoal (#2E2A27) for primary text, muted graphite (#5D5853) for secondary text.
+- Accent: muted blue-gray (#5B6B7A) for links and accents; avoid saturated blues.
+- Borders: warm gray (#DDD6CF) with subtle contrast.
+- Feedback: restrained tones (success #5A7C6E, warning #B08D57, danger #A6615E).
+
+**Dark theme**
+- Base: deep espresso (#1B1917), elevated surfaces (#26231F).
+- Ink: warm off-white (#E7E0D8) for primary text, muted clay (#B7AEA4) for secondary.
+- Accent: desaturated blue-gray (#6C7A88) for links and accents.
+- Borders: soft umber (#3A3530).
+- Feedback: desaturated equivalents (success #6E8C7F, warning #B49563, danger #A87472).
+
+### Typography
+- **Primary**: system sans (e.g., `-apple-system`, `Segoe UI`, `Inter`, `Roboto`, `Helvetica Neue`) for neutrality and clarity.
+- **Scale**: modest hierarchy (H1 32–36, H2 24–28, H3 20–22, body 16–17, small 13–14).
+- **Weight**: regular (400) for body, medium (500) for headings and buttons; avoid heavy bold by default.
+- **Line height**: 1.5–1.65 for body text to support calm reading.
+
+### Spacing & layout rhythm
+- 4/8/12/16/24/32/48 spacing scale.
+- Generous vertical rhythm; breathe between sections and response blocks.
+- Max content width: 720–840px for reading-focused pages; wider only for dashboards.
+
+### Surface hierarchy & elevation
+- Flat by default; elevation only for active/interactive elements.
+- Cards: subtle border + slight background contrast; avoid heavy shadows.
+- Inputs: soft fill with clear focus state (2px outline, low-saturation accent).
+
+### Light/dark theme guidance
+- Keep contrast comfortable, not stark (avoid pure black/white pairing).
+- Use consistent token names for surface/text/border/intent colors to enable theme switching.
+- Use a single accent color per theme for links and primary actions; rely on weight and spacing for emphasis.
+
+### Interaction tone
+- Buttons: rounded corners (8–10px), low chroma fills.
+- Links: understated, underline on hover/focus.
+- Status/mode indicators: small pills with soft background tints and clear text labels.
+
+---
+
+## UI plan update: layout patterns (step 3)
+Updated layout patterns for key screens emphasize clarity, warmth, and reduced cognitive load while keeping the “container” feeling bounded.
+
+### Home / feed
+- Structure: single-column reading rail with optional narrow sidebar for filters (desktop only).
+- Card pattern: title, short excerpt, response agreement chip, and a calm meta row (author, date).
+- CTA: “Open post” button is primary; “Respond later” secondary link.
+- Empty state: reassure neutrality (“No posts yet. This space stays quiet until someone shares.”).
+
+### Post detail
+- Layout: centered content column (max 760–840px), with generous vertical spacing.
+- Response Agreement block: always above responses, visually distinct (soft panel with icon + agreement label).
+- Media: embedded video in a framed surface with muted controls; fallback to link if embed fails.
+- Response list: compact cards with subtle separators; highlight moderation status only when needed.
+
+### Response flow (composer)
+- Stepper-lite: “Agreement → Compose → Review” inline, not a modal, to reduce friction.
+- Agreement acknowledgment: checkbox + short reminder copy, placed directly above the editor.
+- Editor: comfortable line height, low chrome, clear focus ring; helper text for tone guidance.
+- Submission: primary action aligned right; secondary “Save draft” if enabled later.
+
+### Login / register
+- Calm, minimal form surfaces; avoid heavy branding or sales copy.
+- Soft panel with supportive microcopy (“This is a quiet, account-bound space.”).
+- Clear error presentation without alarmist color use; keep labels always visible.
+
+### Global layout notes
+- Navigation: reduce emphasis on gradients; aim for neutral surfaces and legible contrast.
+- Use consistent section headers and spacing for moderation screens (admin queue, creator inbox).
+- Prefer inline status tags over banners to avoid over-alerting.
+
+---
+
 ## MVP scope statement
 ### In scope (MVP)
 **Content**
