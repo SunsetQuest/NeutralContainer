@@ -26,6 +26,30 @@
     letter-spacing: 0.01em;
 }
 
+.nc-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nc-logo {
+    height: 1.6rem;
+    width: auto;
+    display: block;
+}
+
+.nc-logo-dark {
+    display: none;
+}
+
+[data-theme="dark"] .nc-logo-light {
+    display: none;
+}
+
+[data-theme="dark"] .nc-logo-dark {
+    display: block;
+}
+
 .top-row .container-fluid {
     display: flex;
     align-items: center;

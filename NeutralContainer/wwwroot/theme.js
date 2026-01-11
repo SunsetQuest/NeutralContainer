@@ -10,6 +10,18 @@
         return mediaQuery.matches ? "dark" : "light";
     };
 
+    const updateFavicon = (theme) => {
+        const favicon = document.querySelector('link[rel="icon"]#nc-favicon');
+        if (!favicon) {
+            return;
+        }
+
+        const nextHref = theme === "dark" ? "favicon-dark.png" : "favicon.png";
+        if (favicon.getAttribute("href") !== nextHref) {
+            favicon.setAttribute("href", nextHref);
+        }
+    };
+
     const applyTheme = (theme) => {
         document.documentElement.setAttribute("data-theme", theme);
         document.documentElement.style.colorScheme = theme;
@@ -17,6 +29,7 @@
             document.body.setAttribute("data-theme", theme);
             document.body.style.colorScheme = theme;
         }
+        updateFavicon(theme);
     };
 
     const syncSelects = (preference) => {
