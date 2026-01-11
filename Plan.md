@@ -28,6 +28,52 @@ This repo is building an MVP that supports:
 
 ---
 
+## UI plan update: visual direction (step 2)
+This direction translates the README principles into a calm, neutral visual system that emphasizes presence, clarity, and low cognitive load.
+
+### Palette
+**Light theme**
+- Base: soft parchment white (#F7F5F2), pure white surfaces (#FFFFFF).
+- Ink: charcoal (#2E2A27) for primary text, muted graphite (#5D5853) for secondary text.
+- Accent: muted blue-gray (#5B6B7A) for links and accents; avoid saturated blues.
+- Borders: warm gray (#DDD6CF) with subtle contrast.
+- Feedback: restrained tones (success #5A7C6E, warning #B08D57, danger #A6615E).
+
+**Dark theme**
+- Base: deep espresso (#1B1917), elevated surfaces (#26231F).
+- Ink: warm off-white (#E7E0D8) for primary text, muted clay (#B7AEA4) for secondary.
+- Accent: desaturated blue-gray (#6C7A88) for links and accents.
+- Borders: soft umber (#3A3530).
+- Feedback: desaturated equivalents (success #6E8C7F, warning #B49563, danger #A87472).
+
+### Typography
+- **Primary**: system sans (e.g., `-apple-system`, `Segoe UI`, `Inter`, `Roboto`, `Helvetica Neue`) for neutrality and clarity.
+- **Scale**: modest hierarchy (H1 32–36, H2 24–28, H3 20–22, body 16–17, small 13–14).
+- **Weight**: regular (400) for body, medium (500) for headings and buttons; avoid heavy bold by default.
+- **Line height**: 1.5–1.65 for body text to support calm reading.
+
+### Spacing & layout rhythm
+- 4/8/12/16/24/32/48 spacing scale.
+- Generous vertical rhythm; breathe between sections and response blocks.
+- Max content width: 720–840px for reading-focused pages; wider only for dashboards.
+
+### Surface hierarchy & elevation
+- Flat by default; elevation only for active/interactive elements.
+- Cards: subtle border + slight background contrast; avoid heavy shadows.
+- Inputs: soft fill with clear focus state (2px outline, low-saturation accent).
+
+### Light/dark theme guidance
+- Keep contrast comfortable, not stark (avoid pure black/white pairing).
+- Use consistent token names for surface/text/border/intent colors to enable theme switching.
+- Use a single accent color per theme for links and primary actions; rely on weight and spacing for emphasis.
+
+### Interaction tone
+- Buttons: rounded corners (8–10px), low chroma fills.
+- Links: understated, underline on hover/focus.
+- Status/mode indicators: small pills with soft background tints and clear text labels.
+
+---
+
 ## MVP scope statement
 ### In scope (MVP)
 **Content**
