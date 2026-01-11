@@ -534,7 +534,7 @@
                     : comment.CommenterUser!.DisplayName))
             .ToListAsync();
 
-        publicComments.AddRange(comments);
+        publicComments.AddRange(comments.Where(comment => !comment.IsHighlighted));
         highlightedComments.AddRange(comments.Where(comment => comment.IsHighlighted));
     }
 
@@ -1011,5 +1011,4 @@
         }
     }
 }
-
 
