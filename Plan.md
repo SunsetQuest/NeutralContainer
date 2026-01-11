@@ -126,6 +126,31 @@ Accessibility checks focused on contrast, focus visibility, and motion comfort a
 
 ---
 
+## UI plan update: validation against principles + MVP flow (step 7)
+The refreshed UI direction and component updates were validated against the README principles and the MVP flow to ensure the visual system reinforces the product intent without adding friction.
+
+### README principles alignment
+- **Postpone judgment**: Response Agreement is visually prominent, and supporting copy avoids evaluative language; status indicators are subdued and contextual.
+- **Author-defined intent**: Agreement chips, intent selectors, and agreement panels remain primary in the hierarchy across feed, detail, and response flows.
+- **Neutral language by default**: UI tone stays matter-of-fact, with muted accents and restrained status color usage to avoid urgency or crisis framing.
+- **Context optional**: Layouts prioritize concise titles and optional body text; media and supporting context are framed as optional blocks rather than required fields.
+- **Presence over policing**: Moderation and status visuals are present but de-emphasized, favoring calm inline tags instead of alarm banners.
+
+### MVP flow validation
+- **Home/feed** emphasizes scanability and a quiet entry point with calm cards and agreement tags.
+- **Post detail** keeps the agreement and responses in a single-column, low-noise reading flow.
+- **Response flow** keeps acknowledgement and composition in sequence with minimal chrome to reduce cognitive load.
+- **Auth screens** remain minimal and supportive, preserving the “bounded space” tone.
+- **Moderation screens** use consistent spacing and status tags to avoid punitive visual weight while remaining clear.
+
+### UI notes update (what changed vs. previous UI)
+- Navigation and layout visuals are simplified to neutral surfaces; gradients are reduced and replaced by subtle borders and surface contrast.
+- Themed tokens now drive all surfaces, borders, and text colors for consistent light/dark behavior.
+- Core components (buttons, cards, inputs, tabs, badges, alerts) now share rounded, low-chroma styling aligned with the calm visual system.
+- Focus-visible states and reduced-motion overrides are now part of the default UI contract.
+
+---
+
 ## MVP scope statement
 ### In scope (MVP)
 **Content**
