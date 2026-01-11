@@ -72,6 +72,13 @@ a:hover, .btn-link:hover {
     color: var(--nc-link-hover);
 }
 
+a:focus-visible,
+.btn-link:focus-visible {
+    outline: 2px solid var(--nc-focus);
+    outline-offset: 2px;
+    text-decoration: underline;
+}
+
 .btn-primary {
     color: #fff;
     background-color: var(--nc-accent);
@@ -189,8 +196,16 @@ a:hover, .btn-link:hover {
     font-weight: 600;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+.btn:focus-visible,
+.btn:active:focus-visible,
+.btn-link.nav-link:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.form-check-input:focus-visible,
+.nav-link:focus-visible,
+.dropdown-item:focus-visible {
   box-shadow: 0 0 0 0.12rem var(--nc-surface), 0 0 0 0.3rem var(--nc-focus);
+  outline: none;
 }
 
 .content {
@@ -198,7 +213,8 @@ a:hover, .btn-link:hover {
 }
 
 h1:focus {
-    outline: none;
+    outline: 2px solid var(--nc-focus);
+    outline-offset: 4px;
 }
 
 .valid.modified:not([type=checkbox]) {
@@ -441,6 +457,11 @@ h1:focus {
     border-color: var(--nc-border-strong);
 }
 
+.nc-intent-group .form-check:focus-within {
+    border-color: var(--nc-accent);
+    box-shadow: 0 0 0 0.12rem var(--nc-surface), 0 0 0 0.3rem var(--nc-focus);
+}
+
 .nc-intent-group .form-check-input {
     margin-top: 0.2rem;
 }
@@ -457,4 +478,18 @@ h1:focus {
 
 .darker-border-checkbox.form-check-input {
     border-color: var(--nc-border-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .btn:hover {
+        transform: none;
+        box-shadow: none;
+    }
 }
