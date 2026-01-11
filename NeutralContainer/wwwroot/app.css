@@ -22,6 +22,14 @@
     --nc-focus: #8fb2c4;
     --nc-shadow: 0 12px 30px rgba(27, 31, 35, 0.08);
     --nc-radius: 12px;
+    --nc-success: #2f7a62;
+    --nc-success-soft: #e2f1ec;
+    --nc-warning: #b06a2f;
+    --nc-warning-soft: #f7ede2;
+    --nc-danger: #b24d4a;
+    --nc-danger-soft: #f6e6e5;
+    --nc-info: #2f6f9f;
+    --nc-info-soft: #e3eef6;
 }
 
 [data-theme="dark"] {
@@ -40,6 +48,14 @@
     --nc-accent-soft: #1a2a30;
     --nc-focus: #5d8aa3;
     --nc-shadow: 0 14px 35px rgba(0, 0, 0, 0.4);
+    --nc-success: #7fc6a2;
+    --nc-success-soft: #1a2b24;
+    --nc-warning: #e3a062;
+    --nc-warning-soft: #2f2318;
+    --nc-danger: #e08a86;
+    --nc-danger-soft: #2f1b1b;
+    --nc-info: #86b6d8;
+    --nc-info-soft: #1d2a36;
 }
 
 html, body {
@@ -66,6 +82,111 @@ a:hover, .btn-link:hover {
 .btn-primary:focus {
     background-color: var(--nc-accent-strong);
     border-color: var(--nc-accent-strong);
+}
+
+.btn {
+    border-radius: calc(var(--nc-radius) - 2px);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 0.45rem 1.1rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(27, 31, 35, 0.12);
+}
+
+.btn-sm {
+    padding: 0.3rem 0.75rem;
+    font-weight: 600;
+}
+
+.btn-outline-secondary {
+    color: var(--nc-text);
+    border-color: var(--nc-border-strong);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: var(--nc-surface-alt);
+    color: var(--nc-text);
+}
+
+.btn-outline-primary {
+    color: var(--nc-accent);
+    border-color: var(--nc-accent);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--nc-accent-soft);
+    color: var(--nc-accent-strong);
+    border-color: var(--nc-accent-strong);
+}
+
+.btn-success {
+    background-color: var(--nc-success);
+    border-color: var(--nc-success);
+}
+
+.btn-success:hover,
+.btn-success:focus {
+    background-color: color-mix(in srgb, var(--nc-success) 85%, #000);
+    border-color: color-mix(in srgb, var(--nc-success) 85%, #000);
+}
+
+.btn-outline-success {
+    color: var(--nc-success);
+    border-color: var(--nc-success);
+}
+
+.btn-outline-success:hover,
+.btn-outline-success:focus {
+    background-color: var(--nc-success-soft);
+    color: var(--nc-success);
+    border-color: var(--nc-success);
+}
+
+.btn-warning {
+    background-color: var(--nc-warning);
+    border-color: var(--nc-warning);
+    color: #fff;
+}
+
+.btn-warning:hover,
+.btn-warning:focus {
+    background-color: color-mix(in srgb, var(--nc-warning) 85%, #000);
+    border-color: color-mix(in srgb, var(--nc-warning) 85%, #000);
+    color: #fff;
+}
+
+.btn-outline-warning {
+    color: var(--nc-warning);
+    border-color: var(--nc-warning);
+}
+
+.btn-outline-warning:hover,
+.btn-outline-warning:focus {
+    background-color: var(--nc-warning-soft);
+    color: var(--nc-warning);
+    border-color: var(--nc-warning);
+}
+
+.btn-outline-danger {
+    color: var(--nc-danger);
+    border-color: var(--nc-danger);
+}
+
+.btn-outline-danger:hover,
+.btn-outline-danger:focus {
+    background-color: var(--nc-danger-soft);
+    color: var(--nc-danger);
+    border-color: var(--nc-danger);
+}
+
+.btn-link {
+    font-weight: 600;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
@@ -107,11 +228,60 @@ h1:focus {
     box-shadow: none;
 }
 
+.card {
+    border-radius: var(--nc-radius);
+    border: 1px solid var(--nc-border);
+    box-shadow: var(--nc-shadow);
+}
+
+.card-header,
+.card-footer {
+    background-color: var(--nc-surface);
+    border-color: var(--nc-border);
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+    border-radius: var(--nc-radius);
+}
+
+.form-control::placeholder,
+.form-select::placeholder {
+    color: var(--nc-text-muted);
+}
+
+.form-check-input {
+    border-radius: 0.35rem;
+    border-color: var(--nc-border-strong);
+    background-color: var(--nc-surface);
+}
+
+.form-check-input:checked {
+    background-color: var(--nc-accent);
+    border-color: var(--nc-accent-strong);
+}
+
 .table {
     --bs-table-bg: var(--nc-surface);
     --bs-table-striped-bg: var(--nc-surface-alt);
     --bs-table-striped-color: var(--nc-text);
     --bs-table-border-color: var(--nc-border);
+}
+
+.table > :not(caption) > * > * {
+    border-color: var(--nc-border);
+}
+
+.table thead th {
+    background-color: var(--nc-surface-alt);
+    color: var(--nc-text-muted);
+    font-weight: 600;
+}
+
+.table-active {
+    --bs-table-active-bg: var(--nc-accent-soft);
+    --bs-table-active-color: var(--nc-text);
 }
 
 .list-group-item,
@@ -138,10 +308,141 @@ h1:focus {
     background-color: var(--nc-surface-alt) !important;
 }
 
+.nav-tabs {
+    border-bottom-color: var(--nc-border);
+}
+
+.nav-tabs .nav-link {
+    color: var(--nc-text-muted);
+    border: 1px solid transparent;
+    border-radius: calc(var(--nc-radius) - 4px);
+    margin-bottom: -1px;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--nc-text);
+    background-color: var(--nc-surface-alt);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--nc-text);
+    background-color: var(--nc-surface);
+    border-color: var(--nc-border) var(--nc-border) transparent;
+    box-shadow: var(--nc-shadow);
+}
+
+.nav-pills .nav-link {
+    border-radius: calc(var(--nc-radius) - 4px);
+    color: var(--nc-text-muted);
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--nc-accent-soft);
+    color: var(--nc-text);
+}
+
+.badge {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-radius: 999px;
+    padding: 0.35em 0.65em;
+}
+
 .badge.text-bg-light {
     background-color: var(--nc-surface-alt);
     color: var(--nc-text);
     border: 1px solid var(--nc-border);
+}
+
+.text-bg-secondary {
+    background-color: var(--nc-surface-strong) !important;
+    color: var(--nc-text) !important;
+    border: 1px solid var(--nc-border);
+}
+
+.text-bg-success {
+    background-color: var(--nc-success-soft) !important;
+    color: var(--nc-success) !important;
+    border: 1px solid color-mix(in srgb, var(--nc-success) 30%, transparent);
+}
+
+.text-bg-warning {
+    background-color: var(--nc-warning-soft) !important;
+    color: var(--nc-warning) !important;
+    border: 1px solid color-mix(in srgb, var(--nc-warning) 40%, transparent);
+}
+
+.text-bg-danger {
+    background-color: var(--nc-danger-soft) !important;
+    color: var(--nc-danger) !important;
+    border: 1px solid color-mix(in srgb, var(--nc-danger) 40%, transparent);
+}
+
+.text-bg-info {
+    background-color: var(--nc-info-soft) !important;
+    color: var(--nc-info) !important;
+    border: 1px solid color-mix(in srgb, var(--nc-info) 40%, transparent);
+}
+
+.alert {
+    border-radius: var(--nc-radius);
+    border: 1px solid var(--nc-border);
+    background-color: var(--nc-surface);
+    color: var(--nc-text);
+    box-shadow: var(--nc-shadow);
+}
+
+.alert-secondary {
+    border-color: var(--nc-border);
+    background-color: var(--nc-surface-alt);
+}
+
+.alert-success {
+    border-color: color-mix(in srgb, var(--nc-success) 35%, transparent);
+    background-color: var(--nc-success-soft);
+    color: var(--nc-success);
+}
+
+.alert-warning {
+    border-color: color-mix(in srgb, var(--nc-warning) 40%, transparent);
+    background-color: var(--nc-warning-soft);
+    color: var(--nc-warning);
+}
+
+.alert-danger {
+    border-color: color-mix(in srgb, var(--nc-danger) 40%, transparent);
+    background-color: var(--nc-danger-soft);
+    color: var(--nc-danger);
+}
+
+.alert-info {
+    border-color: color-mix(in srgb, var(--nc-info) 40%, transparent);
+    background-color: var(--nc-info-soft);
+    color: var(--nc-info);
+}
+
+.nc-intent-group .form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.65rem 0.75rem;
+    margin-bottom: 0.65rem;
+    border-radius: var(--nc-radius);
+    border: 1px solid var(--nc-border);
+    background-color: var(--nc-surface-alt);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.nc-intent-group .form-check:last-child {
+    margin-bottom: 0;
+}
+
+.nc-intent-group .form-check:hover {
+    border-color: var(--nc-border-strong);
+}
+
+.nc-intent-group .form-check-input {
+    margin-top: 0.2rem;
 }
 
 .blazor-error-boundary {
