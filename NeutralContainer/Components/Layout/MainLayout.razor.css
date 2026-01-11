@@ -9,7 +9,7 @@ main {
 }
 
 .sidebar {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--nc-accent) 35%, var(--nc-surface) 65%) 0%, var(--nc-surface) 70%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--nc-accent) 55%, var(--nc-surface) 45%) 0%, var(--nc-surface) 75%);
     border-right: 1px solid var(--nc-border);
 }
 
@@ -22,6 +22,12 @@ main {
     align-items: center;
     color: var(--nc-text);
 }
+
+    .top-row-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
         white-space: nowrap;
