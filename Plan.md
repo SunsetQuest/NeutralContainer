@@ -107,6 +107,25 @@ Updated layout patterns for key screens emphasize clarity, warmth, and reduced c
 
 ---
 
+## UI plan update: accessibility audit (step 6)
+Accessibility checks focused on contrast, focus visibility, and motion comfort across both themes. The adjustments prioritize keyboard clarity and reduced motion without changing the overall visual direction.
+
+### Contrast & legibility
+- Maintain readable body text contrast on both surfaces; keep muted text reserved for supporting metadata only.
+- Use clear borders on inputs/cards to keep component boundaries visible on low-contrast displays.
+- Preserve distinct alert/status text colors paired with soft background tints to keep state recognition clear.
+
+### Focus states & keyboard navigation
+- Ensure focus rings are visible for links, buttons, inputs, selects, and navigation elements.
+- Add focus-visible styling on intent selection rows to make keyboard selection obvious.
+- Keep the focus target on page navigation (h1) visible with an outline rather than removing it.
+
+### Motion & reduced motion
+- Avoid hover-driven motion for users who prefer reduced motion (disable transform/transition where possible).
+- Retain subtle transitions for standard motion settings to preserve affordance without distraction.
+
+---
+
 ## MVP scope statement
 ### In scope (MVP)
 **Content**
