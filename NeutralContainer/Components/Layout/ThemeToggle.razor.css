@@ -54,7 +54,7 @@
     padding: 0;
     border-radius: 999px;
     border-color: var(--nc-border);
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M12 4.75a.75.75 0 0 1 .75-.75 7 7 0 1 1-6.787 8.625.75.75 0 1 1 1.46-.35 5.5 5.5 0 1 0 5.327-6.775.75.75 0 0 1-.75-.75Z'/%3E%3Cpath d='M12 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 2Zm7.25 9.25a.75.75 0 0 1 .75.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-1.5Zm-16.5 0a.75.75 0 0 1 .75-.75H5a.75.75 0 0 1 0 1.5H3.5a.75.75 0 0 1-.75-.75Zm14.03-5.78a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06Zm-10.68 10.68a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06Zm10.68 1.06a.75.75 0 0 1 0-1.06l1.06-1.06a.75.75 0 1 1 1.06 1.06l-1.06 1.06a.75.75 0 0 1-1.06 0Zm-10.68-10.68a.75.75 0 0 1 0-1.06L7.16 4.41a.75.75 0 1 1 1.06 1.06L7.16 6.53a.75.75 0 0 1-1.06 0Z'/%3E%3C/svg%3E") no-repeat center/1.2rem var(--nc-surface);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='currentColor'%3E%3Cpath d='M8 15A7 7 0 1 0 8 1v14z'/%3E%3C/svg%3E") no-repeat center/1.2rem var(--nc-surface);
     color: var(--nc-text-muted);
     text-indent: 100%;
     white-space: nowrap;
