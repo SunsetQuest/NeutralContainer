@@ -42,6 +42,13 @@
     display: none;
 }
 
+[data-theme="dark"] .nc-logo-light {
+    display: none;
+}
+
+[data-theme="dark"] .nc-logo-dark {
+    display: block;
+}
 
 .top-row .container-fluid {
     display: flex;
