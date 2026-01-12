@@ -8,60 +8,105 @@
 
 <PageTitle>Home</PageTitle>
 
-<div class="container py-4">
-    <h1>Welcome</h1>
-    <p class="text-muted">Browse recent posts inside the container.</p>
+<div class="nc-home">
+    <div class="nc-hero">
+        <div class="container">
+            <h1 class="nc-hero-title">Welcome to NeutralContainer</h1>
+            <p class="nc-hero-subtitle">A neutral space for collaborative content and thoughtful discussion.</p>
+        </div>
+    </div>
 
-    <AuthorizeView>
-        <Authorized>
-            @if (isLoading)
-            {
-                <p class="text-muted">Loading posts…</p>
-            }
-            else if (!string.IsNullOrWhiteSpace(loadError))
-            {
-                <div class="alert alert-danger">@loadError</div>
-            }
-            else if (posts.Count == 0)
-            {
-                <div class="card">
-                    <div class="card-body">
-                        <p class="mb-2">No posts yet.</p>
+    <div class="container py-4">
+        <AuthorizeView>
+            <Authorized>
+                <div class="nc-section-header">
+                    <h2 class="nc-section-title">Recent Posts</h2>
+                    <a class="btn btn-primary btn-sm" href="posts/create">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 0.35rem;">
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                        Create Post
+                    </a>
+                </div>
+
+                @if (isLoading)
+                {
+                    <div class="nc-loading-state">
+                        <div class="nc-spinner"></div>
+                        <p class="text-muted">Loading postsâ€¦</p>
+                    </div>
+                }
+                else if (!string.IsNullOrWhiteSpace(loadError))
+                {
+                    <div class="alert alert-danger">@loadError</div>
+                }
+                else if (posts.Count == 0)
+                {
+                    <div class="nc-empty-state">
+                        <div class="nc-empty-icon">
+                            <svg width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+                                <path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>
+                            </svg>
+                        </div>
+                        <h3 class="nc-empty-title">No posts yet</h3>
+                        <p class="nc-empty-text">Be the first to share content with the community.</p>
                         <a class="btn btn-primary" href="posts/create">Create the first post</a>
                     </div>
+                }
+                else
+                {
+                    <div class="nc-post-grid">
+                        @foreach (var post in posts)
+                        {
+                            <a class="nc-post-card" href="@($"posts/{post.Id}")">
+                                <div class="nc-post-card-header">
+                                    <div class="nc-post-card-icon">
+                                        @if (post.PostTypeLabel == "YouTube-backed")
+                                        {
+                                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/>
+                                            </svg>
+                                        }
+                                        else
+                                        {
+                                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h13zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-13z"/>
+                                                <path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zM3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8zm0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>
+                                            </svg>
+                                        }
+                                    </div>
+                                    <span class="nc-post-card-type">@post.PostTypeLabel</span>
+                                    <span class="nc-post-card-date">@post.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</span>
+                                </div>
+                                <h3 class="nc-post-card-title">@post.Title</h3>
+                                <p class="nc-post-card-author">by @post.CreatorDisplayName</p>
+                                @if (!string.IsNullOrWhiteSpace(post.ContextPreview))
+                                {
+                                    <p class="nc-post-card-preview">@post.ContextPreview</p>
+                                }
+                            </a>
+                        }
+                    </div>
+                }
+            </Authorized>
+            <NotAuthorized>
+                <div class="nc-auth-card">
+                    <div class="nc-auth-icon">
+                        <svg width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
+                        </svg>
+                    </div>
+                    <h2 class="nc-auth-title">Sign in to view posts</h2>
+                    <p class="nc-auth-text">Posts are visible only to authenticated members of the container.</p>
+                    <div class="nc-auth-actions">
+                        <a class="btn btn-primary" href="Account/Login">Log in</a>
+                        <a class="btn btn-outline-secondary" href="Account/Register">Create an account</a>
+                    </div>
                 </div>
-            }
-            else
-            {
-                <div class="list-group">
-                    @foreach (var post in posts)
-                    {
-                        <a class="list-group-item list-group-item-action" href="@($"posts/{post.Id}")">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h2 class="h5 mb-1">@post.Title</h2>
-                                <small class="text-muted">@post.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</small>
-                            </div>
-                            <p class="mb-1 text-muted">@post.CreatorDisplayName · @post.PostTypeLabel</p>
-                            @if (!string.IsNullOrWhiteSpace(post.ContextPreview))
-                            {
-                                <p class="mb-0">@post.ContextPreview</p>
-                            }
-                        </a>
-                    }
-                </div>
-            }
-        </Authorized>
-        <NotAuthorized>
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="h5">Sign in to view posts</h2>
-                    <p class="text-muted">Posts are visible only to authenticated members of the container.</p>
-                    <a class="btn btn-primary me-2" href="Account/Login">Log in</a>
-                    <a class="btn btn-outline-secondary" href="Account/Register">Create an account</a>
-                </div>
-            </div>
-        </NotAuthorized>
-    </AuthorizeView>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
 </div>
 
 @code {
@@ -129,4 +174,3 @@
         public DateTimeOffset CreatedAt { get; init; }
     }
 }
-

@@ -115,17 +115,32 @@
     line-height: 2.6rem;
     width: 100%;
     padding: 0 0.75rem;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
 .nav-item ::deep a.active {
     background-color: color-mix(in srgb, var(--nc-accent) 20%, transparent);
     color: var(--nc-text);
+    font-weight: 600;
+}
+
+.nav-item ::deep a.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 1.5rem;
+    background: var(--nc-accent-strong);
+    border-radius: 0 2px 2px 0;
 }
 
 .nav-item ::deep .nav-link:hover {
     background-color: color-mix(in srgb, var(--nc-accent) 12%, transparent);
     color: var(--nc-text);
+    transform: translateX(2px);
 }
 
 .nav-scrollable {
