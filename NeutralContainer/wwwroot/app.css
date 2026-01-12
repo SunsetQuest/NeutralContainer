@@ -546,6 +546,50 @@ h1:focus {
     color: var(--nc-text);
 }
 
+.nc-home-copy {
+    max-width: 860px;
+    margin-bottom: 2rem;
+}
+
+.nc-home-copy-title {
+    font-size: 1.85rem;
+    font-weight: 650;
+    margin-bottom: 1rem;
+    color: var(--nc-text);
+}
+
+.nc-home-copy p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--nc-text);
+    margin-bottom: 1.25rem;
+}
+
+.nc-beta-callout {
+    border-radius: var(--nc-radius);
+    border: 1px solid color-mix(in srgb, var(--nc-accent-strong) 60%, var(--nc-border));
+    background: color-mix(in srgb, var(--nc-accent) 12%, var(--nc-surface));
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--nc-shadow);
+}
+
+.nc-beta-callout-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nc-accent-strong);
+    margin-bottom: 0.5rem;
+}
+
+.nc-beta-callout-text {
+    margin: 0;
+    color: var(--nc-text);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
 /* ====== Post Grid & Cards ====== */
 .nc-post-grid {
     display: grid;
