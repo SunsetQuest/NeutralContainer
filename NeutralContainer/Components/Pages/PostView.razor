@@ -1041,11 +1041,11 @@
             // Log the deletion action
             DbContext.ModerationLogs.Add(new ModerationLog
             {
-                PostId = null, // Post is deleted, so we can't reference it
-                CommentId = null,
-                ModeratorUserId = user.Id,
-                Action = $"Post deleted by creator. Post ID: {post.Id}, Title: \"{post.Title}\", Comment count: {commentCount}",
-                PerformedAt = DateTimeOffset.UtcNow
+                EntityType = "Post",
+                EntityId = post.Id.ToString(),
+                Action = $"Deleted by creator",
+                Reason = $"Post \"{post.Title}\" deleted with {commentCount} comment(s)",
+                ActorUserId = user.Id
             });
             await DbContext.SaveChangesAsync();
 
