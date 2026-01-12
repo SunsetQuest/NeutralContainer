@@ -229,7 +229,7 @@
                         <InputTextArea id="commentBody"
                                        class="form-control"
                                        rows="4"
-                                       disabled="@(isUserBlocked || isUserSuspended)"
+                                       disabled="@((isUserBlocked || isUserSuspended) ? "disabled" : null)"
                                        @bind-Value="commentModel.Body" />
                         <ValidationMessage For="@(() => commentModel.Body)" />
                     </div>
@@ -242,14 +242,14 @@
                                 <div class="form-check">
                                     <InputRadio id="commentVisibilityPrivate"
                                                 class="form-check-input"
-                                                disabled="@(isUserBlocked || isUserSuspended)"
+                                                disabled="@((isUserBlocked || isUserSuspended) ? "disabled" : null)"
                                                 Value="CommentVisibility.Private" />
                                     <label class="form-check-label" for="commentVisibilityPrivate">Private (creator only)</label>
                                 </div>
                                 <div class="form-check">
                                     <InputRadio id="commentVisibilityPublic"
                                                 class="form-check-input"
-                                                disabled="@(isUserBlocked || isUserSuspended)"
+                                                disabled="@((isUserBlocked || isUserSuspended) ? "disabled" : null)"
                                                 Value="CommentVisibility.Public" />
                                     <label class="form-check-label" for="commentVisibilityPublic">Public (shows on this post)</label>
                                 </div>
@@ -271,7 +271,7 @@
                             <InputCheckbox id="commentAcknowledgement"
                                            class="form-check-input"
                                            @bind-Value="commentModel.Acknowledged"
-                                           disabled="@(isUserBlocked || isUserSuspended)" />
+                                           disabled="@((isUserBlocked || isUserSuspended) ? "disabled" : null)" />
                             <label class="form-check-label" for="commentAcknowledgement">
                                 I will respond within these boundaries.
                             </label>
@@ -314,12 +314,12 @@
                         <button class="btn btn-outline-secondary"
                                 type="button"
                                 @onclick="HandleCheckComment"
-                                disabled="@(isUserBlocked || isUserSuspended)">
+                                disabled="@((isUserBlocked || isUserSuspended) ? "disabled" : null)">
                             Check my comment
                         </button>
                         <button class="btn btn-primary"
                                 type="submit"
-                                disabled="@(isUserBlocked || isUserSuspended)">
+                                disabled="@((isUserBlocked || isUserSuspended) ? "disabled" : null)">
                             Submit
                         </button>
                     </div>
