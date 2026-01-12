@@ -58,6 +58,14 @@
     --nc-info-soft: #1d2a36;
 }
 
+[data-theme="dark"] .nc-logo-light {
+    display: none;
+}
+
+[data-theme="dark"] .nc-logo-dark {
+    display: block;
+}
+
 html, body {
     font-family: var(--nc-font-family);
     background-color: var(--nc-surface-alt);
