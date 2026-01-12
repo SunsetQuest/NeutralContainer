@@ -11,6 +11,7 @@
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
 @inject CommentModerationService CommentModerationService
+@inject NavigationManager NavigationManager
 
 @attribute [Authorize]
 
@@ -69,9 +70,45 @@
         </p>
         @if (isCreatorViewing)
         {
-            <div class="mb-3">
+            <div class="mb-3 d-flex flex-wrap gap-2">
                 <a class="btn btn-outline-secondary btn-sm" href="@creatorInboxLink">View in Inbox</a>
+                <button class="btn btn-outline-danger btn-sm"
+                        type="button"
+                        @onclick="ToggleDeletePrompt">
+                    Delete post
+                </button>
             </div>
+
+            @if (showDeletePrompt)
+            {
+                <div class="alert alert-warning">
+                    <p class="mb-2">
+                        This will permanently remove the post and its comments. This action cannot be undone.
+                    </p>
+                    @if (!string.IsNullOrWhiteSpace(deleteError))
+                    {
+                        <div class="alert alert-danger mb-2">@deleteError</div>
+                    }
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-danger btn-sm"
+                                type="button"
+                                @onclick="DeletePostAsync"
+                                disabled="isDeleting">
+                            @if (isDeleting)
+                            {
+                                <span>Deleting...</span>
+                            }
+                            else
+                            {
+                                <span>Confirm delete</span>
+                            }
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" type="button" @onclick="ToggleDeletePrompt">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            }
         }
         @if (post.PostType == PostType.YouTubeBacked && !string.IsNullOrWhiteSpace(post.ContextText))
         {
@@ -447,6 +484,9 @@
     private string? reportReason;
     private string? reportMessage;
     private string? reportError;
+    private bool showDeletePrompt;
+    private bool isDeleting;
+    private string? deleteError;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -495,6 +535,9 @@
             reportReason = null;
             reportMessage = null;
             reportError = null;
+            showDeletePrompt = false;
+            isDeleting = false;
+            deleteError = null;
             commentModel.Body = string.Empty;
             commentModel.Acknowledged = false;
             commentEditContext = new EditContext(commentModel);
@@ -962,6 +1005,68 @@
         return new CommentModerationResult(CommentModerationStatus.Held, reasons);
     }
 
+    private void ToggleDeletePrompt()
+    {
+        showDeletePrompt = !showDeletePrompt;
+        deleteError = null;
+    }
+
+    private async Task DeletePostAsync()
+    {
+        if (isDeleting)
+        {
+            return;
+        }
+
+        deleteError = null;
+        isDeleting = true;
+
+        try
+        {
+            if (post is null)
+            {
+                deleteError = "Unable to delete the post because it could not be loaded.";
+                return;
+            }
+
+            var authState = await AuthenticationStateTask;
+            var user = await UserManager.GetUserAsync(authState.User);
+            if (user is null)
+            {
+                deleteError = "Unable to identify the current user. Please sign in again.";
+                return;
+            }
+
+            if (user.Id != post.CreatorUserId)
+            {
+                deleteError = "Only the creator of this post can delete it.";
+                return;
+            }
+
+            var postToDelete = await DbContext.Posts
+                .FirstOrDefaultAsync(current => current.Id == post.Id && current.CreatorUserId == user.Id);
+
+            if (postToDelete is null)
+            {
+                deleteError = "We couldn't find the post to delete. It may have already been removed.";
+                return;
+            }
+
+            DbContext.Posts.Remove(postToDelete);
+            await DbContext.SaveChangesAsync();
+
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception)
+        {
+            deleteError = "Something went wrong while deleting the post. Please try again.";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
     private sealed record CommentListItem(int Id, string Body, DateTimeOffset CreatedAt, bool IsHighlighted, string DisplayName);
 
     private static string GetViewerCommentLabel(ViewerCommentListItem comment) => comment.Status switch
@@ -1020,4 +1125,3 @@
         }
     }
 }
-
