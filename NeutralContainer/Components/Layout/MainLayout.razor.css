@@ -9,8 +9,17 @@ main {
 }
 
 .sidebar {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--nc-accent) 55%, var(--nc-surface) 45%) 0%, var(--nc-surface) 75%);
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--nc-accent) 12%, var(--nc-surface)) 0%,
+        color-mix(in srgb, var(--nc-accent) 8%, var(--nc-surface)) 30%,
+        color-mix(in srgb, var(--nc-accent) 3%, var(--nc-surface)) 70%,
+        var(--nc-surface) 100%);
     border-right: 1px solid var(--nc-border);
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .sidebar {
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.2);
 }
 
 .top-row {
@@ -45,11 +54,27 @@ main {
         border-radius: 999px;
         border: 1px solid var(--nc-border);
         color: var(--nc-text);
+        background: var(--nc-surface);
+        transition: all 0.2s ease;
     }
 
     .top-row ::deep .github-link svg {
         width: 1.2rem;
         height: 1.2rem;
+        fill: currentColor;
+        transition: transform 0.2s ease;
+    }
+
+    .top-row ::deep .github-link:hover {
+        background: var(--nc-accent-soft);
+        border-color: var(--nc-accent);
+        color: var(--nc-accent-strong);
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .top-row ::deep .github-link:hover svg {
+        transform: scale(1.1);
     }
 
     .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
