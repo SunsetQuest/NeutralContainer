@@ -42,11 +42,11 @@
     display: none;
 }
 
-[data-theme="dark"] .nc-logo-light {
+:global([data-theme="dark"]) .nc-logo-light {
     display: none;
 }
 
-[data-theme="dark"] .nc-logo-dark {
+:global([data-theme="dark"]) .nc-logo-dark {
     display: block;
 }
 
