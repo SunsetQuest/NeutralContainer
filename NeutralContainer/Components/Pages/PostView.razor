@@ -11,6 +11,7 @@
 @inject ApplicationDbContext DbContext
 @inject UserManager<ApplicationUser> UserManager
 @inject CommentModerationService CommentModerationService
+@inject NavigationManager NavigationManager
 
 @attribute [Authorize]
 
@@ -70,7 +71,10 @@
         @if (isCreatorViewing)
         {
             <div class="mb-3">
-                <a class="btn btn-outline-secondary btn-sm" href="@creatorInboxLink">View in Inbox</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-outline-secondary btn-sm" href="@creatorInboxLink">View in Inbox</a>
+                    <button class="btn btn-outline-danger btn-sm" type="button" @onclick="ShowDeleteConfirmation">Delete Post</button>
+                </div>
             </div>
         }
         @if (post.PostType == PostType.YouTubeBacked && !string.IsNullOrWhiteSpace(post.ContextText))
@@ -393,6 +397,33 @@
                 </div>
             </div>
         }
+
+        @if (showDeleteConfirmation)
+        {
+            <div class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Deletion</h5>
+                            <button type="button" class="btn-close" @onclick="CancelDelete" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete this post?</p>
+                            <p class="text-danger mb-0"><strong>Warning:</strong> This will permanently delete the post and all associated comments. This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                            <button type="button" class="btn btn-danger" @onclick="ConfirmDeleteAsync">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(deleteError))
+        {
+            <div class="alert alert-danger mt-3">@deleteError</div>
+        }
     }
 </div>
 
@@ -438,6 +469,8 @@
     private string? reportReason;
     private string? reportMessage;
     private string? reportError;
+    private bool showDeleteConfirmation;
+    private string? deleteError;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -951,6 +984,79 @@
             0.55));
 
         return new CommentModerationResult(CommentModerationStatus.Held, reasons);
+    }
+
+    private void ShowDeleteConfirmation()
+    {
+        showDeleteConfirmation = true;
+        deleteError = null;
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirmation = false;
+        deleteError = null;
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        deleteError = null;
+
+        if (post is null)
+        {
+            deleteError = "Unable to delete the post because it could not be loaded.";
+            return;
+        }
+
+        try
+        {
+            var authState = await AuthenticationStateTask;
+            var user = await UserManager.GetUserAsync(authState.User);
+            if (user is null)
+            {
+                deleteError = "Unable to identify the current user. Please sign in again.";
+                return;
+            }
+
+            // Verify ownership - critical security check
+            var postToDelete = await DbContext.Posts
+                .FirstOrDefaultAsync(p => p.Id == post.Id && p.CreatorUserId == user.Id);
+
+            if (postToDelete is null)
+            {
+                deleteError = "You do not have permission to delete this post.";
+                return;
+            }
+
+            // Count comments before deletion for logging
+            var commentCount = await DbContext.Comments
+                .AsNoTracking()
+                .Where(c => c.PostId == post.Id)
+                .CountAsync();
+
+            // Delete the post (comments will cascade delete automatically)
+            DbContext.Posts.Remove(postToDelete);
+            await DbContext.SaveChangesAsync();
+
+            // Log the deletion action
+            DbContext.ModerationLogs.Add(new ModerationLog
+            {
+                PostId = null, // Post is deleted, so we can't reference it
+                CommentId = null,
+                ModeratorUserId = user.Id,
+                Action = $"Post deleted by creator. Post ID: {post.Id}, Title: \"{post.Title}\", Comment count: {commentCount}",
+                PerformedAt = DateTimeOffset.UtcNow
+            });
+            await DbContext.SaveChangesAsync();
+
+            // Redirect to home page after successful deletion
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            deleteError = $"An error occurred while deleting the post: {ex.Message}";
+            showDeleteConfirmation = false;
+        }
     }
 
     private sealed record CommentListItem(int Id, string Body, DateTimeOffset CreatedAt, bool IsHighlighted, string DisplayName);
