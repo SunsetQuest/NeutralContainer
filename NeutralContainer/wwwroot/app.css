@@ -622,6 +622,39 @@ h1:focus {
     margin-bottom: 0.5rem;
 }
 
+.nc-boundary-callout {
+    border-radius: var(--nc-radius);
+    border: 1px solid color-mix(in srgb, var(--nc-info) 65%, var(--nc-border));
+    background: color-mix(in srgb, var(--nc-info) 10%, var(--nc-surface));
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: var(--nc-shadow);
+}
+
+.nc-boundary-callout-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nc-info);
+    margin-bottom: 0.5rem;
+}
+
+.nc-boundary-callout-text {
+    margin-bottom: 0.75rem;
+    color: var(--nc-text);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.nc-boundary-callout-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--nc-text);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
 /* ====== Post Grid & Cards ====== */
 .nc-post-grid {
     display: grid;
