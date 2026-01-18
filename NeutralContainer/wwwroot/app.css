@@ -590,6 +590,38 @@ h1:focus {
     line-height: 1.6;
 }
 
+.nc-safety-callout {
+    border-radius: var(--nc-radius);
+    border: 1px solid color-mix(in srgb, var(--nc-warning) 70%, var(--nc-border));
+    background: color-mix(in srgb, var(--nc-warning) 12%, var(--nc-surface));
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--nc-shadow);
+}
+
+.nc-safety-callout-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--nc-warning) 75%, var(--nc-text));
+    margin-bottom: 0.5rem;
+}
+
+.nc-safety-callout-text {
+    margin-bottom: 0.75rem;
+    color: var(--nc-text);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.nc-safety-callout-details summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--nc-text);
+    margin-bottom: 0.5rem;
+}
+
 /* ====== Post Grid & Cards ====== */
 .nc-post-grid {
     display: grid;
